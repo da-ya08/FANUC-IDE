@@ -17,7 +17,7 @@ Cross-platform IDE for FANUC robot programming (LS files) with syntax highlighti
 
 1. Clone repository:
 ```bash
-git clone https://github.com/yourname/fanuc-ide.git
+git clone https://github.com/da-ya08/FANUC-IDE.git
 cd fanuc-ide
 ```
 
