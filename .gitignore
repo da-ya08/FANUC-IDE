@@ -3,7 +3,7 @@ __pycache__/
 output/
 *.py[cod]
 *$py.class
-settings.py
+settings.json
 
 # C extensions
 *.so
