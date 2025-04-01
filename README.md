@@ -30,6 +30,9 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
+## Get .exe
+You can also [download .exe](https://github.com/da-ya08/FANUC-IDE/releases/tag/Release).
+
 ## Usage
 
 Open LS files, edit syntax highlighting and save.
