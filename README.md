@@ -37,5 +37,8 @@ Open LS files, edit syntax highlighting and save.
 
 Pull requests are welcome! For major changes, please open an issue first.
 
+## In the future
+It is planned to add a title and point information generator.
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
