@@ -10,6 +10,7 @@ Cross-platform IDE for FANUC robot programming (LS files) with syntax highlighti
 - Line numbers
 - Dark/Light themes
 - Multi-language support (English/Russian)
+- Ability to drag a .LS file onto a packed script in exe to open it
 
 ## Installation
 
