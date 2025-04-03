@@ -34,7 +34,7 @@ python src/main.py
 
 ## Get .exe
 
-Так же, Вы можете [скачать .exe](https://github.com/da-ya08/FANUC-IDE/releases/tag/Release).
+Так же, Вы можете [скачать .exe](https://github.com/da-ya08/FANUC-IDE/releases).
 
 ## Usage
 
