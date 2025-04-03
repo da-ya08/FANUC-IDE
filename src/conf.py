@@ -16,6 +16,14 @@ LANGUAGES = {
         'all_files': 'All files',
         'lang': 'English',
         'lang_menu': 'Language',
+        'dnld': 'Download',
+        'send': 'Send',
+        'send_link': 'Send via link...',
+        'ftp_head': 'FTP download',
+        'ftp_text': 'Enter FTP link (like: ftp:/path/file.LS):',
+        'success': 'Success',
+        'suc_dnld': ' downloaded.',
+        'suc_upl': ' uploaded.',
     },
     'ru': {
         'file': 'Файл',
@@ -34,6 +42,14 @@ LANGUAGES = {
         'all_files': 'Все файлы',
         'lang': 'Русский',
         'lang_menu': 'Язык',
+        'dnld': 'Скачать',
+        'send': 'Отправить',
+        'send_link': 'Отправить по ссылке...',
+        'ftp_head': 'FTP Скачивание',
+        'ftp_text': 'Введите FTP ссылку (например: ftp:/path/file.LS):',
+        'success': 'Успех',
+        'suc_dnld': ' скачан.',
+        'suc_upl': ' отправлен.',
     }
 }
 
@@ -77,6 +93,11 @@ SINTAX_WORDS = {
 'datas': [
          'DO', 'DI', 'F', 'R', 'P', 'PR',
          ],
+}
+
+FTP_data = {
+    'login': '',
+    'password': '',
 }
 
 CURRENT_LANGUAGE = 'en'  # by default

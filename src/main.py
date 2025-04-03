@@ -1,10 +1,13 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog
 import json
+from ftplib import FTP
 import os
 import sys
 import re
-from conf import LANGUAGES, CURRENT_LANGUAGE, THEME, SINTAX_WORDS
+from io import BytesIO
+import tempfile
+from conf import LANGUAGES, CURRENT_LANGUAGE, THEME, SINTAX_WORDS, FTP_data
 
 class FANUCIDE:
     def __init__(self, root):
@@ -16,9 +19,9 @@ class FANUCIDE:
         self.current_file = None # Переменная для хранения пути к текущему файлу
         self.SysKeys = ["Control_R", "Control_L", "Alt_L", "Alt_R", "Escape", "Shift_L", "Shift_R"]
         self.del_stoppers = [" ", ",", ".", "!", "?", ";", ":", "-", "(", ")", "\\", "/", "="]
-        self.buffer_header = ""
-        self.buffer_asser = ""
+        self.buffer_header, self.buffer_asser = '', ''
         self.colors = THEME['light']
+        self.ftp_adress = ''
         # Переменная для отслеживания изменений
         self.is_modified = False
         self.view = False
@@ -28,30 +31,32 @@ class FANUCIDE:
         self.scrollbarY = tk.Scrollbar(right_frame)
         # Создаем текстовое поле с прокруткой и номерами строк
         self.text_area = tk.Text(right_frame, 
-                           yscrollcommand=self.scrollbarY.set,
-                           wrap=tk.NONE, 
-                           pady=2,
-                           font=("Consolas", 10),
-                           width=80, 
-                           height=25)
+                                 yscrollcommand=self.scrollbarY.set,
+                                 wrap=tk.NONE, 
+                                 pady=2,
+                                 font=("Consolas", 10),
+                                 width=80, 
+                                 height=25)
         self.scrollbarY.pack(side=tk.RIGHT, fill=tk.Y)
         self.text_area.pack(side=tk.LEFT, expand=True, fill='both')
         # Поле для номеров строк
         self.line_numbers = tk.Text(self.root,
-                                  width=4,
-                                  padx=3,
-                                  pady=2,
-                                  takefocus=0,
-                                  border=0,
-                                  font=("Consolas", 10),
-                                  background='lightgray',
-                                  foreground='gray',
-                                  state='disabled')
+                                    width=4,
+                                    padx=3,
+                                    pady=2,
+                                    takefocus=0,
+                                    border=0,
+                                    font=("Consolas", 10),
+                                    background='lightgray',
+                                    foreground='gray',
+                                    state='disabled')
         self.line_numbers.pack(side=tk.LEFT, fill=tk.Y)
         for tag, color in self.colors.items():
             self.text_area.tag_config(tag, foreground=color)
 
         self.text_area.bind("<KeyPress>", self.new_input)
+        self.text_area.bind('<Control-v>', self.paste_text)
+        self.text_area.bind('<Control-c>', self.copy_text)
         self.text_area.bind("<KeyRelease>", self.update_line_numbers)
         self.root.bind("<Control-KeyPress>", self.on_ctrl_keypress)  # Обработка Ctrl + клавиша
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)  # Обработка закрытия окна
@@ -115,7 +120,7 @@ class FANUCIDE:
                 self.text_area.tag_add('logic', start, end)
                 start = end
         self.highlight_pattern(r'(?<!\w)\d+(?!\w)', 'nums')
-        self.highlight_pattern(r'LBL', 'LBL')
+        self.highlight_pattern(r'LBL|FINE', 'LBL')
         self.highlight_pattern(r'!.*$|//.*$', 'comment')
         
     def highlight_pattern(self, pattern, tags, start='1.0', end='end'):
@@ -130,6 +135,21 @@ class FANUCIDE:
             end_idx = f"{start}+{match.end(group)}c"
             
             self.text_area.tag_add(tag, start_idx, end_idx)
+
+    def paste_text(self, event=None):
+        try:
+            self.text_area.event_generate('<<Paste>>')
+        except tk.TclError:
+            try:
+                self.text_area.insert(tk.INSERT, self.root.clipboard_get())
+            except:
+                pass
+        self.is_modified = True
+        return "break"  # Предотвращаем дальнейшую обработку
+
+    def copy_text(self, event=None):
+        self.text_area.event_generate('<<Copy>>')
+        
     def translate(self, key):
         """Получение перевода по ключу"""
         return LANGUAGES[self.language].get(key, key)
@@ -157,9 +177,95 @@ class FANUCIDE:
         lang_menu.add_command(label="English", command=lambda: self.set_language('en'))
         lang_menu.add_command(label="Русский", command=lambda: self.set_language('ru'))
         menubar.add_cascade(label=self.translate('lang_menu'), menu=lang_menu)
+        ftp_menu = tk.Menu(menubar, tearoff=0)
+        ftp_menu.add_command(label=self.translate('dnld'), command=self.download_via_ftp)
+        ftp_menu.add_command(label=self.translate('send'), command=self.upload_via_ftp)
+        ftp_menu.add_command(label=self.translate('send_link'), command=lambda: self.upload_via_ftp(True))
+        menubar.add_cascade(label="FTP", menu=ftp_menu)
         self.root.config(menu=menubar)
         self.file_menu = file_menu
         self.view_menu = view_menu
+    
+    def download_via_ftp(self):
+        # Диалог для ввода FTP данных
+        self.ftp_adress = simpledialog.askstring(self.translate('ftp_head'), 
+                                   self.translate('ftp_text'),
+                                   parent=self.root)
+        if not self.ftp_adress:
+            return
+        temp = self.ftp_adress
+        if self.is_modified:
+            response = messagebox.askyesnocancel(
+                self.translate('save_file'),
+                self.translate('quest_bef_cls'),
+                icon=messagebox.WARNING
+            )
+            if response is True:  # Пользователь выбрал "Сохранить"
+                self.save_file()
+            elif response is False:  # Пользователь выбрал "Не сохранять"
+                pass
+            else:
+                return
+        # Парсинг URL
+        if '@' in self.ftp_adress:
+            username = self.ftp_adress.split('@')[0].replace('ftp://', '')
+            server = self.ftp_adress.split('@')[1].split('/')[0]
+            remote_path = self.ftp_adress.split('@')[1].split('/', 1)[1]
+        else:
+            server = self.ftp_adress.split('/')[2]
+            remote_path = self.ftp_adress.split('/')[4]
+            username = FTP_data['login']
+        password = FTP_data['password']
+        # Декодирование пути (заменяем %3A на : и %5C на \)
+        decoded_path = remote_path.replace('%3A', ':').replace('%5C', '\\')
+        filename = decoded_path.split('\\')[-1]
+        file_path = filedialog.asksaveasfilename(
+            defaultextension="LS",
+            initialfile=filename,
+            filetypes=[("FANUC Programs", "*.LS"), (self.translate('all_files'), "*.*")]
+        )
+        try:
+            with FTP(server) as ftp:
+                ftp.login(user=username, passwd=password)
+                # Для FANUC robots часто нужен пассивный режим
+                ftp.set_pasv(True)
+                # Скачивание файла
+                with open(file_path, 'wb') as local_file:
+                    ftp.retrbinary(f"RETR {decoded_path}", local_file.write)
+                self.open_file(file_path)
+                messagebox.showinfo(self.translate('success'), filename + self.translate('suc_dnld'))
+            self.ftp_adress = temp
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to download: {str(e)}")
+            
+    def upload_via_ftp(self, new_link=False):
+        self._save_to_file(self.current_file)
+        if not self.ftp_adress or new_link:
+            temp = self.ftp_adress
+            self.ftp_adress = simpledialog.askstring(self.translate('ftp_head'), 
+                                   self.translate('ftp_text'),
+                                   parent=self.root)
+            if not self.ftp_adress:
+                self.ftp_adress = temp
+                return
+        username = self.ftp_adress.split('@')[0].replace('ftp://', '')
+        server = self.ftp_adress.split('@')[1].split('/')[0]
+        remote_path = self.ftp_adress.split('@')[1].split('/', 1)[1]
+        decoded_path = remote_path.replace('%3A', ':').replace('%5C', '\\')
+        password = FTP_data['password']
+        with open(self.current_file, "r", encoding="utf-8") as file:
+            content = file.read()
+            with FTP(server) as ftp:
+                ftp.login(user=username, passwd=password)
+                ftp.set_pasv(True)
+                with tempfile.NamedTemporaryFile(mode='w+', delete=False, encoding='utf-8') as tmp:
+                    tmp.write(content)
+                    tmp_path = tmp.name
+                with open(tmp_path, 'rb') as f:
+                    ftp.storbinary(f"STOR {decoded_path}", f)
+                os.unlink(tmp_path)
+        messagebox.showinfo(self.translate('success'), self.current_file + self.translate('suc_upl'))
+                    
     
     def set_language(self, lang_code):
         """Смена языка интерфейса"""
@@ -257,14 +363,18 @@ class FANUCIDE:
             self.text_area.delete("1.0", tk.END)
         else:
             self.update_title()
+        self.ftp_adress = ''
     
     def set_view(self):
+        if self.current_file:
+            self.save_file()
         if self.view:
             self.view_menu.entryconfig(self.translate('light_v'), label=self.translate('full_v'))
         else:
             self.view_menu.entryconfig(self.translate('full_v'), label=self.translate('light_v'))
         self.view = not self.view
-        self.open_file(self.current_file)
+        if self.current_file:
+            self.open_file(self.current_file)
 
     def open_file(self, file_path=None):
         """Открывает файл и загружает его содержимое в текстовое поле."""
@@ -280,37 +390,43 @@ class FANUCIDE:
             header_getted = False
             text_getted = False
             try:
-                if not self.view:
-                    with open(file_path, "r", encoding="utf-8") as file:
-                        while True:
-                            one_line = file.readline()
-                            if "/MN" in one_line:
-                                header_getted = True
+                with open(file_path, "r", encoding="utf-8") as file:
+                    while True:
+                        one_line = file.readline()
+                        if "/MN" in one_line:
+                            header_getted = True
+                            header += one_line
+                        elif "/POS" in one_line:
+                            text_getted = True
+                            asser += one_line
+                        elif "/END" in one_line:
+                            asser += one_line
+                            if self.view:
+                                content += one_line
+                            break
+                        else:
+                            if not header_getted:
                                 header += one_line
-                            elif "/POS" in one_line:
-                                text_getted = True
+                            elif header_getted and text_getted:
                                 asser += one_line
-                            elif "/END" in one_line:
-                                asser += one_line
-                                break
-                            else:
-                                if not header_getted:
-                                    header += one_line
-                                elif header_getted and not text_getted:
-                                    content += one_line[5:]
+                            elif header_getted and not text_getted:
+                                if self.view:
+                                    content += one_line
                                 else:
-                                    asser += one_line
+                                    content += one_line[5:]
+                                continue
+                        if self.view:
+                            content += one_line
+                if not self.view:
                     content = content[:-1]
-                    self.buffer_header = header
-                    self.buffer_asser = asser
                     content = content.replace(";", "")
-                    self.text_area.delete("1.0", tk.END) 
-                    self.text_area.insert(tk.END, content) 
-                else:
-                    with open(file_path, "r", encoding="utf-8") as file:
-                        content = file.read()
-                    self.text_area.delete("1.0", tk.END)
-                    self.text_area.insert(tk.END, content)
+                self.buffer_header = header
+                self.buffer_asser = asser
+                index = self.buffer_header.find("READ;")
+                if index!= -1:
+                    self.buffer_header = self.buffer_header[:index] + 'READ_WRITE' + self.buffer_header[index+4:]
+                self.text_area.delete("1.0", tk.END) 
+                self.text_area.insert(tk.END, content)
                 self.current_file = file_path  
                 self.update_title() 
                 self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
@@ -319,6 +435,7 @@ class FANUCIDE:
                 self.highlight_syntax()
             except Exception as e:
                 messagebox.showerror("Error", f"Can't open file: {e}")
+        self.ftp_adress = ''
 
     def save_file(self, event=None):
         """Сохраняет файл, если он уже существует, иначе вызывает 'Сохранить как'."""
@@ -330,7 +447,8 @@ class FANUCIDE:
     def save_file_as(self):
         """Открывает диалог сохранения файла и сохраняет текст."""
         file_path = filedialog.asksaveasfilename(
-            defaultextension="new_file.LS",
+            defaultextension="LS",
+            initialfile=self.current_file,
             filetypes=[("FANUC Programs", "*.LS"), (self.translate('all_files'), "*.*")]
         )
         if file_path:
@@ -343,20 +461,23 @@ class FANUCIDE:
     def _save_to_file(self, file_path):
         """Сохраняет текст в указанный файл."""
         try:
-            if not self.view:
-                text_to_save = self.buffer_header
-                temp = self.text_area.get("1.0", tk.END)
-                text = self.text_area.get("1.0", tk.END).split("\n")[:-1]
-                temp = ""
-                for i, line in enumerate(text):
-                    t = "    " + str(i+1)
-                    temp += t[abs(4-len(t)):] + ":" + line + "\n"
-                text_to_save += temp.replace("\n", ";\n")
-                text_to_save += self.buffer_asser
+            if self.buffer_header and self.buffer_asser:
+                if not self.view:
+                    text_to_save = self.buffer_header
+                    temp = self.text_area.get("1.0", tk.END)
+                    text = self.text_area.get("1.0", tk.END).split("\n")[:-1]
+                    temp = ""
+                    for i, line in enumerate(text):
+                        t = "    " + str(i+1)
+                        temp += t[abs(4-len(t)):] + ":" + line + "\n"
+                    text_to_save += temp.replace("\n", ";\n")
+                    text_to_save += self.buffer_asser
+                else:
+                    text_to_save = self.text_area.get("1.0", tk.END)
+                with open(file_path, "w", encoding="utf-8") as file:
+                    file.write(text_to_save)
             else:
-                text_to_save = self.text_area.get("1.0", tk.END)
-            with open(file_path, "w", encoding="utf-8") as file:
-                file.write(text_to_save)
+                pass # generator
             self.is_modified = False 
             self.update_title() 
         except Exception as e:
@@ -438,6 +559,7 @@ class FANUCIDE:
             # Если response is None (пользователь выбрал "Отменить"), ничего не делаем
         else:
             self.root.destroy()
+        self.ftp_adress = ''
 
     def sync_scroll(self, *args):
         """Синхронизирует прокрутку текста и номеров строк"""
