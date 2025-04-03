@@ -5,7 +5,6 @@ from ftplib import FTP
 import os
 import sys
 import re
-from io import BytesIO
 import tempfile
 from conf import LANGUAGES, CURRENT_LANGUAGE, THEME, SINTAX_WORDS, FTP_data
 
