@@ -40,7 +40,7 @@ You can also [download .exe](https://github.com/da-ya08/FANUC-IDE/releases/tag/R
 
 Open LS files, edit syntax highlighting and save.
 
-## Use FTP
+## Use FTP 
 
 - In the FTP menu, the download function requests an FTP link (example: ftp://admin@127.0.0.1/md%3A%5Cmain.ls)
 - If there is no login in the link, it is taken from [conf.py](conf.py), the _FTP_DATA_ variable
