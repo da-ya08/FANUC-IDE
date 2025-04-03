@@ -18,7 +18,7 @@
 
 1. Клонировать репозиторий:
 ```bash
-git clone https://github.com/yourname/fanuc-ide.git
+git clone https://github.com/da-ya08/FANUC-IDE.git
 cd fanuc-ide
 ```
 
