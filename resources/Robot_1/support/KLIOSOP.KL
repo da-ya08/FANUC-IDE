@@ -1,0 +1,58 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1991
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File:  kliosop - Constants used for SOP I/O
+--    
+--    Description:  
+--     
+--     
+--    Dependancies:
+--    
+--    
+--    Language: KAREL
+--    
+--    Source File:   kliosop.kl  24-SEP-91   02:31PM
+--    
+--    Author: BRYCETK
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--    07-MAR-2000   dreslism  add tpenable to sopout
+
+
+
+CONST
+  -- Inputs
+  sopi_estop   =  0          -- EMERGENCY STOP
+  sopi_reset   =  1          -- FAULT RESET
+  sopi_remote  =  2          -- REMOTE keyswitch 
+  sopi_hold    =  3          -- HOLD 
+  sopi_user1   =  4          -- USER PB#1
+  sopi_user2   =  5          -- USER PB#2
+  sopi_start   =  6          -- CYCLE START
+      
+  -- Outputs
+  sopo_remote  =  0          -- REMOTE (illuminated keyswitch)
+  sopo_busy    =  1          -- CYCLE START (illuminated pushbutton)
+  sopo_held    =  2          -- HOLD (illuminated pushbutton)
+  sopo_fault   =  3          -- FAULT LED
+  sopo_bat_alm =  4          -- BATTERY ALARM LED
+  sopo_user1   =  5          -- USER LED#1
+  sopo_user2   =  6          -- USER LED#2
+  sopo_tpenbl  =  7          -- TP ENABLED
+

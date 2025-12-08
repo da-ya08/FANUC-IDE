@@ -1,0 +1,308 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1991, 1992
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File:  klevtpe - Constants for using TPE environment
+--    
+--    Description:
+--     
+--     
+--    Dependancies:
+--    
+--    
+--    Language: KAREL
+--    
+--    Source File:   klevtpe.kl   3-DEC-91   01:41PM
+--    
+--    Author: BRYCETK
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--  11-MAR-1992 WFJ Added LM* definitions from LMCODES.HC
+--  07-APR-1992 MAS Add motion cycle time code
+--  23-FEB_2000 ECL Add cell finder code
+--  06-APR-2001 DAM V5.30 Changes to support GUN=COFF instruction
+--  02-MAR-2006 STRYBIS V7.2023 Add lm_coord_ldr
+--  13-SEP-2013 GRACARA  Add lm_epc and lm_trk for redundant robot
+
+
+CONST
+  -- OPEN_TPE open_mode constants
+  om_none      = 0
+  om_read      = 1  -- read only
+  om_write     = 2  -- write only
+  om_read_wr   = 3  -- read/write
+  om_overwrite = 4  -- overwrite (modify) 
+  om_rd_ov_wr  = 5  -- read/overwrite
+  om_wr_ov_wr  = 6  -- write/overwrite
+  om_all       = 7   -- all access
+  
+  -- OPEN_TPE reject_mode constants
+  rm_none      = 0
+  rm_read      = 1  -- read only
+  rm_write     = 2  -- write only
+  rm_read_wr   = 3  -- read/write
+  rm_overwrite = 4  -- overwrite (modify) 
+  rm_rd_ov_wr  = 5  -- read/overwrite
+  rm_wr_ov_wr  = 6  -- write/overwrite
+  rm_all       = 7  -- all access
+  
+  -- SET/GET_ATTR_TPE attr constants
+  atr_prg_name = 0  -- Currently not accessible
+  atr_owner    = 1  -- Currently not accessible
+  atr_comment  = 2  -- Currently not accessible
+  atr_prg_size = 3  
+  atr_mem_size = 4  
+  atr_num_line = 5  
+  atr_cre_time = 6
+  atr_mod_time = 7
+  atr_file_ptr = 8  -- Currently not accessible
+  atr_file_ver = 9
+  atr_motn_grp = 10
+  atr_protect  = 11
+  atr_stack_sz = 12
+  atr_tsk_pri  = 13
+  atr_time_sl  = 14
+  atr_busy_lmp = 15
+  atr_ign_abrt = 16
+  atr_ign_paus = 17
+  atr_ctl_code = 18
+
+  -- GET_POS_TYP posn_typ
+  pt_position  = 1
+  pt_xyzwpr    = 2
+  pt_xyzaes    = 3
+  pt_xyz456    = 4
+  pt_rposition = 5
+  pt_rxyzwpr   = 6
+  pt_rxyzaes   = 7
+  pt_rxyz456   = 8
+  pt_jointpos  = 9
+
+  -- Mnemonic codes (from SSD_MN_CODES.XRO).
+  -- ( Do not add any more of these and do not use these anymore. )
+  -- ( Instead use the lm_ equivalents below. )
+  mn_motion    = 254  -- Standard "POINT"
+  mn_wait_dly  = 123  -- WAIT (delay)
+  mn_wait_ch   = 124  -- WAIT (condition)
+
+  -- Mnemonic codes from LMCODES.HC
+
+  -- **************************
+  -- *  Basic code (0 - 149)  *
+  -- **************************
+
+  lm_sample    =   0  -- RESERVED DO NOT CHANGE 
+  lm_noitm     =   0  -- no item 
+  lm_const     =   1  -- constant
+  lm_index     =   2  -- index
+  lm_reg       =   3  -- Register
+  lm_preg      =   4  -- Position Register
+  lm_positem   =   5  -- Position Item        
+  lm_plreg     =   6  -- Pallet Register      
+  lm_plelm     =   7  -- Pallet Element       
+  lm_sdi       =  10  -- SDI
+  lm_rdi       =  11  -- RDI
+  lm_ain       =  12  -- AIN
+  lm_sdo       =  15  -- SDO
+  lm_rdo       =  16  -- RDO
+  lm_aout      =  17  -- AOUT
+  lm_rsr       =  20  -- RSR
+  lm_ualm      =  21  -- UALM
+  lm_codei     =  22  -- CODE (input)
+  lm_codeo     =  23  -- CODE (output)
+  lm_ovrd      =  24  -- OVERRIDE
+  lm_timer     =  25  -- TIMER
+  lm_param     =  26  -- parameter
+  lm_erprg     =  27  -- error program
+  lm_rsmprg    =  28  -- resume program
+  lm_semph     =  29  -- semaphore
+  lm_rem       =  30  -- comment
+  lm_msg       =  31  -- MESSAGE
+  lm_ufrnum    =  32  -- user frame selection
+  lm_uframe    =  33  -- user frame
+  lm_utlnum    =  34  -- user tool selection
+  lm_utool     =  35  -- user tool frame
+  lm_spcon     =  50  -- special constant
+  lm_pulse     =  51  -- pulse constant
+  lm_trk       =  94  -- Hidden instruction for tracking data
+  lm_epc       =  96  -- EPC[] instruction
+  lm_asgn      = 100  -- =  (assign)
+  lm_plus      = 101  -- +
+  lm_minus     = 102  -- -
+  lm_mult      = 103  -- *
+  lm_div       = 104  -- /
+  lm_divi      = 105  -- DIV
+  lm_mod       = 106  -- MOD
+  lm_eq        = 107  -- =  (compare) 
+  lm_ne        = 108  -- <>
+  lm_lt        = 109  -- <
+  lm_le        = 110  -- <=
+  lm_gt        = 111  -- >
+  lm_ge        = 112  -- >=
+  lm_if        = 120  -- IF
+  lm_sel       = 121  -- SELECT
+  lm_othws     = 122  -- OTHERWISE
+  lm_delay     = 123  -- WAIT (delay)
+  lm_wait      = 124  -- WAIT (condition)
+  lm_tmout     = 125  -- TIMEOUT
+  lm_jmp       = 126  -- JMP
+  lm_jmpds     = 127  -- LBL (specifier)
+  lm_lbl       = 128  -- LBL (definition)
+  lm_call      = 129  -- CALL
+  lm_pgnam     = 130  -- program name
+  lm_pause     = 131  -- PAUSE
+  lm_abort     = 132  -- ABORT
+  lm_end       = 133  -- END
+  lm_run       = 134  -- RUN
+  lm_macro     = 135  -- MACRO
+
+  lm_send      = 140  -- SEND              
+  lm_rcv       = 141  -- RECEIVE        
+
+  -- *****************************************
+  -- *  Application related code (150 - 199) *
+  -- *****************************************
+
+  lm_appl      = 150  -- process logic
+  lm_appl1     = 151  -- process logic
+  lm_appl2     = 152  -- process logic
+
+
+  -- ************************************
+  -- *  Motion related code (200 - 254) *
+  -- ************************************
+
+  lm_wjnt      = 200  -- Wrist joint
+  lm_coord     = 201  -- Coordinated motion
+  lm_skip      = 202  -- SKIP
+  lm_skpcnd    = 203  -- SKIP CONDITION
+  lm_ofst      = 205  -- OFFSET
+  lm_viaofs    = 206  -- OFFSET for via point
+  lm_ofscnd    = 207  -- OFFSET CONDITION
+  lm_inc       = 210  -- Incremental motion
+  lm_acc       = 211  -- Acceleation override
+  lm_touch     = 212  -- TOUCH SENSOR
+  lm_ct        = 213  -- CORNER_TOL (obsolete)
+  lm_coord_ldr = 213  -- COORD[LDR]
+  lm_cell      = 214  -- CELL FINDER
+  lm_ws        = 215  -- WS
+  lm_we        = 216  -- WE (Obsolete)
+  lm_track     = 216  -- TRACK
+  lm_mct       = 217  -- motion cycle time
+  lm_lnt       = 218  -- line tracking
+  lm_concr     = 240  -- CONCURRENT
+  lm_endcn     = 241  -- ENDCONCUR
+  lm_mogrp     = 242  -- motion group mask
+  lm_move      = 254  -- motion
+
+  -- Terminator
+  lm_term      = 255  -- terminator
+
+  -- Data type for constant
+  lm_cnst_byt  =   1  -- integer (1 byte)
+  lm_cnst_lng  =   2  -- longword integer (4 bytes)
+  lm_cnst_flt  =   3  -- Short real (4 BYTES)
+
+  -- Special constant value
+  lm_spc_off   =   0  -- OFF
+  lm_spc_on    =   1  -- ON
+  lm_spc_coff  =   2  -- COFF
+  lm_spc_enb   =   2  -- ENABLE
+  lm_spc_dis   =   3  -- DISABLE
+  lm_spc_start =   4  -- START
+  lm_spc_stop  =   5  -- STOP
+  lm_spc_reset =   6  -- RESET
+  lm_spc_lpos  =   7  -- LPOS
+  lm_spc_jpos  =   8  -- JPOS
+  lm_spc_open  =   9  -- OPEN
+  lm_spc_close =  10  -- CLOSE
+  lm_spc_enter =  11  -- ENTER
+  lm_spc_exit  =  12  -- EXIT
+  lm_spc_copen =  13  -- OPEN FOR CLAMP
+  lm_spc_crep  =  14  -- REPOZITION FOR CLAMP
+  lm_spc_svhi  =  17  -- HIGH FOR SPOT[..,V = H,...]
+  lm_spc_svmid =  18  -- MID  FOR SPOT[..,V = M,...]
+  lm_spc_svlow =  19  -- LOW  FOR SPOT[..,V = L,...]
+  lm_spc_nochg =  20  -- "*" of BACKUP[i] = * etc.
+  LM_SPC_AVOFF =  21  --  /* AOV disabled */
+  LM_SPC_AVON  =  22  --  /* AOV enabled  */
+  -- Data type for motion statement
+  -- Interporation type
+  lm_mtn_unt   =   0  -- reserve (untaught)
+  lm_mtn_jnt   =   1  -- joint
+  lm_mtn_lin   =   2  -- linear
+  lm_mtn_cir   =   3  -- circular
+  lm_mtn_incl  =   4  -- inclination control
+  lm_mtn_home  =   5  -- home
+  lm_mtn_arc   =   6  -- circle arc
+
+  -- Position type
+  lm_mtn_npos  =   0  -- normal position
+  lm_mtn_rpos  =   1  -- position register
+  lm_mtn_palt  =   2  -- pallet
+
+  -- Speed unit
+  lm_mtn_per   =   0  -- % (joint)
+  lm_mtn_mmsec =   1  -- mm/sec
+  lm_mtn_cmmin =   2  -- cm/min
+  lm_mtn_incmn =   3  -- inch/min
+  lm_mtn_dgsec =   4  -- deg/sec
+  lm_mtn_sec   =   5  -- sec
+
+  -- Speed type (new to V4.2x)
+  lm_mtn_nspd  =   0   -- Normal speed
+  lm_mtn_rspd  =   64  -- Direct Register Speed
+  lm_mtn_rrspd =   128 -- Indirect Register Speed
+  lm_mtn_apspd =   192 -- Application Speed
+  lm_mtn_unspd =   192 -- Mask for speed type field
+
+  -- Termination type
+  lm_mtn_fine  =   0  -- Fine
+  lm_mtn_cnt   = 128  -- Cnt
+
+  -- System/User AIR
+  lm_sys_air   =   0  -- System defined AIR
+  lm_user_air  =   1  -- User defined AIR
+
+  -- SPOT[B= ,V= ,S= ,B= ]
+  lm_sp1_bb    =  71  -- B =
+  lm_sp1_v     =  72  -- V =
+  lm_sp1_s     =  73  -- S =
+  lm_sp1_ba    =  74  -- B =
+
+  -- SPOT[B=(,) ,V=(,) ,S=(,) ,B=(,) ]
+  lm_sp2_bb    =  75   -- B =
+  lm_sp2_v     =  76   -- V =
+  lm_sp2_s     =  77   -- S =
+  lm_sp2_ba    =  78   -- B =
+
+  LM_SP2_EQ    = 79     -- /* EQ= */
+  LM_SP2_WC    = 80     -- /* WC= */
+  LM_SP2_CT    = 81
+  LM_SP2_SN    = 82
+  LM_SP2_VL    =  83
+  LM_SP2_AV    =  84    -- /* AOV(,) */
+  LM_STK_FCTR  =  85
+  LM_TIP_STIK  =  86    -- /* Tip Stick data (invisible) */
+  LM_AVEN_C    =  87
+  LM_SP2_EP    =  88    -- /* Equalization pressure EP= */
+  LM_SP2_THK   =  89    -- /* Thickness t= */
+  LM_SP2_WID   =  90    -- /* Weld ID WID= */
+  LM_SP2_RSV   =  91    -- /* For reserve */
+  LM_SPLNG_C   =  92    -- /* longword integer for SPOT  */
+  LM_SP2_RSV2  = 93    -- /* For reserve 2 */

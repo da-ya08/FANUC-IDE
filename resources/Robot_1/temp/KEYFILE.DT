@@ -1,0 +1,485 @@
+$
+$" -1  "#135"2D Guidance Plus     "#135"A05B-2600-R905 "#135
+$" -1  "#135"3DA Guidance Plus    "#135"A05B-2600-R903 "#135
+$" -1  "#135"3DL Guidance Plus    "#135"A05B-2600-R906 "#135
+$" -1  "#135"3DV Guidance Plus    "#135"A05B-2600-R902 "#135
+$" -1  "#135"3rd Party Laser      "#135"A05B-2600-S504 "#135
+$" -1  "#135"4D Graphics          "#135"A05B-2600-R764 "#135
+$" -1  "#135"4D Graphics Import   "#135"A05B-2600-R829 "#135
+$" -1  "#135"AB-RIO Int (pc104)   "#135"A05B-2600-R576 "#135
+$" -1  "#135"ADV-CP Path Ctrl     "#135"A05B-2600-R806 "#135
+$" -1  "#135"ADV-CP Speed Ctrl    "#135"A05B-2600-R805 "#135
+$" -1  "#135"AI Bin Picking       "#135"A05B-2600-S520 "#135
+$" -1  "#135"APC function         "#135"A05B-2600-J574 "#135
+$" -1  "#135"Accu & Stiff Enh Pack"#135"A05B-2600-J674 "#135
+$" -1  "#135"Accu Cur Pos Out     "#135"A05B-2600-J673 "#135
+$" -1  "#135"AccuCal2             "#135"A05B-2600-R635 "#135
+$" -1  "#135"Accuracy Package     "#135"A05B-2600-R811 "#135
+$" -1  "#135"Adapt Ctrl           "#135"A05B-2600-R505 "#135
+$" -1  "#135"Adjust Point         "#135"A05B-2600-J550 "#135
+$" -1  "#135"Adv. Constant Path   "#135"A05B-2600-J891 "#135
+$" -1  "#135"Adv. DCS/PMC Package "#135"A05B-2600-R909 "#135
+$" -1  "#135"Advanced DCS Package "#135"A05B-2600-R859 "#135
+$" -1  "#135"Advanced EIP ADP Pkg "#135"A05B-2600-R860 "#135
+$" -1  "#135"Advanced EIP SCN Pkg "#135"A05B-2600-R887 "#135
+$" -1  "#135"Alarm Cause/Remedy   "#135"A05B-2600-R665 "#135
+$" -1  "#135"All Smooth Stop      "#135"A05B-2600-J651 "#135
+$" -1  "#135"Anti-Deflection      "#135"A05B-2600-J919 "#135
+$" 1050"#135"Ascii Program Loader "#135"A05B-2600-R796 "#135
+$" 780 "#135"Ascii Upload         "#135"A05B-2600-R507 "#135
+$" -1  "#135"Auto Backward Exit   "#135"A05B-2600-R861 "#135
+$" -1  "#135"Auto Collision Recov "#135"A05B-2600-R510 "#135
+$" -1  "#135"Auto Error Recovery  "#135"A05B-2600-J924 "#135
+$" -1  "#135"AutoMode TP operation"#135"A05B-2600-J698 "#135
+$" -1  "#135"AutoSingularityAvoidM"#135"A05B-2600-R512 "#135
+$" -1  "#135"BOOTP Server         "#135"A05B-2600-JNN6 "#135
+$" -1  "#135"Basic Interference Ck"#135"A05B-2600-R761 "#135
+$" -1  "#135"Basic Process Axes   "#135"A05B-2600-R689 "#135
+$" -1  "#135"Basic Remote TCP     "#135"A05B-2600-R657 "#135
+$" -1  "#135"Brake check function "#135"A05B-2600-J951 "#135
+$" -1  "#135"BumpBox              "#135"A05B-2600-R516 "#135
+$" -1  "#135"CC-Link IE Field Safe"#135"A05B-2600-S524 "#135
+$" -1  "#135"CC-Link IE Field Slv "#135"A05B-2600-J779 "#135
+$" -1  "#135"CC-Link Interface    "#135"A05B-2600-J786 "#135
+$" -1  "#135"CD Dynamic UFrame    "#135"A05B-2600-R700 "#135
+$" -1  "#135"CD Dynamic UFrame Arc"#135"A05B-2600-R845 "#135
+$" -1  "#135"CE Mark              "#135"A05B-2600-J618 "#135
+$" -1  "#135"CLSM for KMTS        "#135"A05B-2600-J956 "#135
+$" -1  "#135"CORETEC bead insp I/F"#135"A05B-2600-J714 "#135
+$" -1  "#135"CPRUT                "#135"A05B-2600-J858 "#135
+$" -1  "#135"CRT/Keyboard Manager "#135"A05B-2600-J535 "#135
+$" -1  "#135"CRW Shape Generation "#135"A05B-2600-S514 "#135
+$" -1  "#135"CalMate              "#135"A05B-2600-R517 "#135
+$" -1  "#135"Camera Disconnection "#135"A05B-2600-J908 "#135
+$" -1  "#135"CeilingMountVisMast  "#135"A05B-2600-S510 "#135
+$" -1  "#135"Cell Finder          "#135"A05B-2600-R519 "#135
+$" -1  "#135"Center Finder        "#135"A05B-2600-R520 "#135
+$" -1  "#135"Clock Simulaneous    "#135"A05B-2600-J955 "#135
+$" -1  "#135"Collision Guard      "#135"A05B-2600-R534 "#135
+$" -1  "#135"Collision Guard Pack "#135"A05B-2600-J684 "#135
+$" -1  "#135"Collision Recovery   "#135"A05B-2600-R791 "#135
+$" -1  "#135"Common application   "#135"A05B-2600-CMAP "#135
+$" 1163"#135"Constant Path        "#135"A05B-2600-R663 "#135
+$" -1  "#135"Cont. Turn Speed     "#135"A05B-2600-R847 "#135
+$" -1  "#135"Continuous Turn      "#135"A05B-2600-J613 "#135
+$" -1  "#135"ControlNet Interface "#135"A05B-2600-J756 "#135
+$" -1  "#135"ControlNet(Slave)    "#135"A05B-2600-J757 "#135
+$" -1  "#135"Coord Motion Package "#135"A05B-2600-J686 "#135
+$" -1  "#135"Coord-Motion Plus    "#135"A05B-2600-R669 "#135
+$" -1  "#135"CornerDistance       "#135"A05B-2600-R748 "#135
+$" -1  "#135"Custom Config Import "#135"A05B-2600-J947 "#135
+$" -1  "#135"Custom Log Output 1  "#135"A05B-2600-J998 "#135
+$" -1  "#135"Custom Package 1     "#135"A05B-2600-J531 "#135
+$" -1  "#135"Custom Setting 1     "#135"A05B-2600-J652 "#135
+$" -1  "#135"Custom Setting 11    "#135"A05B-2600-S563 "#135
+$" -1  "#135"Custom Setting 2     "#135"A05B-2600-J797 "#135
+$" -1  "#135"Custom Setting 3     "#135"A05B-2600-J594 "#135
+$" -1  "#135"Custom Setting 4     "#135"A05B-2600-J661 "#135
+$" -1  "#135"Custom Setting 5     "#135"A05B-2600-J636 "#135
+$" -1  "#135"Custom Setting 6     "#135"A05B-2600-S540 "#135
+$" -1  "#135"Customer Reg         "#135"A05B-2600-J508 "#135
+$" -1  "#135"Customize Support    "#135"A05B-2600-J742 "#135
+$" -1  "#135"Cutting Tool         "#135"A05B-2600-J926 "#135
+$" -1  "#135"Cycle Time Logging   "#135"A05B-2600-R802 "#135
+$" 1080"#135"Cycle Time Priority  "#135"A05B-2600-J523 "#135
+$" -1  "#135"Cycle Time Tracking  "#135"A05B-2600-R522 "#135
+$" -1  "#135"DCS AR               "#135"A05B-2600-R908 "#135
+$" -1  "#135"DCS Basic Pos. check "#135"A05B-2600-J556 "#135
+$" -1  "#135"DCS Joint Pos check  "#135"A05B-2600-DCSJ "#135
+$" -1  "#135"DCS Joint Speed check"#135"A05B-2600-J555 "#135
+$" -1  "#135"DCS Pos./Speed Pkg.  "#135"A05B-2600-R735 "#135
+$" -1  "#135"DCS Pos./Speed check "#135"A05B-2600-J567 "#135
+$" -1  "#135"DCS Safe I/O connect "#135"A05B-2600-J568 "#135
+$" -1  "#135"DCS Safety PMC       "#135"A05B-2600-J764 "#135
+$" -1  "#135"DCS collabo Robot    "#135"A05B-2600-CLLB "#135
+$" -1  "#135"DRAM File Storage    "#135"A05B-2600-R798 "#135
+$" -1  "#135"Data Monitor         "#135"A05B-2600-J675 "#135
+$" -1  "#135"Data Transfer        "#135"A05B-2600-J501 "#135
+$" -1  "#135"Data trans.betw.Robot"#135"A05B-2600-J740 "#135
+$" -1  "#135"Deadlock Prevention  "#135"A05B-2600-R772 "#135
+$" -1  "#135"Deflection Comp. II  "#135"A05B-2600-R754 "#135
+$" -1  "#135"DeviceNet Interface  "#135"A05B-2600-J753 "#135
+$" -1  "#135"DeviceNet Safety     "#135"A05B-2600-J974 "#135
+$" -1  "#135"DeviceNet(Slave)     "#135"A05B-2600-J754 "#135
+$" -1  "#135"Diag Lite Interface  "#135"A05B-2600-R710 "#135
+$" -1  "#135"Diagnostics Interface"#135"A05B-2600-R711 "#135
+$" -1  "#135"Digital I/O Jog      "#135"A05B-2600-J543 "#135
+$" -1  "#135"Domain Name Serv.    "#135"A05B-2600-J755 "#135
+$" -1  "#135"Dual Chan. Profinet  "#135"A05B-2600-R834 "#135
+$" -1  "#135"Dual Drive           "#135"A05B-2600-J836 "#135
+$" -1  "#135"Dummy order for FRNA "#135"A05B-2600-J679 "#135
+$" -1  "#135"Duty Diagnosis       "#135"A05B-2600-J646 "#135
+$" -1  "#135"Dyn Path Modifier    "#135"A05B-2600-R739 "#135
+$" -1  "#135"Dynamic Space Check  "#135"A05B-2600-R683 "#135
+$" -1  "#135"EGD Ethernet I/O     "#135"A05B-2600-R535 "#135
+$" -1  "#135"EGD I/O              "#135"A05B-2600-R793 "#135
+$" -1  "#135"EX Sensor Utility    "#135"A05B-2600-J937 "#135
+$" -1  "#135"Easy Normal Utility  "#135"A05B-2600-J553 "#135
+$" -1  "#135"Easy Teach Suite     "#135"A05B-2600-R803 "#135
+$" -1  "#135"Enh Vision Port      "#135"A05B-2600-R825 "#135
+$" -1  "#135"Enh ZDT Ethernet Port"#135"A05B-2600-R910 "#135
+$" -1  "#135"Enhanced Dry Run     "#135"A05B-2600-J985 "#135
+$" -1  "#135"Enhanced Edit        "#135"A05B-2600-J560 "#135
+$" -1  "#135"Enhanced Mirror Image"#135"A05B-2600-R698 "#135
+$" -1  "#135"Enhanced PMC Editor  "#135"A05B-2600-S501 "#135
+$" -1  "#135"Equalization         "#135"A05B-2600-J849 "#135
+$" -1  "#135"Error Code Output    "#135"A05B-2600-J527 "#135
+$" -1  "#135"Error Recovery       "#135"A05B-2600-J664 "#135
+$" -1  "#135"EtherCAT             "#135"A05B-2600-J743 "#135
+$" -1  "#135"EtherNet/IP Safety   "#135"A05B-2600-R713 "#135
+$" -1  "#135"Ethernet Encoder     "#135"A05B-2600-R762 "#135
+$" -1  "#135"Ethernet Sniffer     "#135"A05B-2600-R659 "#135
+$" -1  "#135"Ethernet/IP Adapter  "#135"A05B-2600-R784 "#135
+$" -1  "#135"Ethernet/IP EDA      "#135"A05B-2600-R822 "#135
+$" -1  "#135"Ethernet/IP Router   "#135"A05B-2600-R804 "#135
+$" -1  "#135"Ethernet/IP SCN Lt1  "#135"A05B-2600-R889 "#135
+$" -1  "#135"Ethernet/IP SCN Lt2  "#135"A05B-2600-R890 "#135
+$" -1  "#135"Ethernet/IP Scanner  "#135"A05B-2600-R785 "#135
+$" -1  "#135"EthernetIP I/O RTR   "#135"A05B-2600-R539 "#135
+$" -1  "#135"European special func"#135"A05B-2600-J537 "#135
+$" -1  "#135"Evaluation Control   "#135"A05B-2600-R855 "#135
+$" -1  "#135"Expanded Registers   "#135"A05B-2600-R830 "#135
+$" -1  "#135"Ext Mach Vis I/F Opt "#135"A05B-2600-R897 "#135
+$" -1  "#135"Ext Path Optimization"#135"A05B-2600-J829 "#135
+$" -1  "#135"Extended Axis Control"#135"A05B-2600-J518 "#135
+$" -1  "#135"Extern Proc Axes Ctrl"#135"A05B-2600-R824 "#135
+$" -1  "#135"External MPG jog     "#135"A05B-2600-S508 "#135
+$" -1  "#135"External mode select "#135"A05B-2600-J569 "#135
+$" -1  "#135"FANUC S/W Reg.       "#135"A05B-2600-R715 "#135
+$" -1  "#135"FC Basic 3-Axis      "#135"A05B-2600-J844 "#135
+$" -1  "#135"FC Deburring package "#135"A05B-2600-J840 "#135
+$" -1  "#135"FL-net               "#135"A05B-2600-J759 "#135
+$" -1  "#135"FRA Params           "#135"A05B-2600-R650 "#135
+$" 655 "#135"FRL Params           "#135"A05B-2600-R651 "#135
+$" -1  "#135"FSW programing       "#135"A05B-2600-J967 "#135
+$" -1  "#135"FacePlate Linear     "#135"A05B-2600-R743 "#135
+$" -1  "#135"Fanuc Fiber Laser    "#135"A05B-2600-J922 "#135
+$" -1  "#135"Fanuc Remote Laser   "#135"A05B-2600-J939 "#135
+$" -1  "#135"Fault & Incident Rep "#135"A05B-2600-R544 "#135
+$" -1  "#135"Filtered Memory Dev. "#135"A05B-2600-R545 "#135
+$" -1  "#135"Finishing func PKG   "#135"A05B-2600-J558 "#135
+$" -1  "#135"Fipio Interface      "#135"A05B-2600-J758 "#135
+$" -1  "#135"Fixed Force Sensor   "#135"A05B-2600-J843 "#135
+$" -1  "#135"Force Control Basic  "#135"A05B-2600-J876 "#135
+$" -1  "#135"Force Control Fitting"#135"A05B-2600-J877 "#135
+$" -1  "#135"Force Ctl. Contouring"#135"A05B-2600-J835 "#135
+$" -1  "#135"Force Deburring      "#135"A05B-2600-J845 "#135
+$" -1  "#135"Frequency Interface  "#135"A05B-2600-R548 "#135
+$" -1  "#135"Gen FS Interface     "#135"A05B-2600-S506 "#135
+$" -1  "#135"GenkotsuLearningCtrl "#135"A05B-2600-R815 "#135
+$" -1  "#135"Gravity Compensation "#135"A05B-2600-J649 "#135
+$" -1  "#135"HDI for Line Tracking"#135"A05B-2600-J831 "#135
+$" 1291"#135"HMI Device (SNPX)    "#135"A05B-2600-R553 "#135
+$" -1  "#135"HSSB intrface        "#135"A05B-2600-J585 "#135
+$" -1  "#135"Hand Guidance        "#135"A05B-2600-J841 "#135
+$" -1  "#135"High Accuracy LNTK   "#135"A05B-2600-R884 "#135
+$" -1  "#135"High Spd Pos Output  "#135"A05B-2600-R891 "#135
+$" -1  "#135"High speed CD setup  "#135"A05B-2600-S564 "#135
+$" -1  "#135"High speed shift     "#135"A05B-2600-J592 "#135
+$" -1  "#135"IC Multi-Arm Recovery"#135"A05B-2600-R749 "#135
+$" -1  "#135"IIC DSP Support      "#135"A05B-2600-R783 "#135
+$" -1  "#135"IIC for Arc          "#135"A05B-2600-R872 "#135
+$" -1  "#135"IIC for PaintTool    "#135"A05B-2600-R883 "#135
+$" -1  "#135"IO Strip Chart       "#135"A05B-2600-R559 "#135
+$" -1  "#135"Indexer Tracking     "#135"A05B-2600-R763 "#135
+$" -1  "#135"Initial Setting Load "#135"A05B-2600-J980 "#135
+$" -1  "#135"Int. Interference Chk"#135"A05B-2600-R759 "#135
+$" -1  "#135"Integrated PMC       "#135"A05B-2600-J760 "#135
+$" -1  "#135"Integrated PMC Pkg   "#135"A05B-2600-R807 "#135
+$" -1  "#135"Integration Checklist"#135"A05B-2600-R888 "#135
+$" -1  "#135"InterBus DDI server  "#135"A05B-2600-J769 "#135
+$" -1  "#135"InterBus PxC         "#135"A05B-2600-J804 "#135
+$" -1  "#135"InterBus PxC Slave   "#135"A05B-2600-J896 "#135
+$" -1  "#135"Interface panel      "#135"A05B-2600-J741 "#135
+$" -1  "#135"Internet Conn/Custo  "#135"A05B-2600-R558 "#135
+$" -1  "#135"J2 Protection        "#135"A05B-2600-J2SF "#135
+$" -1  "#135"Jnt Position output  "#135"A05B-2600-J966 "#135
+$" -1  "#135"Jog Retract & Return "#135"A05B-2600-R786 "#135
+$" 667 "#135"Jog in Auto Mode     "#135"A05B-2600-R694 "#135
+$" 646 "#135"KAREL                "#135"A05B-2600-R632 "#135
+$" -1  "#135"KAREL Diagnostic     "#135"A05B-2600-R566 "#135
+$" -1  "#135"KAREL Trans/Comp     "#135"A05B-2600-R567 "#135
+$" -1  "#135"KAREL Use Sprt FCTN  "#135"A05B-2600-J971 "#135
+$" -1  "#135"KAREL Use Sprt UIF   "#135"A05B-2600-J735 "#135
+$" -1  "#135"LF Softpart          "#135"A05B-2600-LFSP "#135
+$" -1  "#135"LJV7k Sensor KRL PKG "#135"A05B-2600-LJV7 "#135
+$" -1  "#135"LVC function         "#135"A05B-2600-J573 "#135
+$" -1  "#135"Laser Interface      "#135"A05B-2600-S555 "#135
+$" -1  "#135"Laser welding I/F    "#135"A05B-2600-J590 "#135
+$" -1  "#135"Learning Path Control"#135"A05B-2600-R816 "#135
+$" -1  "#135"Line Track Coord     "#135"A05B-2600-R853 "#135
+$" -1  "#135"Line Tracking        "#135"A05B-2600-J512 "#135
+$" -1  "#135"Linear Press Tool    "#135"A05B-2600-LPTO "#135
+$" -1  "#135"Local Stop           "#135"A05B-2600-J806 "#135
+$" -1  "#135"M-10iA,M-20iA TUI    "#135"A05B-2600-J959 "#135
+$" -1  "#135"M-1iA 1kg Option     "#135"A05B-2600-J848 "#135
+$" -1  "#135"M-2000iA 1350kg Opt  "#135"A05B-2600-J732 "#135
+$" -1  "#135"M-2iA/3S,3SL HiOpt   "#135"A05B-2600-J562 "#135
+$" -1  "#135"M-3iA6S HiOpt        "#135"A05B-2600-J595 "#135
+$" -1  "#135"M-900iA 700kg option "#135"A05B-2600-J798 "#135
+$" -1  "#135"M-TP Interface       "#135"A05B-2600-J897 "#135
+$" -1  "#135"M. Tool Easy Setup   "#135"A05B-2600-R835 "#135
+$" -1  "#135"M.Tool Connection    "#135"A05B-2600-J984 "#135
+$" -1  "#135"M.Tool Easy Setup    "#135"A05B-2600-R727 "#135
+$" -1  "#135"M.Tool Interface Pkg "#135"A05B-2600-R808 "#135
+$" -1  "#135"M900iA400L HiOpt     "#135"A05B-2600-J731 "#135
+$" -1  "#135"MH Gripper Option    "#135"A05B-2600-R578 "#135
+$" -1  "#135"MH RS4 compliance    "#135"A05B-2600-R579 "#135
+$" -1  "#135"MIG CORE             "#135"A05B-2600-MIGC "#135
+$" -1  "#135"MPG jog function     "#135"A05B-2600-S507 "#135
+$" -1  "#135"MROT Instruction     "#135"A05B-2600-R640 "#135
+$" -1  "#135"MTConnect Adapter    "#135"A05B-2600-R914 "#135
+$" -1  "#135"Maint Reminder Plus  "#135"A05B-2600-J766 "#135
+$" -1  "#135"Maint. Remind.(ctrl) "#135"A05B-2600-J772 "#135
+$" -1  "#135"Maintenance Package  "#135"A05B-2600-R870 "#135
+$" -1  "#135"Maintenance Reminder "#135"A05B-2600-J771 "#135
+$" -1  "#135"Math Function        "#135"A05B-2600-J593 "#135
+$" -1  "#135"Menu Utility         "#135"A05B-2600-R577 "#135
+$" -1  "#135"Modbus TCP           "#135"A05B-2600-R581 "#135
+$" -1  "#135"Modbus TCP Connection"#135"A05B-2600-R800 "#135
+$" -1  "#135"Motion Interface     "#135"A05B-2600-R583 "#135
+$" -1  "#135"Motion Package       "#135"A05B-2600-R809 "#135
+$" -1  "#135"Motion Stream        "#135"A05B-2600-R584 "#135
+$" -1  "#135"Motion Trigger       "#135"A05B-2600-J625 "#135
+$" -1  "#135"Multi UOP (Dual Arm) "#135"A05B-2600-J605 "#135
+$" -1  "#135"Multi UOP Interface  "#135"A05B-2600-J964 "#135
+$" -1  "#135"Multi-Arm Calibration"#135"A05B-2600-R670 "#135
+$" -1  "#135"Multi-Arm Pkg        "#135"A05B-2600-R819 "#135
+$" -1  "#135"Multi-Arm Pkg(Legacy)"#135"A05B-2600-R671 "#135
+$" -1  "#135"Multi-Group Motion   "#135"A05B-2600-J601 "#135
+$" -1  "#135"Multi-Pass           "#135"A05B-2600-MPAS "#135
+$" -1  "#135"Multi-Path PMC       "#135"A05B-2600-J763 "#135
+$" -1  "#135"NC Prog Conversion   "#135"A05B-2600-R775 "#135
+$" -1  "#135"NRTL                 "#135"A05B-2600-J547 "#135
+$" -1  "#135"Nadex DeviceNet WC   "#135"A05B-2600-J925 "#135
+$" -1  "#135"No shift jog         "#135"A05B-2600-J739 "#135
+$" -1  "#135"No shift operation   "#135"A05B-2600-J591 "#135
+$" -1  "#135"Off-line Singularity "#135"A05B-2600-R585 "#135
+$" -1  "#135"Old Stop Function    "#135"A05B-2600-J680 "#135
+$" -1  "#135"Online Help          "#135"A05B-2600-R664 "#135
+$" -1  "#135"Operation logbook    "#135"A05B-2600-J695 "#135
+$" -1  "#135"Option size list     "#135"A05B-2600-SIZE "#135
+$" -1  "#135"Orientation Control  "#135"A05B-2600-R723 "#135
+$" 143 "#135"PC Interface         "#135"A05B-2600-R641 "#135
+$" -1  "#135"PC Remote iPendant   "#135"A05B-2600-R850 "#135
+$" -1  "#135"PDF viewer           "#135"A05B-2600-J838 "#135
+$" -1  "#135"PLC Motion I/O Func  "#135"A05B-2600-S525 "#135
+$" -1  "#135"PLC Motion Interface "#135"A05B-2600-R892 "#135
+$" -1  "#135"PMC Change Mode      "#135"A05B-2600-R652 "#135
+$" -1  "#135"PMC and Internet Pkg "#135"A05B-2600-R812 "#135
+$" -1  "#135"PROFIBUS             "#135"A05B-2600-J713 "#135
+$" -1  "#135"PROFIBUS-DP(Master)  "#135"A05B-2600-J752 "#135
+$" -1  "#135"PROFIBUS-DP(Slave)   "#135"A05B-2600-J751 "#135
+$" -1  "#135"PROFIENERGY          "#135"A05B-2600-J750 "#135
+$" -1  "#135"PROFINET CP16XX FW.  "#135"A05B-2600-J744 "#135
+$" -1  "#135"PROFINET FANUC board "#135"A05B-2600-S523 "#135
+$" -1  "#135"PROFINET I/O         "#135"A05B-2600-J930 "#135
+$" -1  "#135"PROFINET I/O G2      "#135"A05B-2600-J709 "#135
+$" -1  "#135"PROFINET Safety      "#135"A05B-2600-J931 "#135
+$" -1  "#135"PROGRAM/JOG Override "#135"A05B-2600-J579 "#135
+$" -1  "#135"Paint Plug-in        "#135"A05B-2600-R707 "#135
+$" -1  "#135"Pallet PRO Package   "#135"A05B-2600-J989 "#135
+$" -1  "#135"PalletTool           "#135"A05B-2600-R590 "#135
+$" -1  "#135"PalletTool Fork Grip "#135"A05B-2600-R591 "#135
+$" -1  "#135"PalletTool MultiCase "#135"A05B-2600-R592 "#135
+$" -1  "#135"PalletTool Turbo     "#135"A05B-2600-R593 "#135
+$" -1  "#135"PalletTool pkg       "#135"A05B-2600-R813 "#135
+$" -1  "#135"PalletToolTurboII Pkg"#135"A05B-2600-R871 "#135
+$" -1  "#135"PalletToolTurboLite  "#135"A05B-2600-R915 "#135
+$" -1  "#135"Palletizing          "#135"A05B-2600-J500 "#135
+$" -1  "#135"Panel Wizard         "#135"A05B-2600-R594 "#135
+$" 1075"#135"Password Protection  "#135"A05B-2600-J541 "#135
+$" -1  "#135"PathSwitch           "#135"A05B-2600-J693 "#135
+$" -1  "#135"Payload Ident.       "#135"A05B-2600-J669 "#135
+$" -1  "#135"Payload confirm      "#135"A05B-2600-J878 "#135
+$" -1  "#135"Persistent Strg      "#135"A05B-2600-NVDT "#135
+$" -1  "#135"Pos.Rep.Conversion   "#135"A05B-2600-J975 "#135
+$" -1  "#135"Position BumpBox     "#135"A05B-2600-R797 "#135
+$" -1  "#135"Position Snap & Map  "#135"A05B-2600-R596 "#135
+$" -1  "#135"Positional record    "#135"A05B-2600-J932 "#135
+$" -1  "#135"Process Logger       "#135"A05B-2600-R758 "#135
+$" -1  "#135"Procsync function    "#135"A05B-2600-R649 "#135
+$" -1  "#135"Prod Status Display  "#135"A05B-2600-R868 "#135
+$" -1  "#135"ProductDisplayImprove"#135"A05B-2600-J887 "#135
+$" -1  "#135"Program ToolBox      "#135"A05B-2600-R598 "#135
+$" -1  "#135"Pump Only Motion     "#135"A05B-2600-J801 "#135
+$" -1  "#135"QSSR for CNC         "#135"A05B-2600-S502 "#135
+$" -1  "#135"QUEUE EXPAND         "#135"A05B-2600-J789 "#135
+$" -1  "#135"R-2000iB/200R Stud   "#135"A05B-2600-J973 "#135
+$" -1  "#135"R-2000iB/210F SM I/F "#135"A05B-2600-J805 "#135
+$" -1  "#135"R2000iB200R,170CF TUI"#135"A05B-2600-J968 "#135
+$" -1  "#135"ROBODRILL Connection "#135"A05B-2600-J571 "#135
+$" -1  "#135"ROBODRILL Connection2"#135"A05B-2600-J561 "#135
+$" -1  "#135"ROBODRILL Inter. Pkg "#135"A05B-2600-R814 "#135
+$" -1  "#135"ROBODRILL Inter. Pkg2"#135"A05B-2600-R836 "#135
+$" -1  "#135"ROBODRILL-QSSR Set   "#135"A05B-2600-S503 "#135
+$" -1  "#135"ROBOMachine JOG      "#135"A05B-2600-J803 "#135
+$" 1156"#135"ROS Ethernet Packets "#135"A05B-2600-R603 "#135
+$" -1  "#135"RSI interface        "#135"A05B-2600-J802 "#135
+$" -1  "#135"Remote Laser type1   "#135"A05B-2600-J575 "#135
+$" -1  "#135"Remote Motion        "#135"A05B-2600-R912 "#135
+$" -1  "#135"Remote TCP           "#135"A05B-2600-J624 "#135
+$" 1936"#135"Remote iPendant      "#135"A05B-2600-R843 "#135
+$" -1  "#135"Remote jog for TUI   "#135"A05B-2600-J941 "#135
+$" -1  "#135"RemovalTool          "#135"A05B-2600-R600 "#135
+$" -1  "#135"Robot Isolation      "#135"A05B-2600-J544 "#135
+$" -1  "#135"Robot Setup Assist   "#135"A05B-2600-J737 "#135
+$" -1  "#135"Robot Simlator FCTN  "#135"A05B-2600-J776 "#135
+$" -1  "#135"RobotLink Plus Pkg   "#135"A05B-2600-R672 "#135
+$" -1  "#135"Roller Hemming       "#135"A05B-2600-J746 "#135
+$" -1  "#135"Root-Pass Memorize   "#135"A05B-2600-RTPM "#135
+$" -1  "#135"S/W Reg Enh          "#135"A05B-2600-R774 "#135
+$" -1  "#135"SPI Interface        "#135"A05B-2600-R612 "#135
+$" -1  "#135"SVGN Setup IF package"#135"A05B-2600-J890 "#135
+$" -1  "#135"Safety func by FL-net"#135"A05B-2600-J586 "#135
+$" -1  "#135"Safety space         "#135"A05B-2600-J667 "#135
+$" -1  "#135"Seam welding I/F     "#135"A05B-2600-J923 "#135
+$" -1  "#135"Sencoder Feedback    "#135"A05B-2600-R712 "#135
+$" -1  "#135"Sensor Interface     "#135"A05B-2600-J502 "#135
+$" -1  "#135"Servo Robot          "#135"A05B-2600-R604 "#135
+$" -1  "#135"Servo Robot Ethernet "#135"A05B-2600-J934 "#135
+$" -1  "#135"Servo Roller Hemming "#135"A05B-2600-J749 "#135
+$" -1  "#135"Servo Tool           "#135"A05B-2600-R675 "#135
+$" -1  "#135"Servo Tool Change    "#135"A05B-2600-J671 "#135
+$" -1  "#135"Servo gun setup pack "#135"A05B-2600-J979 "#135
+$" -1  "#135"Servo-Robot PKG      "#135"A05B-2600-R900 "#135
+$" -1  "#135"ServoConv.LnTk       "#135"A05B-2600-J589 "#135
+$" -1  "#135"ServoGun Dual CPU    "#135"A05B-2600-J833 "#135
+$" -1  "#135"Shape Generation 3   "#135"A05B-2600-R801 "#135
+$" -1  "#135"Shape Generation II  "#135"A05B-2600-R674 "#135
+$" -1  "#135"Shared TP            "#135"A05B-2600-R844 "#135
+$" -1  "#135"Simple Teach Suite   "#135"A05B-2600-R609 "#135
+$" -1  "#135"SimpleTeach          "#135"A05B-2600-R862 "#135
+$" -1  "#135"Simultaneous R. Link "#135"A05B-2600-J777 "#135
+$" -1  "#135"Singularity Avoidance"#135"A05B-2600-R792 "#135
+$" -1  "#135"SkipJump Instruction "#135"A05B-2600-R866 "#135
+$" -1  "#135"Slave Robot for PS   "#135"A05B-2600-J659 "#135
+$" -1  "#135"Slave motion I/F     "#135"A05B-2600-J854 "#135
+$" -1  "#135"Small Circle Accuracy"#135"A05B-2600-J644 "#135
+$" -1  "#135"Small Hand Guidance  "#135"A05B-2600-S505 "#135
+$" -1  "#135"Smooth Stop Upgrade  "#135"A05B-2600-J548 "#135
+$" -1  "#135"Smpl grp chg         "#135"A05B-2600-J892 "#135
+$" -1  "#135"SmthStop at PowerFail"#135"A05B-2600-J639 "#135
+$" -1  "#135"Soft Float           "#135"A05B-2600-J612 "#135
+$" -1  "#135"Special FWD/BWD      "#135"A05B-2600-J538 "#135
+$" -1  "#135"Special Jog Sequence "#135"A05B-2600-J559 "#135
+$" -1  "#135"Spline Motion        "#135"A05B-2600-R904 "#135
+$" -1  "#135"SrvoRbt Fuji-Cam     "#135"A05B-2600-J936 "#135
+$" -1  "#135"SrvoRbt ROBOCOM Lite "#135"A05B-2600-J935 "#135
+$" -1  "#135"Stick Detection      "#135"A05B-2600-J629 "#135
+$" -1  "#135"Stitch function      "#135"A05B-2600-J683 "#135
+$" -1  "#135"Stop Cat.1 by E-Stop "#135"A05B-2600-J521 "#135
+$" -1  "#135"Stream motion        "#135"A05B-2600-J519 "#135
+$" -1  "#135"System Design Tool   "#135"A05B-2600-J738 "#135
+$" -1  "#135"TCP Mate             "#135"A05B-2600-R638 "#135
+$" -1  "#135"TCP SPEED OUTPUT     "#135"A05B-2600-J694 "#135
+$" -1  "#135"TP DRAM/FILE Storage "#135"A05B-2600-R709 "#135
+$" -1  "#135"TP Hot Swap          "#135"A05B-2600-J647 "#135
+$" -1  "#135"TP Mode Sel. AUTO/T1 "#135"A05B-2600-S519 "#135
+$" -1  "#135"TP Shim (FlexTool)   "#135"A05B-2600-R620 "#135
+$" -1  "#135"TP mode select       "#135"A05B-2600-J768 "#135
+$" -1  "#135"TPP Size 175         "#135"A05B-2600-R621 "#135
+$" -1  "#135"TPP Size 400         "#135"A05B-2600-R623 "#135
+$" -1  "#135"TUI FANUC pos. disp. "#135"A05B-2600-J943 "#135
+$" -1  "#135"TUI FANUC std.I/F    "#135"A05B-2600-J821 "#135
+$" -1  "#135"TUI SVGN Package     "#135"A05B-2600-S517 "#135
+$" -1  "#135"TUI Unified spec     "#135"A05B-2600-J940 "#135
+$" -1  "#135"Tablet TP            "#135"A05B-2600-S527 "#135
+$" -1  "#135"Tool Torsion Comp.   "#135"A05B-2600-J988 "#135
+$" -1  "#135"Torch Angle          "#135"A05B-2600-R734 "#135
+$" -1  "#135"Torque Limit         "#135"A05B-2600-J611 "#135
+$" -1  "#135"Touch Sensing        "#135"A05B-2600-J536 "#135
+$" -1  "#135"Touch Skip           "#135"A05B-2600-J921 "#135
+$" -1  "#135"Track Optimize tool  "#135"A05B-2600-R722 "#135
+$" -1  "#135"Tracking Jog         "#135"A05B-2600-R624 "#135
+$" -1  "#135"Trigonometric Func   "#135"A05B-2600-J736 "#135
+$" -1  "#135"Triple/Quad Arm Pkg  "#135"A05B-2600-R673 "#135
+$" -1  "#135"Unified UserInterFace"#135"A05B-2600-J893 "#135
+$" -1  "#135"Universal Sensor IF  "#135"A05B-2600-R691 "#135
+$" -1  "#135"Universal Sensor IF2 "#135"A05B-2600-R901 "#135
+$" -1  "#135"User Function        "#135"A05B-2600-J986 "#135
+$" 157 "#135"User Socket Msg      "#135"A05B-2600-R648 "#135
+$" -1  "#135"VAG Ex Mode Select   "#135"A05B-2600-J529 "#135
+$" -1  "#135"VAG Package          "#135"A05B-2600-J658 "#135
+$" -1  "#135"VAG Package 2        "#135"A05B-2600-J528 "#135
+$" -1  "#135"VAG Sign Off Setup   "#135"A05B-2600-J638 "#135
+$" -1  "#135"VAG VAxis Master     "#135"A05B-2600-J530 "#135
+$" -1  "#135"VAG servogun setup   "#135"A05B-2600-J653 "#135
+$" -1  "#135"VAG setup 1          "#135"A05B-2600-J654 "#135
+$" -1  "#135"VAG setup 2          "#135"A05B-2600-J655 "#135
+$" -1  "#135"VAG setup 3          "#135"A05B-2600-J656 "#135
+$" -1  "#135"Vision support tools "#135"A05B-2600-J873 "#135
+$" -1  "#135"Visual Diagnostics   "#135"A05B-2600-R702 "#135
+$" -1  "#135"Visual Tracking      "#135"A05B-2600-J635 "#135
+$" -1  "#135"Wash teaching        "#135"A05B-2600-J724 "#135
+$" -1  "#135"Weaving              "#135"A05B-2600-J504 "#135
+$" -1  "#135"XSIF Sensor IF       "#135"A05B-2600-R881 "#135
+$" -1  "#135"YELLOW BOX           "#135"A05B-2600-J775 "#135
+$" -1  "#135"Zero Down Time Option"#135"A05B-2600-R854 "#135
+$" -1  "#135"Zero Down Time Pkg   "#135"A05B-2600-R851 "#135
+$" -1  "#135"arbitrary delay func."#135"A05B-2600-J572 "#135
+$" -1  "#135"i-cable change       "#135"A05B-2600-S511 "#135
+$" -1  "#135"iPendant Haptic      "#135"A05B-2600-R848 "#135
+$" -1  "#135"iRCalib. Signature   "#135"A05B-2600-R726 "#135
+$" -1  "#135"iRCalibration Frame  "#135"A05B-2600-R518 "#135
+$" -1  "#135"iRCalibration Master "#135"A05B-2600-R601 "#135
+$" -1  "#135"iRCalibration Package"#135"A05B-2600-R810 "#135
+$" -1  "#135"iRCalibration TCP    "#135"A05B-2600-R617 "#135
+$" -1  "#135"iRCalibration VAxis  "#135"A05B-2600-J996 "#135
+$" -1  "#135"iRCalibration VFrame "#135"A05B-2600-J991 "#135
+$" -1  "#135"iRCalibration VMCal  "#135"A05B-2600-J993 "#135
+$" -1  "#135"iRCalibration VMaster"#135"A05B-2600-J992 "#135
+$" -1  "#135"iRCalibration VShift "#135"A05B-2600-J994 "#135
+$" -1  "#135"iRCalibration VTCP   "#135"A05B-2600-J990 "#135
+$" -1  "#135"iRConnect            "#135"A05B-2600-R818 "#135
+$" -1  "#135"iRDiag with GenVI RTU"#135"A05B-2600-R873 "#135
+$" -1  "#135"iRDiagnostics        "#135"A05B-2600-R765 "#135
+$" -1  "#135"iRPick/iRV 3DV add-on"#135"A05B-2600-S947 "#135
+$" -1  "#135"iRPickAutoVTrkSetup  "#135"A05B-2600-J773 "#135
+$" -1  "#135"iRPickTool           "#135"A05B-2600-J945 "#135
+$" -1  "#135"iRPickTool / iRVision"#135"A05B-2600-J946 "#135
+$" -1  "#135"iRPickTool /Eff Tools"#135"A05B-2600-R846 "#135
+$" -1  "#135"iRPickTool /Prod Ctrl"#135"A05B-2600-R827 "#135
+$" -1  "#135"iRPickTool AR        "#135"A05B-2600-R907 "#135
+$" -1  "#135"iRPickTool Basic     "#135"A05B-2600-J944 "#135
+$" -1  "#135"iRPickTool MVS add on"#135"A05B-2600-S521 "#135
+$" -1  "#135"iRProgrammer         "#135"A05B-2600-J767 "#135
+$" -1  "#135"iRVision 1&2D Barcode"#135"A05B-2600-R742 "#135
+$" -1  "#135"iRVision 1D Barcode  "#135"A05B-2600-R720 "#135
+$" -1  "#135"iRVision 2D Barcode  "#135"A05B-2600-R737 "#135
+$" -1  "#135"iRVision 2D Basic Pkg"#135"A05B-2600-R858 "#135
+$" -1  "#135"iRVision 2D Pkg      "#135"A05B-2600-R685 "#135
+$" -1  "#135"iRVision 2D Upgrd Pkg"#135"A05B-2600-R867 "#135
+$" -1  "#135"iRVision 2DV         "#135"A05B-2600-J901 "#135
+$" -1  "#135"iRVision 3-D Multi VP"#135"A05B-2600-R714 "#135
+$" -1  "#135"iRVision 3D Tri-View "#135"A05B-2600-J904 "#135
+$" -1  "#135"iRVision 3DL         "#135"A05B-2600-J902 "#135
+$" -1  "#135"iRVision 3DLaser Pkg "#135"A05B-2600-R686 "#135
+$" -1  "#135"iRVision 3DM Commun. "#135"A05B-2600-R738 "#135
+$" -1  "#135"iRVision 3DV Sensor  "#135"A05B-2600-J914 "#135
+$" -1  "#135"iRVision AI Error P. "#135"A05B-2600-S522 "#135
+$" -1  "#135"iRVision AntiDefect  "#135"A05B-2600-J910 "#135
+$" -1  "#135"iRVision Area Sensor "#135"A05B-2600-J913 "#135
+$" -1  "#135"iRVision BarcodeRead "#135"A05B-2600-J911 "#135
+$" -1  "#135"iRVision Bin Picking "#135"A05B-2600-J909 "#135
+$" -1  "#135"iRVision Client      "#135"A05B-2600-J917 "#135
+$" -1  "#135"iRVision Code Reader "#135"A05B-2600-J830 "#135
+$" -1  "#135"iRVision Core        "#135"A05B-2600-J900 "#135
+$" -1  "#135"iRVision Edg Pts tool"#135"A05B-2600-R741 "#135
+$" -1  "#135"iRVision ErrP Adv Pkg"#135"A05B-2600-R730 "#135
+$" -1  "#135"iRVision Error Hand. "#135"A05B-2600-R757 "#135
+$" -1  "#135"iRVision GiGe Camera "#135"A05B-2600-R697 "#135
+$" -1  "#135"iRVision Img Pth Tool"#135"A05B-2600-R736 "#135
+$" -1  "#135"iRVision Img. File CS"#135"A05B-2600-R728 "#135
+$" -1  "#135"iRVision ImgToPnts   "#135"A05B-2600-J912 "#135
+$" -1  "#135"iRVision Inspect Pkg "#135"A05B-2600-R688 "#135
+$" -1  "#135"iRVision Lite        "#135"A05B-2600-J915 "#135
+$" -1  "#135"iRVision TorchMate   "#135"A05B-2600-R744 "#135
+$" -1  "#135"iRVision UIF Controls"#135"A05B-2600-J871 "#135
+$" -1  "#135"iRVision float frame "#135"A05B-2600-J916 "#135
+$" -1  "#135"iRail Gen. III       "#135"A05B-2600-R894 "#135
+$" -1  "#135"iRail Motion         "#135"A05B-2600-R831 "#135
+$" -1  "#135"irpick option pack   "#135"A05B-2600-R857 "#135
+$" -1  "#135"pre-grouping add-on  "#135"A05B-2600-R856 "#135
+$" -1  "#135"soft float recovery  "#135"A05B-2600-NGIP "#135
+$" -1  "#135"software for debug   "#135"A05B-2600-J999 "#135

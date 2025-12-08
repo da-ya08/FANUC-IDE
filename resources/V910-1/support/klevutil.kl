@@ -1,0 +1,61 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1991
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File:  klevutil - Constants for KLUTILS
+--    
+--    Description:
+--     
+--     
+--    Dependancies:
+--    
+--    
+--    Language: KAREL
+--    
+--    Source File:   klevutil      7-OCT-91   08:31AM
+--    
+--    Author: BRYCETK
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--
+
+
+CONST
+  --
+  -- Prompt_box routine response types
+  --
+  pb_yes_no = 1
+  pb_ok     = 2
+  pb_genl   = 3
+  pb_num_scrl  = 4
+  --
+  -- Prompt_box routine responses
+  --
+  pb_resp_yes  = 1
+  pb_resp_no   = 2
+  pb_resp_ok   = 3
+  pb_resp_gnla = 1
+  pb_resp_gnlb = 2
+  pb_resp_inc  = 1
+  pb_resp_dec  = 2
+  --
+  -- Prompt box device constants
+  --
+  pb_tp  = 1
+  pb_crt = 2
+  

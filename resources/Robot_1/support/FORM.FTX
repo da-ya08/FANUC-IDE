@@ -1,0 +1,182 @@
+*  Dictionary Form File: form.ftx
+*  
+*  Description:
+*    This dictionary contains three form templates.  runform.kl
+*    is a KAREL program which will run these forms.
+*  
+*      form1:  contains selectable menu items
+*              contains function key labels and related help text
+*  
+*      form2:  contains edit data items
+*  
+*      form3:  contains display only data items
+*  
+*    You can have selectable menu items, edit data items,
+*    and display only data items all in one form if you wish.
+*    All edit and display only data items are dynamically updated.  
+
+* Generate form.kl which should be included in your KAREL program
+.kl form
+
+***************************************************************************
+.form
+$-,form1
+  &home &reverse " Title here" &standard &new_line 
+  "    Another title here" &new_line 
+&bg_black &fg_white  "-    Menu item 1 " &new_line
+&bg_red   &fg_black  "-    Menu item 2 " &new_line
+&bg_green   "-    Menu item 3 " &new_line
+&bg_yellow  "-    Menu item 4 " &new_line
+&bg_blue    "-    Menu item 5 " &new_line
+&bg_magenta "-    Menu item 6 " &new_line
+&bg_cyan    "-    Menu item 7 " &new_line
+&bg_green   "-    Menu item 8 " &new_line
+&bg_red     "-    Menu item 9 " &new_line
+&bg_magenta "-    Menu item 10 " &new_line
+&bg_yellow  "-    Menu item 11 " &new_line
+&bg_dflt    "-    Menu item 12 " &new_line
+  "-    Menu item 13 " &new_line
+  "-    Menu item 14 " &new_line
+  "-    Menu item 15 " &new_line
+  "-    Menu item 16 " &new_line
+  "-    Menu item 17 " &new_line
+  "-    Menu item 18 " &new_line
+  "-    Menu item 19 " &new_line
+  "-    Menu item 20 " &new_line
+  "-    Menu item 21 " &new_line
+  "-    Menu item 22 " &new_line
+  "-    Menu item 23 " &new_line
+  "-    Menu item 24 " &new_line
+  "-    Menu item 25 " &new_line
+  "-    Menu item 26 " &new_line
+  "-    Menu item 27 " &new_line
+  "-    Menu item 28 " &new_line
+  "-    Menu item 29 " &new_line
+  "-    Menu item 30 " &new_line
+  * Add as many items as you wish.  The form manager will scroll them.
+  ^form1_fkey   * specifies element which contains function key labels
+  ?form1_help   * specifies element which contains help
+.endform
+
+$-,form1_fkey 
+  "  F1" &new_line
+  "  F2" &new_line
+  "  F3" &new_line
+  "  F4" &new_line
+  " HELP  >" &new_line  * help must be on F5
+  "  F6" &new_line
+  "  F7" &new_line
+  "  F8" &new_line
+  "  F9" &new_line
+  "  F10  >" 
+  * You can have a maximum of 10 function keys labelled
+
+$-,form1_help
+  "Help Line 1"  &new_line
+  "Help Line 2"  &new_line
+  "Help Line 3"  &new_line
+  * You can have a maximum of 48 help lines
+
+***************************************************************************
+.form
+$-,form2 
+  &home &reverse " Title here" &standard &new_line
+  "    Another title here"               &new_line
+&bg_yellow  "    Integer:    " &bg_green "-%10d"             &new_line
+&bg_yellow  "    Integer:    " &bg_green "-%10d(1,32767)"    &new_line  * specifies min and max
+&bg_dflt  "    Real:       " "-%12f"             &new_line
+  "    Boolean:    " "-%10B(bool_fkey)"  &new_line
+  "    String:     " "-%-20k"            &new_line  * left adjustment
+  "    String:     " "-%12k(clear)"      &new_line  * clear before editing
+  "    Byte:       " "-%10b"             &new_line
+  "    Short:      " "-%10h"             &new_line
+  "    DIN[1]:     " "-%10P(dout_fkey)"  &new_line  * boolean port
+  "    AIN[1]:     " "-%10pu" " " "-%1S(sim_fkey)"  * integer port unsigned 
+                                         &new_line  * simulate port
+  "    AOUT[2]:    " "-%10px" " " "-%1S(sim_fkey)"  * integer port hex
+                                         &new_line  * simulate port
+  "    Enum Type:  " "-%8n(enum_fkey)"   &new_line
+  "    Enum Type:  " "-%6w(enum_subwin)" &new_line
+  "    Enum Type:  " "-%6v(enum_var)"    &new_line
+  "    Prog Type:  " "-%12pk(1)"         &new_line  * specifies TP programs
+  "    Prog Type:  " "-%12pk(2)"         &new_line  * specifies PC programs
+  "    Prog Type:  " "-%12pk(6)"         &new_line  * specifies TP, PC, VR 
+  "    Prog Type:  " "-%12pk(16)"        &new_line  * specifies TP & PC
+  ^form2_fkey
+  ?form1_help   * specifies element which contains help
+.endform
+
+* Allows you to specify the function keys in a variable
+* whose type is an ARRAY[m] of STRING[n].  
+$-,form2_fkey 
+  "*RUNFORM"  &new_line  * specifies program name of variable
+  "*FKEYS"    &new_line  * specifies variable name containing choices
+
+* Allows you to specify the labels for F4 and F5 function keys 
+$-,bool_fkey
+  "FALSE"    &new_line  * F5 key label, value will be set FALSE 
+  "TRUE"     &new_line  * F4 key label, value will be set TRUE 
+
+* Allows you to specify the labels for F4 and F5 function keys 
+$-,dout_fkey
+  "   OFF "  &new_line  * F5 key label, value will be set OFF
+  "   ON  "  &new_line  * F4 key label, value will be set ON
+
+* Allows you to specify the labels for F4 and F5 function keys 
+$-,sim_fkey
+  " UNSIM "  &new_line  * F5 key label, port will be unsimulated
+  "SIMULATE" &new_line  * F4 key label, port will be simulated
+
+* Allows you to specify the labels for 5 function keys 
+$-,enum_fkey
+  #156#127"    FINE"   &new_line  * F1 key label, value will be set to 1
+  "  COARSE"   &new_line  * F2 key label, value will be set to 2
+  " NOSETTL"  &new_line  * F3 key label, value will be set to 3
+  " NODECEL"  &new_line  * F4 key label, value will be set to 4
+  "VARDECEL" &new_line  * F5 key label, value will be set to 5
+
+* Allows you to specify a maximum of 35 choices in a subwindow
+$-,enum_subwin
+"Red"        * value will be set to 1
+$-
+"Blue"       * value will be set to 2
+$-
+"Green" 
+$-
+"Yellow"
+$-
+"Brown"
+$-
+"Pink"
+$-
+"Mauve"
+$-
+"Black"
+$-
+"Lime"
+$-
+"\a"         * specifies end of subwindow list
+
+* Allows you to specify the choices for the subwindow in a variable
+* whose type is an ARRAY[m] of STRING[n].  
+$-,enum_var
+  "RUNFORM"  &new_line  * specifies program name of variable
+  "CHOICES"  &new_line  * specifies variable name containing choices
+
+***************************************************************************
+.form 
+$-,form3 
+  &home &reverse " Title here" &standard                 &new_line
+  "Another title here"                                   &new_line
+                                                         &new_line
+&bg_yellow  "Int:  " "%-10d" &bg_green " Bool: " "%-10B(bool_fkey)"          &new_line
+&bg_yellow  "Real: " "%-10f" &bg_green " Enum: " "%-10n(enum_fkey)"          &new_line
+                                                         &new_line
+&bg_cyan  "DIN[""%1d""]: " "%-10P(dout_fkey)" &bg_red "%-12S(sim2_fkey)" &new_line  
+  * You can have as many columns as you wish without exceeding 40 columns
+  * You can specify blank lines too
+.endform
+
+$-,sim2_fkey
+&bg_green  "UNSIMULATED" &new_line  * F5 key label, port will be unsimulated
+&bg_yellow "SIMULATED"   &new_line  * F4 key label, port will be simulated

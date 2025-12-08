@@ -1,0 +1,74 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1991
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File: klrdread - Routine declarations for KAREL Read Utilities
+--    
+--    Description:
+--    
+--     
+--    
+--    Dependancies:
+--    
+--    Routines declared FROM the program "klread"
+--    
+--    Language: KAREL
+--    
+--    Source File: klrdread.kl    12-DEC-91   08:44AM
+--    
+--    Author: KARGLJT     
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--    -
+--
+
+
+ROUTINE make_mask(p_key_code: INTEGER): INTEGER FROM klread
+
+ROUTINE get_key(p_file_name: FILE; p_term_mask, p_key, 
+                p_status: INTEGER) FROM klread
+
+ROUTINE rread_int (p_file_var: FILE; p_read_ahead, p_time_out, 
+                   p_old_val, p_min_val, p_max_val, p_term_mask, 
+                   p_term_char, p_new_val, p_status: INTEGER) FROM klread
+
+ROUTINE rread_real (p_file_var : FILE; p_read_ahead, p_time_out: INTEGER;
+                    p_old_val, p_min_val, p_max_val : REAL;
+                    p_term_mask, p_term_char : INTEGER; 
+                    p_new_val : REAL; p_status : INTEGER) FROM klread
+
+ROUTINE read_int (p_file_var : FILE; p_old_val, p_min_val, 
+                  p_max_val, p_term_mask, p_term_char, 
+                  p_new_val, p_status : INTEGER) FROM klread
+
+ROUTINE read_real (p_file_var: FILE; p_old_val, p_min_val,
+                   p_max_val: REAL; p_term_mask, p_term_char: INTEGER; 
+                   p_new_val: REAL; p_status : INTEGER) FROM klread
+
+ROUTINE prmpt_int (p_file_var: FILE; p_dict_name: STRING;
+                   p_ele_number, p_old_val, p_min_val,
+                   p_max_val, p_term_mask, p_term_char,
+                   p_new_val, p_status: INTEGER) FROM klread
+
+ROUTINE prmpt_real (p_file_var: FILE; p_dict_name: STRING;
+                    p_ele_number: INTEGER; p_old_val, p_min_val,
+                    p_max_val: REAL; p_term_mask, p_term_char: INTEGER;
+                    p_new_val: REAL; p_status : INTEGER) FROM klread
+
+
+

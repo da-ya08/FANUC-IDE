@@ -1,0 +1,303 @@
+--
+--  This material is the joint property of FANUC Robotics North America  and
+--  FANUC  LTD  Japan,  and  must be returned to either FANUC Robotics North
+--  America or FANUC LTD Japan immediately upon request.  This material  and
+--  the  information  illustrated or contained herein may not be reproduced,
+--  copied, used, or transmitted in whole or in part in any way without  the
+--  prior written consent of both FANUC Robotics North America and FANUC LTD
+--  Japan.
+-- 
+--           All Rights Reserved
+--           Copyright (C)   1993
+--           FANUC Robotics North America
+--           FANUC LTD Japan
+--    
+--  +
+--  Include File:  klevkeys - TP and CRT key codes 
+--    
+--  Dependancies:  Based on WDKCODES.HC
+--    
+--  Language: KAREL
+--    
+--  Source File:   klevkeys.kl  24-SEP-91   02:31PM
+--    
+--  Author: BRYCETK
+--          FANUC Robotics North America
+--          2000 South Adams Road
+--          Auburn Hills, Michigan    48326-2800
+--    
+--  Modification history:
+--  05-Mar-2001 EVANSJA Add ky_disp, ky_disp_s, ky_diag.
+--  27-Nov-2001 T.Yamamoto Add kanji_in_c and kanji_out_c
+--  20-Dec-2004 EVANSJA Change iPendant keys to 2 bytes.
+--  01-Feb-2008 S.Ozaki Add tpi_group
+--  12-Aug-2011 EVANSJA Deleting slow/fast and adding icon and jog keys
+
+
+
+--/* codes for various keys as returned to reading programs */
+--/* same codes sent from TP and CRT aux tasks to WIOM */
+
+CONST
+  -- Undefined key 
+  ky_undef        = 255
+
+  -- Shift key 
+  ky_shift        = 0
+
+  -- E-STOP, Enable, Deadman 
+  tpi_estop       = 250
+  tpi_enable      = 249 
+  tpi_r_dman      = 248 
+  tpi_l_dman      = 247
+
+  -- Arrow keys 
+  ky_up_arw       = 212
+  ky_dn_arw       = 213
+  ky_rt_arw       = 208
+  ky_lf_arw       = 209
+
+  -- Operator panel key requests--not to be used
+  -- for KAREL SOPIN/UOPIN/OPIN requests (use
+  -- CMS_KL:KLIOSOP.KL, KLIOUOP.KL)
+  op_reset        = 165
+  op_sop_start    = 166
+  op_uop_start    = 167
+  op_uop_cstop    = 168
+  op_uop_home     = 169
+
+  -- Special shell command keys (to TPMM)
+  m_recover_c     = 164 
+  m_prodscrn_c    = 242
+  shell_fwd_c     = 160
+  shell_bwd_c     = 161
+
+  -- Term_key codes for non-key terminations 
+  tk_buff_full    = 255
+  tk_no_window    = 254
+  tk_no_kb        = 253
+  -- tk_cancel is defined as ky_cancel below
+  tk_timeout      = 251
+  tk_ui_loaded    = 226
+
+  --**********************************************   TP only keys 
+  -- Hard keys (shifted or unshifted ) 
+  tpi_select   = 143
+  tpi_menus    = 144
+  tpi_edit     = 145
+  tpi_data     = 146
+  tpi_function = 147
+
+  -- Misc. keys
+  tpi_item     = 148
+  tpi_pct_up   = 149
+  tpi_pct_dn   = 150
+  tpi_hold     = 151
+  tpi_step     = 152
+  tpi_reset    = 153
+  tpi_group    = 28
+  tpi_icon     = 12288
+
+  -- Shifted misc keys 
+  ky_item_s    = 154
+  tpi_pct_up_s = 155
+  tpi_pct_dn_s = 156
+  tpi_step_s   = 157
+  tpi_hold_s   = 158
+  tpi_reset_s  = 159
+
+  -- Key codes for non-hardkey menus 
+  tpi_m_system = 151 
+  tpi_m_stat   = 154 
+  tpi_m_alarm  = 162 
+  tpi_m_vision = 163 
+  tpi_m_swg_eq = 243
+  tpi_m_mac_mf = 244
+  tpi_m_user2  = 245 -- USER2 menu (used by form and table managers) 
+
+  -- Motion related keys 
+  tpi_fwd      = 185
+  tpi_bwd      = 186
+  tpi_coord    = 187
+  tpi_x_pls    = 188
+  tpi_y_pls    = 189
+  tpi_z_pls    = 190
+  tpi_w_pls    = 191
+  tpi_p_pls    = 192
+  tpi_r_pls    = 193
+  tpi_j7_pls   = 12290
+  tpi_j8_pls   = 12294
+  tpi_x_mns    = 194
+  tpi_y_mns    = 195
+  tpi_z_mns    = 196
+  tpi_w_mns    = 197
+  tpi_p_mns    = 198
+  tpi_r_mns    = 199
+  tpi_j7_mns   = 12292
+  tpi_j8_mns   = 12296
+
+  -- Shifted motion related keys 
+  tpi_fwd_s    = 200 
+  tpi_bwd_s    = 201
+  tpi_coord_s  = 202 
+  tpi_x_pls_s  = 214  
+  tpi_y_pls_s  = 215  
+  tpi_z_pls_s  = 216  
+  tpi_w_pls_s  = 217  
+  tpi_p_pls_s  = 218  
+  tpi_r_pls_s  = 219  
+  tpi_j7_pls_s = 12291
+  tpi_j8_pls_s = 12295
+  tpi_x_mns_s  = 220  
+  tpi_y_mns_s  = 221  
+  tpi_z_mns_s  = 222  
+  tpi_w_mns_s  = 223  
+  tpi_p_mns_s  = 224  
+  tpi_r_mns_s  = 225  
+  tpi_j7_mns_s = 12293
+  tpi_j8_mns_s = 12297
+
+  tpi_chg_eq_c = 228
+
+  --**********************************************   TP & CRT Shared keys
+
+  -- Keypad keys (shifted or unshifted) 
+  ky_enter     = 13
+  ky_bckspace  =  8
+  ky_comma     = 44
+  ky_minus     = 45
+  ky_dot       = 46
+  ky_zero      = 48
+  ky_one       = 49
+  ky_two       = 50
+  ky_three     = 51
+  ky_four      = 52
+  ky_five      = 53
+  ky_six       = 54
+  ky_seven     = 55
+  ky_eight     = 56
+  ky_nine      = 57
+
+  --/* top row keys */
+  ky_prev      = 128
+  ky_f1        = 129
+  ky_f2        = 131
+  ky_f3        = 132
+  ky_f4        = 133
+  ky_f5        = 134
+  ky_next      = 135
+
+  -- Shifted top row keys
+  ky_prev_s    = 136
+  ky_f1_s      = 137
+  ky_f2_s      = 138
+  ky_f3_s      = 139
+  ky_f4_s      = 140
+  ky_f5_s      = 141
+  ky_next_s    = 142
+
+  -- Key codes for special actions
+  ky_disp_updt   = 170
+  ky_reissue     = 171
+  ky_cancel      = 252
+  ky_new_menu    = 0
+  ky_warn_req    = 172 
+
+  -- Shifted arrow keys 
+  ky_up_arw_s    = 204
+  ky_dn_arw_s    = 205
+  ky_rt_arw_s    = 206
+  ky_lf_arw_s    = 207
+
+  -- /* user function keys */
+  ky_uf_1        = 173
+  ky_uf_2        = 174
+  ky_uf_3        = 175
+  ky_uf_4        = 176
+  ky_uf_5        = 177
+  ky_uf_6        = 178
+  ky_uf_7        = 210
+
+  -- shifted user function keys
+  ky_uf_1_s      = 179
+  ky_uf_2_s      = 180
+  ky_uf_3_s      = 181
+  ky_uf_4_s      = 182
+  ky_uf_5_s      = 183
+  ky_uf_6_s      = 184
+  ky_uf_7_s      = 211
+
+  -- function keys
+  ky_f6          = 194
+  ky_f7          = 195
+  ky_f8          = 196
+  ky_f9          = 197
+  ky_f10         = 198
+  ky_help        = 203
+
+
+  -- ************************************* VT220 only keys */
+  -- F1 - F10 already defined in TP keys ky_f1 - ky_f10
+  ky_f11       = 199
+  ky_f12       = 200
+  ky_f13       = 201
+  ky_f14       = 202
+  ky_disp_s    = 227
+  ky_diag      = 239
+  ky_disp      = 240
+  ky_do        = 241
+  ky_f17       = 238
+  ky_f18       = 235
+  ky_f19       = 236
+  ky_f20       = 237
+
+  -- Editing keys 
+  ky_find      = 229
+  ky_insert    = 230
+  ky_remove    = 231
+  ky_select    = 232
+  ky_prv_scr   = 233
+  ky_nxt_scr   = 234
+
+  -- PF keys 
+  ky_pf1       = 225
+  ky_pf2       = 226
+  ky_pf3       = 227
+  ky_pf4       = 240
+
+  -- Numeric keypad keys 
+  ky_nkp_0     = 176
+  ky_nkp_1     = 177
+  ky_nkp_2     = 178
+  ky_nkp_3     = 179
+  ky_nkp_4     = 180
+  ky_nkp_5     = 181
+  ky_nkp_6     = 182
+  ky_nkp_7     = 183
+  ky_nkp_8     = 184
+  ky_nkp_9     = 185
+  ky_nkp_mns   = 186
+  ky_nkp_cma   = 187
+  ky_nkp_dot   = 188
+  ky_nkp_ntr   = 239
+
+  -- Misc keys
+  ky_ctl_u     =  21
+  ky_ctl_w     =  23
+  ky_delete    = 127
+
+  -- Double byte character input for iPendant and CRT
+  kanji_in_c   = 130
+  kanji_out_c  = 246
+
+  -- Extended key code definitions
+  extend_key_c = 1
+
+  -- keys sent only to iPendant
+  ip_bck_c     = 4097  -- 0x1001 iPendant BACK key */
+  ip_fwd_c     = 8193  -- 0x2001 iPendant FOWARD key */
+  ip_frame_bck = 12289 -- 0x3001 iPendant FRAME BACK key */
+  ip_frame_fwd = 16385 -- 0x4001 iPendant FRAME FORW key */
+
+  -- Use instead of ky_ctl_w to avoid iPendant refresh pane
+  ky_refresh   = 15614

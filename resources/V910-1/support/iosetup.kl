@@ -1,0 +1,81 @@
+
+-- Constants for port mode masks
+const
+  REVERSE_MODE = 1
+  COMPLEM_MODE = 2
+
+-- Constants for port types
+din_type     = 1 -- Digital input 
+dout_type    = 2 -- Digital output 
+anin_type    = 3 -- Analog input 
+anout_type   = 4 -- Analog output 
+tool_type    = 5 -- Tool output 
+plcin_type   = 6 -- PLC input 
+plcout_type  = 7 -- PLC output 
+rdi_type     = 8 -- Robot digital input 
+rdo_type     = 9 -- Robot digital output 
+brk_out_tp   = 10 -- Brake output 
+opin_type    = 11 -- operator panels input 
+opout_type   = 12 -- operator panels output 
+sopin_type   = 11 -- same as opin
+sopout_type  = 12 -- same as opout
+tpin_type    = 14 -- Teach pendant digital input 
+tpout_type   = 15 -- Teach pendant digital output 
+wdi_type     = 16   -- weld inputs 
+wdo_type     = 17   -- weld outputs 
+gpin_type    = 18 -- Grouped inputs 
+gpout_type   = 19 -- Grouped outputs 
+uopin_type   = 20 -- User operator's panel input 
+uopout_type  = 21 -- User operator's panel output 
+ldin_type    = 22 -- laser DIN 
+ldout_type   = 23 -- laser DOUT 
+lain_type    = 24 -- laser AIN 
+laout_type   = 25 -- laser AOUT 
+wstk_in_type = 26 -- weld stick input 
+wstk_out_tp  = 27 -- weld stick output 
+mem_boo_type = 28 -- memory image boolean's 
+mem_num_type = 29 --  memory image din's 
+dmy_boo_type = 30 -- dummy boolean port type 
+dmy_num_type = 31 -- dummy numeric port type 
+proc_axis_tp = 32 -- process axes
+-- (iopin_type   = 33) -- (internal operator's panel input)
+-- (iopout_type  = 34) -- (internal operator's panel output)
+gpin32_type  = 37 -- Grouped inputs 32 bits */
+gpout32_type = 38 -- Grouped outputs 32 bits */
+-- physical only 
+keep_relay_t = 41 -- internal relay (backup)
+relay_type   = 42 -- internal relay 
+keep_reg_t   = 43 -- internal register (backup)
+reg_type     = 44 -- internal register
+--  board types
+base_proc_io = 1   -- basic process I/O board  
+opt_1_prc_io = 2   -- option 1 process I/O board  
+opt_2_prc_io = 3   -- option 2 process I/O board  
+proc_io_21   = 4   -- board id 9ah   board condition fh   
+proc_io_24   = 5   -- board id 9ah   board condition ch   
+proc_io_31   = 6   -- board id 98h   board condition fh   
+proc_io_32   = 7   -- board id 98h   board condition eh   
+proc_io_41   = 8   -- board id 99h   board condition fh   
+proc_io_42   = 9   -- board id 99h   board condition eh   
+laser_prc_io = 10   -- laser process I/O board  
+sop_io       = 11   -- sop  
+tp_io        = 12   -- tp  
+rdio         = 13   -- rdi/rdo  
+mem          = 14   -- memory image ports  
+dummy        = 15   -- dummy ports  
+mod_in_32    = 16   -- input  32ports module in modular I/O UNIT 
+mod_in_16    = 17   -- input  16ports module in modular I/O UNIT 
+mod_in_8     = 18   -- input   8ports module in modular I/O UNIT 
+mod_out_32   = 19   -- output 32ports module in modular I/O UNIT 
+mod_out_16   = 20   -- output 16ports module in modular I/O UNIT 
+mod_out_8    = 21   -- output  8ports module in modular I/O UNIT 
+mod_an_in    = 22   -- analog  input  module in modular I/O UNIT 
+mod_an_out   = 23   -- analog  output module in modular I/O UNIT 
+plc_int_io   = 24   -- PLC interface I/O board  
+pro_mst_rack = 66   -- rack number assigned to PROFIBUS DP master
+pro_slv_rack = 67   -- rack number assigned to PROFIBUS DP slave
+DN_base_rack = 81   -- rack no for first DeviceNet board(also uses 82-84)
+CN_base_rack = 85   -- rack no for controlnet (also uses 86)
+roboweldrack = 87   -- rack no for RoboWeld
+ENETIP_rack  = 89   -- rack no for EthernetIP
+ARCLINK_rack = 90   -- rack no for ArcLink

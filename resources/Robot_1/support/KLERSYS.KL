@@ -1,0 +1,75 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1991
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File:  klersys - Common system error constants
+--    
+--    Description:  
+--     
+--     
+--    Dependancies:
+--    
+--    
+--    Language: KAREL
+--    
+--    Source File:   klersys.kl  24-SEP-91   02:31PM
+--    
+--    Author: BRYCETK
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--    10-Feb-92 GUDATLX add er_deadman
+--    12-Feb-92 GUDATLX add more erorr stuff 
+--    19-Feb-92 GUDATLX add interpreter errors
+
+
+
+CONST
+  ER_SUCCESS   =     0   -- success
+  ER_TPENBL    =  3046   -- teach pendant enabled while prog running
+  ER_EMGOP     = 11001   -- operator's panel e-stop 
+  ER_EMGTP     = 11002   -- teach pendant e-stop 
+  ER_DEADMAN   = 11003   -- deadman released
+  ER_FENCE     = 11004   -- fence open 
+  ER_ROT       = 11005   -- robot overtravel 
+  ER_HBK       = 11006   -- hand breakage 
+  ER_EMGEX     = 11007   -- external e-stops 
+  ER_SERVO     = 11021   -- servos off
+  ER_STOP      = 11023   -- STOP ERROR ACCESS
+  ER_MOVE      = 11024   -- MOVE ERROR ACCESS
+  ER_HOLD      = 11030   -- HOLD
+  ER_CSTOP     = 11999   -- Cycle stop (not real error code, just constant) 
+
+--
+-- interpreter errors 
+--
+
+  ER_RUNFL     = 12105   -- run request fail
+  ER_CONTFL    = 12106   -- continue request fail
+
+--
+-- Constants used in conjunction with the $RMT_MASTER 
+-- system variable.  These values come from SYERRDEF.HC.
+--
+CONST
+  sy_tp_mstr        = 3
+  sy_sop_mstr       = 4
+  sy_uop_mstr       = 5
+  sy_kcl_mstr       = 6
+  sy_ncp_mstr       = 7
+  sy_nop_mstr       = 8
+

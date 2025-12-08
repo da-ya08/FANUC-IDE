@@ -1,0 +1,89 @@
+--
+--  This material is the joint property of FANUC Robotics North America  and
+--  FANUC  LTD  Japan,  and  must be returned to either FANUC Robotics North
+--  America or FANUC LTD Japan immediately upon request.  This material  and
+--  the  information  illustrated or contained herein may not be reproduced,
+--  copied, used, or transmitted in whole or in part in any way without  the
+--  prior written consent of both FANUC Robotics North America and FANUC LTD
+--  Japan.
+-- 
+--           All Rights Reserved
+--           Copyright (C)   1993
+--           FANUC Robotics North America
+--           FANUC LTD Japan
+--    
+--  +
+--  Include File:  kliotyps - Constants defining I/O types (IOSETUP.KE)
+--    
+--  Dependancies:  Based on IOTYPDEF.HC
+--    
+--  Language: KAREL
+--    
+--  Source File:   kliotyps.kl  13-JAN-92   02:31PM
+--    
+--  Author: BRYCETK
+--          FANUC Robotics North America
+--          2000 South Adams Road
+--          Auburn Hills, Michigan    48326-2800
+--    
+--  Modification history:
+--
+
+
+
+CONST
+  io_all        =  0   -- Any I/O type   
+  io_din        =  1   -- Digital input   
+  io_dout       =  2   -- Digital output   
+  io_anin       =  3   -- Analog input   
+  io_anout      =  4   -- Analog output   
+  io_tool       =  5   -- Tool output   
+  io_plcin      =  6   -- PLC input   
+  io_plcout     =  7   -- PLC output   
+  io_rdi        =  8   -- Robot digital input   
+  io_rdo        =  9   -- Robot digital output   
+  io_brake_out  = 10   -- Brake output   
+  io_opin       = 11   -- operator panels input   
+  io_opout      = 12   -- operator panels output   
+  io_sopin      = 11   -- Same as io_opin   
+  io_sopout     = 12   -- Same as io_sopout
+  io_estop      = 13   -- Emergency stop   
+  io_tpin       = 14   -- Teach pendant digital input   
+  io_tpout      = 15   -- Teach pendant digital output   
+  io_wdi        = 16   -- weld inputs   
+  io_wdo        = 17   -- weld outputs   
+  io_gpin       = 18   -- Grouped inputs   
+  io_gpout      = 19   -- Grouped outputs   
+  io_uopin      = 20   -- User operator's panel input   
+  io_uopout     = 21   -- User operator's panel output   
+  io_ldin       = 22   -- laser DIN   
+  io_ldout      = 23   -- laser DOUT   
+  io_lain       = 24   -- laser AIN   
+  io_laout      = 25   -- laser AOUT   
+  io_wstk_in    = 26   -- weld stick input   
+  io_wstk_out   = 27   -- weld stick output   
+  io_mem_boo    = 28   -- memory image boolean's   
+  io_mem_num    = 29   -- memory image din's   
+  io_dummy_boo  = 30   -- dummy boolean port type   
+  io_dummy_num  = 31   -- dummy numeric port type   
+  io_proc_axes  = 32
+  io_iopin      = 33   -- Internal operator's panel input
+  io_iopout     = 34   -- Internal operator's panel output
+  io_flag       = 35   -- Flag (F[ ])
+  io_marker     = 36   -- Marker (M[ ])
+  io_gpin32     = 37   -- Grouped inputs 32 bits 
+  io_gpout32    = 38   -- Grouped outputs 32 bits
+
+  max_log_port  = 38
+
+  -- physical only   
+  io_keep_rly   = 41     -- Backuped internal relay
+  io_rly        = 42     -- No backuped internal relay
+  io_keep_reg   = 43     -- Backuped internal register
+  io_reg        = 44     -- No backuped internal register
+
+  max_phy_port  = 44
+
+  io_min_type   =  1     -- same as io_din
+  io_max_type   = 44     -- same as max_log_port
+

@@ -1,0 +1,158 @@
+--
+-- KAREL program to run form examples in FORM.FTX
+--
+PROGRAM runform
+
+%COMMENT = 'DISCTR_FORM examples'
+%NOLOCKGROUP
+
+%INCLUDE form       -- allows you to access form element numbers
+%INCLUDE klevccdf
+%INCLUDE klevkeys
+%INCLUDE klevkmsk
+
+TYPE
+  mystruc = STRUCTURE
+    byte_var1: BYTE
+    byte_var2: BYTE
+    short_var: SHORT
+  ENDSTRUCTURE
+
+VAR
+  device_stat: INTEGER  -- tp_panel or crt_panel etc
+  value_array:  ARRAY[20] OF STRING[40]
+  inact_array:  ARRAY[1] OF BOOLEAN
+  change_array: ARRAY[1] OF BOOLEAN
+  def_item: INTEGER
+  term_char: INTEGER
+  status: INTEGER
+
+  int_var1: INTEGER
+  int_var2: INTEGER
+  real_var: REAL
+  bool_var: BOOLEAN
+  str_var1: STRING[MAX_FILE_NAM]
+  str_var2: STRING[12]
+  struc_var: mystruc
+  color_sel1: INTEGER
+  color_sel2: INTEGER
+  prog_name1: STRING[MAX_PROG_NAM]
+  prog_name2: STRING[MAX_PROG_NAM]
+  prog_name3: STRING[MAX_PROG_NAM]
+  prog_name4: STRING[MAX_PROG_NAM]
+  choices: ARRAY[5] OF STRING[80]
+  fkeys: ARRAY[10] OF STRING[12]
+  exit_cmnd: INTEGER
+
+ROUTINE exit_form
+BEGIN
+  FORCE_MENU(device_stat, ky_cancel)
+END exit_form
+
+BEGIN
+  -- This is an example of how to exit a form via a program
+  exit_cmnd = 0
+  CONDITION[1]:
+  WHEN exit_cmnd = 1 DO
+    exit_cmnd = 0
+    exit_form
+    ENABLE CONDITION[1]
+  ENDCONDITION
+  ENABLE CONDITION[1]
+  --
+  --      form1:  contains selectable menu items
+  --              contains function key labels and related help text
+  --
+  if(uninit(device_stat)) then
+    device_stat = tp_panel
+  ENDIF
+
+  FORCE_SPMENU(device_stat, SPI_TPUSER2, 1)
+  def_item = 1  -- start with menu item 1
+  DISCTRL_FORM('FORM', form1, value_array, inact_array,
+    change_array, kc_func_key, def_item, term_char, status);
+  WRITE TPERROR (CHR(cc_clear_win))
+  IF term_char = ky_select THEN
+    WRITE TPERROR ('Menu item ', def_item::1, ' was selected.')
+  ELSE 
+    IF term_char = ky_cancel THEN
+      WRITE TPERROR ('Menu cancelled.')
+    ELSE
+      WRITE TPERROR ('Function key ', term_char::1, ' was selected.')
+    ENDIF
+  ENDIF
+
+  --
+  --      form2:  contains edit data items
+  --
+  value_array[1] = 'int_var1'
+  value_array[2] = 'int_var2'
+  value_array[3] = 'real_var'
+  value_array[4] = 'bool_var'
+  value_array[5] = 'str_var1'
+  value_array[6] = 'str_var2'
+  value_array[7] = 'struc_var.byte_var1'
+  value_array[8] = 'struc_var.short_var'
+  value_array[9] = 'din[1]'
+  value_array[10] = 'ain[1]'
+  value_array[11] = 'ain[1]'
+  value_array[12] = 'aout[2]'
+  value_array[13] = 'aout[2]'
+  value_array[14] = '[*system*]$group[1].$termtype'
+  value_array[15] = 'color_sel1'
+  value_array[16] = 'color_sel2'
+  value_array[17] = 'prog_name1'
+  value_array[18] = 'prog_name2'
+  value_array[19] = 'prog_name3'
+  value_array[20] = 'prog_name4'
+  choices[1] = ''       -- not used
+  choices[2] = 'Red'    -- corresponds to color_sel2 = 1
+  choices[3] = 'Blue'   -- corresponds to color_sel2 = 2
+  choices[4] = 'Green'  -- corresponds to color_sel2 = 3
+  choices[5] = 'Yellow' -- corresponds to color_sel2 = 4
+  fkeys[1] = '  EXIT'
+  fkeys[2] = '  F2'
+  fkeys[3] = '  F3'
+  fkeys[4] = '  F4'
+  fkeys[5] = ' HELP  >'
+  fkeys[6] = ''
+  fkeys[7] = '  F7'
+  fkeys[8] = '  F8'
+  fkeys[9] = ''
+  fkeys[10]= '       >'
+
+  -- Initialize variables
+  int_var1 = 12345
+  -- int_var2 is purposely left uninitialized
+  real_var = 0
+  bool_var = TRUE
+  str_var1 = 'This is a test'
+  -- str_var2 is purposely left uninitialzed
+  struc_var.byte_var1 = 10
+  struc_var.short_var = 30
+  color_sel1 = 3
+  color_sel2 = 1
+
+  FORCE_SPMENU(device_stat, SPI_TPUSER2, 1)
+  def_item = 1  -- start with menu item 1
+  DISCTRL_FORM('FORM', form2, value_array, inact_array,
+      change_array, kc_func_key, def_item, term_char, status);
+
+  --
+  --      form3:  contains display only data items
+  --
+  value_array[1] = 'int_var1'
+  value_array[2] = 'bool_var'
+  value_array[3] = 'real_var'
+  value_array[4] = '[*system*]$group[1].$termtype'
+  value_array[5] = 'int_var2'
+  value_array[6] = 'din[1]'
+  value_array[7] = 'din[1]'
+  int_var2 = 1
+
+  FORCE_SPMENU(device_stat, SPI_TPUSER2, 1)
+  def_item = 1  -- start with menu item 1
+  DISCTRL_FORM('FORM', form3, value_array, inact_array,
+      change_array, kc_func_key, def_item, term_char, status);
+
+END runform

@@ -1,0 +1,33 @@
+! This file provides a means to setup the ethernet interface at BMON
+! in preparation for image backup/restore or loading over ethernet.
+
+! The following parameters are set manually.
+!   Use_File : True/False (default FALSE, if TRUE use file)
+!   Ethernet_Port : 0/1 (default 0)
+!   TFTP_Server_Address : 172.22.194.19 (default NULL)
+!   TFTP_Boot_File_Path : pderob017/btest/  (default NULL)
+! The Path should end with a slash/backslash as needed by server
+
+! The following parameters are set automatically each powerup
+! based on current system variable settings.
+!   Robot_IP_Address : 172.22.194.17   (based on port# set above)
+!   Robot_Subnet_Mask : 255.255.240.0  (based on port# set above)
+!   Robot_RTR_Address : 172.22.194.19
+!   Ethernet_Speed_P1 : 2  (from $ENETMODE[1].$SPEED, 0=10, 1=100, 2=auto)
+!   Ethernet_Duplex_P1 : True  (from $ENETMODE[1].$DUPLEX, Boolean)
+!   Ethernet_Speed_P2 : 2  (from $ENETMODE[2].$SPEED, 0=10, 1=100, 2=auto)
+!   Ethernet_Duplex_P2 : True  (from $ENETMODE[2].$DUPLEX, Boolean)
+!   Host_Name : pderob017  (from $HOSTNAME)
+
+Use_File : FALSE
+Ethernet_Port : 0
+TFTP_Server_Address : 
+TFTP_Boot_File_Path : 
+Robot_IP_Address : Not_Initialized
+Robot_Subnet_Mask : 255.255.255.0
+Robot_RTR_Address : Not_Initialized
+Host_Name : ROBOT
+Ethernet_Speed_P1 : 2
+Ethernet_Duplex_P1 : 1
+Ethernet_Speed_P2 : 2
+Ethernet_Duplex_P2 : 1

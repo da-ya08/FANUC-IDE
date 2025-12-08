@@ -1,0 +1,116 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1992
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File: kluifdir - KAREL UIF Softpart Translator Directives
+--    
+--    Description:
+--    
+--      This include file contains the standard translator directives
+--      which should be included with all KAREL UIF Softparts.
+--
+--      Please use the following when numbering KAREL softparts
+--      (per April 13, 1998 TechnoBabble meeting):
+--
+--            Softpart ID             Designated Use
+--            -----------             -----------------
+--            900 - 909               Common MAIN menu entries
+--            910 - 919               Appl. specific MAIN menu entries
+--            920 - 929               Appl. specific [TYPE] menu entries
+--            930 - 939               Common [TYPE] pull-up entries
+--            940 - 979               Appl. specific [TYPE] pull-up entries
+--            980 - 999               Common [TYPE] pull-up entries
+--            1200 - 1299             Karel UIF Softpart expansion 
+--                                     No rules as to which are apps or common
+--
+--     Note that it is OK to overlap softparts ID's that are mutually
+--     exclusive (i.e. Paint has their own Prog Adjust so they can use
+--     the common prog adjust softpart ID for that).
+--
+--
+-- Current Common areas usage:
+-- 
+-- 900 - 909  Common MAIN Menu Entries:
+--  900                          MOVE MENU                                  
+--  901                          TEST CYCLE                                  
+--
+--
+-- 930 - 939  Common [TYPE] pull-up entires
+--  930    ATPRGADJ.KL           UTILITY        Prog Adjust	             
+--  931    ATWAITRL.KL                          Wait Release 
+--  932    ATPRSCRN.KL           STATUS         Prog Status  
+--  933    ATMOVEMN.KL           MOVE MENU      Move Menu       
+--  934    ATERRJOB.KL           ALARM  	Error Recovery	  
+--  935    ATPASWRD.KL           SETUP          Password menu
+--  936    ATINSTALL.KL                         S/W Install Menu        	
+--  937    PGDEBUG2.KL           TESTRUN        Debug Ctl
+--  
+--  939    SWTOOLBX                             Prog ToolBox
+--
+--  962    'HTSETUP'                            Tool Setup (ctrl start)
+--
+--
+-- 980 - 999 Common [TYPE] pull-up entries
+--  shape option
+--  980    SGTPCLDT.KL           DATA    51     Circle Sched
+--  981    SGTPSU.KL             SETUP   51     Setup shapes
+--  982    SGTPSLDT.KL           DATA    52     Slot sched
+--  983    SGTPHXDT.KL           DATA    53     Hex  sched
+--  984    SGTRCLDT.KL           DATA    54     Rect sched
+--  985    SGPRGADJ.KL           UTILITY 51     Shape Shift
+--
+--  auto normal option
+--  986    FINORMSU.KL           SETUP   52     Auto Normal
+--
+--  menu option
+--  987    MHMENUSU.KL           SETUP   20     MENU CONFIG
+--  988    MHPRODST.KL           STATUS  01     PRODUCTION STATUS
+--      	            	  
+-- 1200 - 1299 Karel UIF Softpart expansion 
+--  1200   ATMSKCHG.KL           UTILITY 5B     Group Mask Exchange
+--    
+--    Dependancies:
+--    
+--     
+--    
+--    Language: KAREL
+--    
+--    Source File: kluifdir.kl    16-MAR-92   01:59PM
+--    
+--    Author: KARGLJT     
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--
+--    10-APR-21  TKB Add %INVISIBLE
+--    20-MAY-98  MAS Add Common [TYPE] usage
+--    24-JUL-02  EJF Added comments for Karel UIF Softpart expansions
+--                   and Group Mask Exchange 1200
+
+
+%SYSTEM
+%INVISIBLE
+%NOABORT = ERROR + COMMAND
+%NOPAUSE = ERROR + COMMAND + TPENABLE
+%NOBUSYLAMP
+%NOLOCKGROUP
+%PRIORITY=100
+
+
+
+
+

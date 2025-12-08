@@ -1,0 +1,114 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1991
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File: klrdutil - Routine declarations for KAREL utilities
+--    
+--    Description:
+--    
+--    
+--    Dependancies:
+--    
+--    Routines declared FROM the program "klutils"
+--    
+--    Language: KAREL
+--    
+--    Source File: klrdutil.kl    03-OCT-91   08:35AM
+--    
+--    Author: KARGLJT     
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--    add strg_to_int,int_to_strg 25.10.91 gudatlx
+--    modify parameters of strg_to_int,int_to_strg 04.11.91 brycetk
+--    added pwd_level  11.10.96 steinlet
+--  Dec-5-96  JAE Add pwd_lvl_set.
+--  Dec-19-96 murrellr Added pwd_test.
+--  Sep-07-01 JAE Add connect_id parameter to pwd_test.
+--  Aug-03-2003 JAE Add pwd_login.
+--  Jun-28-2005 JAE Add pwd_logout.
+--
+
+
+ROUTINE clear_win(p_file_name: FILE; status: INTEGER) FROM klutils
+
+ROUTINE clr_stnd_scr(status: INTEGER) FROM klutils
+
+ROUTINE clear_ln(p_file_name: FILE; status: INTEGER) FROM klutlext
+
+ROUTINE att_stnd_win(status: INTEGER) FROM klutils
+
+ROUTINE clr_fscr FROM klutlext
+
+ROUTINE prompt_box(p_dict_name: STRING;
+                   p_dict_ele:  INTEGER;
+                   p_curr_item: INTEGER;
+                   p_resp_type: INTEGER;
+                   p_response:  INTEGER) FROM klutlext
+
+ROUTINE prompt_box_s(p_dict_name: STRING;
+                     p_dict_ele:  INTEGER;
+                     p_string:    STRING; 
+                     p_curr_item: INTEGER;
+                     p_resp_type: INTEGER;
+                     p_response:  INTEGER) FROM klutlext
+
+ROUTINE prompt_box_d(p_device:    INTEGER;
+                     p_dict_name: STRING;
+                     p_dict_ele:  INTEGER;
+                     p_curr_item: INTEGER;
+                     p_resp_type: INTEGER;
+                     p_response:  INTEGER) FROM klutlext
+
+ROUTINE tp_enabled: BOOLEAN FROM klutlext
+  
+ROUTINE strg_to_int(text:STRING): INTEGER FROM klutlext
+
+ROUTINE int_to_strg(int:INTEGER):STRING FROM klutils
+
+ROUTINE clr_ct06 FROM klutlext
+
+ROUTINE pwd_level(p_pwd_const: INTEGER) : INTEGER FROM klutils
+
+ROUTINE pwd_lvl_set(p_pwd_const: INTEGER;
+                    p_level:     INTEGER) FROM klutils
+
+ROUTINE pwd_test(p_pwd_const: INTEGER;
+                 p_prmp_file: FILE;
+                 p_dev_stat: INTEGER;
+                 p_connect_id: INTEGER) : BOOLEAN FROM klutils
+
+ROUTINE pwd_logout(p_device:   INTEGER) -- (in)  password device to login
+                  FROM klutils
+
+ROUTINE pwd_login(p_username: STRING;  -- (in)  name of the user
+                  p_password: STRING;  -- (in)  password of the user
+                  p_device:   INTEGER; -- (in)  password device to login
+                  p_logout:   BOOLEAN; -- (in)  logout current user if required
+                  p_loginname:STRING;  -- (out) name of the logged in user
+                  p_status:   INTEGER) -- (out) returned status 
+                  FROM klutils
+
+ROUTINE feature(p_feature:STRING): BOOLEAN   from klutils
+
+ROUTINE check_home:INTEGER  from klutils
+
+ROUTINE noprv_load(p_file_name:STRING; p_status: INTEGER) from klutils
+
+ROUTINE apckactv(p_softpid:INTEGER): BOOLEAN   from klutils
+
+ROUTINE ap_proc_dsb(p_taskid: INTEGER):BOOLEAN FROM klutils

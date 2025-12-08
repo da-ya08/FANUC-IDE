@@ -1,0 +1,79 @@
+--
+--  This material is the joint property of FANUC Robotics North America  and
+--  FANUC  LTD  Japan,  and  must be returned to either FANUC Robotics North
+--  America or FANUC LTD Japan immediately upon request.  This material  and
+--  the  information  illustrated or contained herein may not be reproduced,
+--  copied, used, or transmitted in whole or in part in any way without  the
+--  prior written consent of both FANUC Robotics North America and FANUC LTD
+--  Japan.
+-- 
+--           All Rights Reserved
+--           Copyright (C)   1993
+--           FANUC Robotics North America
+--           FANUC LTD Japan
+--    
+--  +
+--  Include File:  klevccdf - Character code constants 
+--   
+--  Dependancies:  Based on WDCRTCTL.HC
+--    
+--  Language: KAREL
+--    
+--  Source File:   klevccdf.kl  02-OCT-91   10:31AM
+--    
+--  Author: BRYCETK
+--          FANUC Robotics North America
+--          2000 South Adams Road
+--          Auburn Hills, Michigan    48326-2800
+--    
+--  Modification history:
+--  15-May-2001 EVANSJA Add new control codes for V6.2
+--
+
+
+
+CONST
+  cc_clear_win   = 128    -- Clear window
+  cc_clear_eol   = 129    -- Clear to end of line
+  cc_clear_eow   = 130    -- Clear to end of window
+  cc_set_curs    = 131    -- Set cursor position
+  cc_cr          = 132    -- Carriage return
+  cc_lf          = 133    -- Line feed
+  cc_rvlf        = 134    -- Reverse line feed
+  cc_newline     = 135    -- New line (carriage return and line feed)
+  cc_bs          = 136    -- Back space
+  cc_home        = 137    -- Home cursor in window
+  cc_blink       = 138    -- Blink video attribute
+  cc_reverse     = 139    -- Reverse video attribute
+  cc_bold        = 140    -- Bold video attribute
+  cc_underline   = 141    -- Underline video attribute
+  cc_wide        = 142    -- Wide video size
+  cc_video_off   = 143    -- Video attributes off
+  cc_blink_off   = 144    -- Turn blink off 
+  cc_rev_off     = 145    -- Turn reverse video off
+  cc_graph_on    = 146    -- Turn graphics mode on
+  cc_graph_off   = 147    -- Turn graphics mode off
+  cc_ascii       = 147    -- Ascii mode (same as turn graphics off)
+  cc_high_wide   = 148    -- High/wide video size
+  cc_noupdate    = 149    
+  cc_update      = 150    -- Force update
+  cc_hold_on     = 151    -- Turn auto-hold mode on
+  cc_hold_off    = 152    -- Turn auto-hold mode off
+  cc_normal      = 153    -- Normal height/width video size
+  cc_multi_on    = 154    -- Turn multinational mode mode on
+  cc_fgcolor     = 155    -- Foreground color
+  cc_bgcolor     = 156    -- Background color
+  cc_kanji_on    = 157    -- Kanji on
+  cc_kanji_off   = 254    -- Kanji off
+  cc_same        = 255    -- Same row or column (for use with cc_set_curs
+
+  -- Color codes must follow cc_fgcolor or cc_bgcolor
+  cc_black       = 48
+  cc_red         = 49
+  cc_green       = 50
+  cc_yellow      = 51
+  cc_blue        = 52
+  cc_magenta     = 53
+  cc_cyan        = 54
+  cc_white       = 55
+  cc_dfcolor     = 127    -- Window default

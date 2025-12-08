@@ -1,0 +1,71 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1991
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File:  klevksp - Constants and variables for KAREL Softparts
+--    
+--    Description:  These variables and constants are required for
+--                  the TPMM KAREL softpart loader.
+--     
+--     
+--    Dependancies:
+--    
+--    
+--    Language: KAREL
+--    
+--    Source File:   klevksp.kl  24-SEP-91   02:31PM
+--    
+--    Author: BRYCETK
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--    10-JUL-92 JAE Add device_stat constants
+--    24-MAR-03 KWK Chage CRT device constant
+--
+
+
+
+--
+-- This variable section is required for the 
+-- TPMM KAREL softpart loader.  Do not delete
+-- or rename any of these eight variables!!
+
+VAR
+  fctn_code:    INTEGER
+  exit_cmnd:    INTEGER
+  ret_stat:     INTEGER
+  socket_index: INTEGER
+  save_sp:      INTEGER
+  dynamic_upd:  INTEGER
+  hardkey:      INTEGER
+  common_fctn:  INTEGER
+  device_stat:  INTEGER
+
+CONST
+  tpdc_none_c = 0  -- Softpart/form not running on a device
+  tpdc_tp_c   = tp_panel  -- Softpart/form running on TP (core.ke)
+  tpdc_crt_c  = crt_panel  -- Softpart/form running on CRT (core.ke)
+ 
+--
+-- This constant section is required for the 
+-- TPMM KAREL softpart loader.  Do not delete
+-- or rename any of these three variables!!
+
+CONST
+  ksfc_hardkey = 589835
+  ksfc_cselect = 589836
+  ksfc_interac = 589830

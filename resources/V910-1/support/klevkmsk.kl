@@ -1,0 +1,47 @@
+--
+--  This material is the joint property of FANUC Robotics North America  and
+--  FANUC  LTD  Japan,  and  must be returned to either FANUC Robotics North
+--  America or FANUC LTD Japan immediately upon request.  This material  and
+--  the  information  illustrated or contained herein may not be reproduced,
+--  copied, used, or transmitted in whole or in part in any way without  the
+--  prior written consent of both FANUC Robotics North America and FANUC LTD
+--  Japan.
+-- 
+--           All Rights Reserved
+--           Copyright (C)   1993
+--           FANUC Robotics North America
+--           FANUC LTD Japan
+--    
+--  +
+--  Include File:  klevkmsk - Mask values used for form manager term_masks
+--    
+--  Dependancies:  Based on WDCLSMSK.HC
+--    
+--  Language: KAREL
+--    
+--  Source File:   klevkmsk.kl  24-SEP-91   02:31PM
+--    
+--  Author: BRYCETK
+--          FANUC Robotics North America
+--          2000 South Adams Road
+--          Auburn Hills, Michigan    48326-2800
+--    
+--  Modification history:
+--
+
+
+CONST
+  kc_display    = 1    --  display-able keys  
+  kc_func_key   = 2    --  function keys   
+  kc_keypad     = 4    --  key-pad  and edit keys   
+  kc_enter_key  = 8    --  enter and return keys   
+  kc_delete     = 16   --  delete and bksp keys   
+  kc_lr_arw     = 32   --  left and right arraow keys   
+  kc_ud_arw     = 64   --  up and down arrow keys  
+  kc_other      = 128  --  none of the above   
+  kc_buff_full  = 256  --  buffer is full   
+  kc_no_window  = 512  --  specified window is not attached   
+  kc_kbd_busy   = 1024 --  read of same keys/kbd active   
+  kc_item_chng  = 2048 --  Editable form item changed in disctrl_form
+  kc_f1_type    = 4096 --  used in form manager to process f1 [TYPE]
+  kc_prev_key   = 8192 --  used in form manager to return PREV key

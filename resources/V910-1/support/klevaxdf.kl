@@ -1,0 +1,113 @@
+--
+--  This material is the joint property of GMFanuc Robotics Corporation  and
+--  FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--  Corporation or FANUC LTD Japan immediately upon request.  This  material
+--  and   the  information  illustrated  or  contained  herein  may  not  be
+--  reproduced, copied, used, or transmitted in whole or in part in any  way
+--  without the prior written consent of both GMFanuc Robotics and FANUC.
+--  
+--           All Rights Reserved
+--           Copyright (C)   1991
+--           GMFanuc Robotics Corporation
+--           FANUC LTD Japan
+--  +
+--  Include File:   klevaxdf - type definition for application sub-system
+--  
+--  Description:
+--  
+--  Type definition for application sub-system. This file will also be
+--  included in the softpart of each application.
+--  
+--  Dependencies:
+--  
+--  
+--  Language: KAREL
+--  
+--  Source File:   klevaxdf.kl    14-AUG-91   10:21AM
+--  
+--  Author: JENUWINEWF  
+--          GMFanuc Robotics Corporation
+--          2000 South Adams Road
+--          Auburn Hills, Michigan    48326-2800
+--  
+--  Modification history:
+--
+--  Oct-01-1991   1.01   TKB   Added more constants from APCONSTS.HC
+--  May-05-1992   1.02   TKB   Made all structures as FROM so that they can
+--                             be included as FROM something else.
+--  Sep-22-1992   1.02   KWK   Add error APER_NOPOST_C from aperrdefs.hc
+
+
+CONST
+
+  SEV_WARN = 0
+  SEV_PAUSE = 1
+  SEV_ABORT = 2
+
+  -- request_code for AMR packet (from APCONSTS.HC)
+
+  AMR_NORMAL      = 1             -- Normal AMR packet             
+  AMR_START       = 2             -- Start AMR packet              
+  AMR_STOP        = 3             -- Stop AMR packet               
+  AMR_DONE        = 4             -- AMR done packet               
+  AMR_STOPPED     = AMR_DONE      -- AMR stopped is same as AMR done   
+  AMR_STARTED     = 5             -- AMR started packet            
+  AMR_SETUP       = 6             -- Setup AMR packet              
+  AMR_ENTRY       = 7             -- Entry AMR packet              
+  AMR_MASK        = 8             -- mask AMR packet               
+  AMR_ERROR       = 9             -- error AMR packet              
+  AMR_GETCFG      = 10            -- Get config AMR packet         
+  AMR_SAVCFG      = 11            -- Save config AMR packet        
+  AMR_ERASE       = 12            -- Erase AMR packet              
+  AMR_1MORE       = 13            -- 1More AMR packet              
+
+  -- error_code for AMR packet (from APERRDEF.HC)
+  APER_NOPOST     = 571736159     -- (APER_OTHER_BASE+15+SEV_PAUSE)
+
+TYPE
+
+PKT_HEAD_T FROM KLEVAXDF = STRUCTURE         -- Common part of all packets
+  next_packet: INTEGER         -- Pointer to next packet    
+  subsys_code: BYTE            -- sub-system code           
+  request_code: BYTE           -- Function of the Packet    
+  itr_depth: BYTE              -- Used by interpreter       
+  requestor_id: BYTE           -- Requestors Task ID        
+  status: INTEGER              -- Status of Packet          
+ENDSTRUCTURE
+
+AMR_DATA_T FROM KLEVAXDF = STRUCTURE 
+  start_reqr: BOOLEAN          -- if true, source requires start notification
+  done_reqr: BOOLEAN           -- if true, source requires modone   
+  imm_start: BOOLEAN           -- if true, AX executes immediately  
+  preplan: BOOLEAN             -- if true, AX does preplanning
+  to_resume: BOOLEAN           -- if true, this AMR is kept
+  robot_moved: BOOLEAN         -- if true, robot has moved
+  amr_type: BYTE               -- standard, short, break            
+  source_type: BYTE            -- mnemonic, karel, non-program      
+  program_id: SHORT            -- program ID                        
+  line_number: SHORT           -- program line number               
+ENDSTRUCTURE
+
+APP_ID_T FROM KLEVAXDF = STRUCTURE 
+  sp_index: INTEGER            -- softparts index              
+  ap_subid: BYTE               -- application sub-id.          
+  ap_devno: BYTE               -- device number of application 
+ENDSTRUCTURE
+
+AMGR_WK_T FROM KLEVAXDF = STRUCTURE 
+  preplanned: BOOLEAN          -- bit for already preplanned         
+  executed: BOOLEAN            -- bit for already executed           
+  data_p: INTEGER              -- pointer to local data for this AMR 
+ENDSTRUCTURE
+
+AMR_T FROM KLEVAXDF = STRUCTURE 
+  hdr: PKT_HEAD_T              -- Standard Packet header                 
+  last_pkt_p: INTEGER          -- pointer to last AMR packet             
+  number: INTEGER              -- Unique AMR identification num          
+  priority: BYTE               -- special priority for this AMR process  
+  ax_phase: BYTE               -- may be used by AX freely for bookkeeping
+  ax_id: APP_ID_T              -- to identify AX task receiving this AMR 
+  amgr_wk: AMGR_WK_T           -- used by AMGR only                      
+  amr_data: AMR_DATA_T         -- AMR attribute data                      
+  air_p: INTEGER               -- pointer to AIR                         
+ENDSTRUCTURE

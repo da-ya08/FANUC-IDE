@@ -1,0 +1,45 @@
+--
+-- 
+--   Password Constants
+--   Created by vmpwd68
+-- Thu Jan 21 19:38:21 2021
+-- 
+--
+
+-- Constants have been moved to pwdcons.kl
+%INCLUDE pwdcons
+
+OLD_NONE_C   = 0
+OLD_SYSV_C   = 1
+OLD_CONTROL_ = 2
+OLD_CALIB_C  = 3
+OLD_SERVO_C  = 4
+OLD_IO_C     = 5
+OLD_FILES_C  = 6
+OLD_TPE_C    = 7
+OLD_KRLDATA_ = 8
+OLD_KCL_C    = 9
+OLD_SETUP_C  = 10
+OLD_IO_CFG_C = 11
+OLD_FRAMES_C = 12
+OLD_NUMREG_C = 13
+OLD_POSREG_C = 14
+OLD_TOUCHUP_ = 15
+OLD_PRGADJ_C = 16
+OLD_MIRROR_C = 17
+OLD_SHIFT_C  = 18
+OLD_TESTRUN_ = 19
+OLD_MANUAL_C = 20
+OLD_OTREL_C  = 21
+OLD_BRAKES_C = 22
+OLD_AXS_LIM_ = 23
+OLD_CLEAR_C  = 24
+OLD_DEL_PRG_ = 25
+OLD_AP_DATA_ = 26
+OLD_AP_SETUP = 27
+OLD_AP_OTF_C = 28
+OLD_FULL_C   = 29
+OLD_MASTER_C = 30
+OLD_SMON_C   = 32
+OLD_DEP_C    = 33
+OLD_USER_C   = 34

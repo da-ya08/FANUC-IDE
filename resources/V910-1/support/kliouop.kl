@@ -1,0 +1,92 @@
+--
+--    This material is the joint property of GMFanuc Robotics Corporation  and
+--    FANUC  LTD  Japan,  and  must  be  returned  to  either GMFanuc Robotics
+--    Corporation or FANUC LTD Japan immediately upon request.  This  material
+--    and   the  information  illustrated  or  contained  herein  may  not  be
+--    reproduced, copied, used, or transmitted in whole or in part in any  way
+--    without the prior written consent of both GMFanuc Robotics and FANUC.
+--    
+--             All Rights Reserved
+--             Copyright (C)   1991
+--             GMFanuc Robotics Corporation
+--             FANUC LTD Japan
+--    
+--             Karel is a registered trademark of
+--             GMFanuc Robotics Corporation
+--    +
+--    Include File:  kliouop - Constants used for UOP I/O
+--    
+--    Description:  
+--     
+--     
+--    Dependancies:
+--    
+--    
+--    Language: KAREL
+--    
+--    Source File:   kliouop.kl  24-SEP-91   02:31PM
+--    
+--    Author: BRYCETK
+--            GMFanuc Robotics Corporation
+--            2000 South Adams Road
+--            Auburn Hills, Michigan    48326-2800
+--    
+--    Modification history:
+--
+
+
+
+CONST
+  -- Inputs (these are for UOPIN[] only; if using OPIN then add 15)
+  uopi_qstop   =  1          -- QUICK STOP
+  uopi_hold    =  2          -- HOLD 
+  uopi_sfsd    =  3          -- Safety fence
+  uopi_cstop   =  4          -- CYCLE STOP
+  uopi_reset   =  5          -- FAULT RESET
+  uopi_start   =  6          -- START
+  uopi_home    =  7          -- HOME 
+  uopi_enbl    =  8          -- ENABLED
+  uopi_rsr1    =  9          -- RSR2
+  uopi_rsr2    = 10          -- RSR2
+  uopi_rsr3    = 11          -- RSR3
+  uopi_rsr4    = 12          -- RSR4
+  uopi_pns1    = 13          -- PNS1
+  uopi_pns2    = 14          -- PNS2
+  uopi_pns3    = 15          -- PNS3
+  uopi_pns4    = 16          -- PNS4
+  uopi_pns5    = 17          -- PNS5
+  uopi_pns6    = 18          -- PNS6
+  uopi_pns7    = 19          -- PNS7
+  uopi_pns8    = 20          -- PNS8
+  uopi_strobe  = 11          -- PNSTROBE (note same as RSR3)
+  uopi_prod_st = 12          -- PROD START (note same as RSR4)
+      
+  -- Outputs (these are for UOPOUT[] only; if using OPOUT then add 15)
+  uopo_cmdenbl =  1          -- CMND ENABLE
+  uopo_sysrdy  =  2          -- SYSTEM READY
+  uopo_progrun =  3          -- Program running
+  uopo_paused  =  4          -- Paused
+  uopo_held    =  5          -- HOLD
+  uopo_fault   =  6          -- FAULT
+  uopo_atperch =  7          -- At perch
+  uopo_tpenbl  =  8          -- TP ENABLED
+  uopo_batalm  =  9          -- Battery alarm
+  uopo_busye   = 10          -- Busy (why the e??)
+  uopo_ack1    = 11          -- ACK1
+  uopo_ack2    = 12          -- ACK2
+  uopo_ack3    = 13          -- ACK3
+  uopo_ack4    = 14          -- ACK4
+  uopo_snack   = 11          -- SNACK (note same as ACK1)
+  uopo_sn01    = 13          -- SNO1 (note same as ACK3)
+  uopo_sn02    = 14          -- SNO2 (note same as ACK4)
+  uopo_sn03    = 15          -- SNO3
+  uopo_sn04    = 16          -- SNO4
+  uopo_sn05    = 17          -- SNO5
+  uopo_sn06    = 18          -- SNO6
+  uopo_sn07    = 19          -- SNO7
+  uopo_sn08    = 20          -- SNO8
+  uopo_uncal   = 21          -- UNCALIBRATED
+  uopo_upenbl  = 22          -- UOP ENABLED
+  uopo_locked  = 23          -- LOCKED
+  uopo_cstop   = 24          -- CYCLE STOPPED
+      
