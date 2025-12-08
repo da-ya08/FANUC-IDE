@@ -176,6 +176,7 @@ class FTPSettingsWindow(tk.Toplevel):
         }
         
         self.servers_list[self.selected_server] = new_settings
+        self.save_servers()
     
     def _test_connection(self):
         """Тестирует подключение"""        

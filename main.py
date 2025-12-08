@@ -396,7 +396,8 @@ class FANUCE_IDE:
             try:
                 ftp = FTP(timeout=5)
                 ftp.connect(self.target_server['adress'])
-                ftp.login('admin', '')
+                login = self.target_server['login'] if self.target_server['login'] else 'admin'
+                ftp.login(login, self.target_server['pass'])
                 files = ftp.nlst()
                 extensions = ['.kl', '.ls']  # Нужные расширения
                 files = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)]
