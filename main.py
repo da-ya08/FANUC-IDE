@@ -1,10 +1,9 @@
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk, Menu
+import tkinter as tk, os, json, shutil, subprocess
+from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
 from ftplib import FTP
 from PIL import ImageTk, Image
 from src.conf import LANGUAGES
-import os, json, shutil, subprocess
 
 class FANUCE_IDE:
     def __init__(self, root):
@@ -25,6 +24,7 @@ class FANUCE_IDE:
         if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'):
             self._create_robot_ini(self.PROJECT_DIRICTORY)
         self.local_dir = self.CURRENT_DIRICTORY
+        self.LOCAL_FILES_DIR = self.CURRENT_DIRICTORY
         self.buffer_header, self.buffer_asser = '', ''
         self.target_server = {}
         self.all_servers = {}
@@ -212,7 +212,6 @@ class FANUCE_IDE:
         try:
             if tmp_path.split('\\')[-1].split('.')[-1].lower() == 'kl':
                 tmp_path = f'{tmp_path[:-2]}pc'
-            print(tmp_path)
             ftp = FTP(timeout=7)
             ftp.connect(self.target_server['adress'])
             ftp.login('admin', '')
@@ -232,7 +231,6 @@ class FANUCE_IDE:
     def _local_nav_back(self):
         """Переходит в родительскую папку для локальных файлов"""
         parent = os.path.dirname(self.local_dir.rstrip('/\\'))
-        print(parent)
         if os.path.exists(parent):
             self.CURRENT_DIRICTORY = parent
             self.update_local_files()
@@ -336,11 +334,53 @@ class FANUCE_IDE:
         menu.add_command(label=self.translate('send'), command=self._send_local_file)
         menu.add_command(label=self.translate('del'), command=self._delete_selected_local_file)
         menu.add_separator()
+        menu.add_command(label='Открыть папку...', command=self._open_local_folder)
+        menu.add_command(label='Создать папку', command=self._create_folder)
         menu.add_command(label=self.translate('refresh'), command=self.update_local_files)
         widget.bind("<Button-3>", lambda e: menu.tk_popup(e.x_root, e.y_root))
+    
+    def _open_local_folder(self):
+        open_folder = filedialog.askdirectory(title="Выберите папку",
+                                              initialdir=self.CURRENT_DIRICTORY)
+        if not open_folder:  # Пользователь отменил выбор
+            return
+        self.CURRENT_DIRICTORY = open_folder
+        self.update_local_files
+    
+    def _create_folder(self):
+        while True:
+            folder_name = simpledialog.askstring(
+                'Имя папки:',
+                'Введите имя для папки: ',
+                initialvalue='folder1'
+            )
+            if folder_name is None:
+                return
+            if not folder_name.strip():
+                messagebox.showwarning(
+                    'Пустая строка',
+                    'Имя папки пустое'
+                )
+                continue
+            try:
+                os.makedirs(f'{self.CURRENT_DIRICTORY}\\{folder_name}')
+            except Exception as e:
+                messagebox.showerror(
+                    'Ошибка создания',
+                    f'Не удалось создать папку: {e}'
+                )
+            self.update_local_files()
+            break
 
     def _delete_selected_local_file(self):
-        item = self.local_file_tree.selection()[0]
+        try:
+            item = self.local_file_tree.selection()[0]
+        except Exception as e:
+            messagebox.showwarning(
+                'Ошибка удаления',
+                'Не выбран файл'
+            )
+            return
         if item:
             file = self.CURRENT_DIRICTORY + '\\' + self.local_file_tree.item(item, 'text')
             if not messagebox.askyesno('Подтверждение',
@@ -399,10 +439,11 @@ class FANUCE_IDE:
                 login = self.target_server['login'] if self.target_server['login'] else 'admin'
                 ftp.login(login, self.target_server['pass'])
                 files = ftp.nlst()
-                extensions = ['.kl', '.ls']  # Нужные расширения
-                files = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)]
+                # extensions = ['.kl', '.ls']  # Нужные расширения
+                # files = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)]
             except Exception as e:
                 messagebox.showerror("Error", f"Подключение не удалось: {e}")
+                return
             for item in self.file_tree.get_children():
                 self.file_tree.delete(item)
             for name in files:
@@ -476,7 +517,7 @@ class FANUCE_IDE:
     def _download_and_open_file(self, filename):
         try:
             self.update_file_path(custom='ЗАГРУЗКА ФАЙЛА')
-            file_path = self.CURRENT_DIRICTORY + f'\\{self.server_combobox.get()}\\' + filename
+            file_path = self.CURRENT_DIRICTORY + f'\\' + filename
             ftp = FTP(timeout=5)
             ftp.connect(self.target_server['adress'])
             ftp.login('admin', '')
@@ -552,7 +593,7 @@ class FANUCE_IDE:
             self.compile_button.config(state='disable')
             self.buffer_asser = ''
             self.buffer_header = ''
-            if file_path[-1:-3:-1] == 'sl':
+            if file_path[-1:-3:-1].lower() == 'sl':
                 content = ""
                 one_line = ""
                 header = ""
