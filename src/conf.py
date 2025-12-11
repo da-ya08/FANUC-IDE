@@ -30,7 +30,6 @@ LANGUAGES = {
         'con_name': 'Connection name',
         'login': 'Login',
         'adr': 'Robot adress',
-        'back_file': '←',
         'saved_servs': 'Saved servers',
         'refresh': 'Refresh list',
         'paste': 'Paste',
@@ -42,7 +41,30 @@ LANGUAGES = {
         'err': 'Error',
         'del_serv': 'Delete server',
         'change_dir': 'Change files dir',
-        'pass': 'Password'
+        'pass': 'Password',
+        'robot': 'Robot',
+        'r_backup': 'Robot backup',
+        'open_folder': 'Open folder...',
+        'create_folder': 'Create folder',
+        'compiled_success': 'Compilation success!',
+        'compiled': 'Compiled!',
+        'compilation_error': 'Error with compilation',
+        'inf': 'Information',
+        'no_select_server': 'Server is not selected',
+        'warn': 'Warning',
+        'cant_send_folder': "Can't send the folder!",
+        'send_confirm': 'Confirmation of sending',
+        'to_server': 'To server',
+        'u_sure_to_send': 'Are you sure about sending the file',
+        'sending_file': 'File sending',
+        'was_success': 'was success',
+        'couldnt_send_file': "Couldn't send file",
+        'choice_folder': 'Choice a folder',
+        'folder_name': 'Folder name',
+        'enter_folder_name': 'Enter the folder name',
+        'empty_name': 'Empty name',
+        'name_empty': 'Empty name of folder'
+
     },
     'ru': {
         'file': 'Файл',
@@ -75,7 +97,6 @@ LANGUAGES = {
         'con_name': 'Название подключения',
         'login': 'Логин', 
         'adr': 'Адрес робота',
-        'back_file': '←',
         'saved_servs': 'Сохранённые сервера',
         'refresh': 'Обновить список',
         'paste': 'Вставить',
@@ -87,7 +108,30 @@ LANGUAGES = {
         'err': 'Ошибка',
         'del_serv': 'Удалить сервер',
         'change_dir': 'Изменить путь к файлам',
-        'pass': 'Пароль'
+        'pass': 'Пароль',
+        #
+        'robot': 'Робот',
+        'r_backup': 'Бэкап робота',
+        'open_folder': 'Открыть папку...',
+        'create_folder': 'Создать папку',
+        'compiled_success': 'Успешная компиляция!',
+        'compiled': 'Скомпилировано!',
+        'compilation_error': 'Ошибка компиляции',
+        'inf': 'Информация',
+        'no_select_server': 'Сервер не выбран!',
+        'warn': 'Предупреждение',
+        'cant_send_folder': "Нельзя отправить папку!",
+        'send_confirm': 'Подтверждение отправки',
+        'to_server': 'На сервер',
+        'u_sure_to_send': 'Вы уверены в отправке файла',
+        'sending_file': 'Отправка файла',
+        'was_success': 'прошла успешно',
+        'couldnt_send_file': "Не удалось отправить файл",
+        'choice_folder': 'Выбрать папку',
+        'folder_name': 'Имя папки',
+        'enter_folder_name': 'Введите имя папки',
+        'empty_name': 'Пустое имя',
+        'name_empty': 'Не введено имя папки'
     }
 }
 
@@ -105,4 +149,4 @@ SINTAX_WORDS = {
          ],
 }
 
-CURRENT_LANGUAGE = 'ru'  # by default
+CURRENT_LANGUAGE = 'en'  # by default

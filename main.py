@@ -25,13 +25,14 @@ class FANUCE_IDE:
         self.language = 'ru'
         self.is_karel = False
 
-        # Главное окно
+        ''' Главное окно '''
         main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
         main_paned.pack(expand=True, fill='both')
         left_paned = tk.PanedWindow(main_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED, sashwidth=4)
         main_paned.add(left_paned, minsize=50, width=200) 
         right_frame = tk.Frame(main_paned)
         main_paned.add(right_frame)
+
         '''Левая часть'''
         # Меню-бар
         menubar_left_menu = tk.Frame(left_paned, height=20)
@@ -62,8 +63,7 @@ class FANUCE_IDE:
         tree_scroll.config(command=self.file_tree.yview)
         self.file_tree.bind("<Double-1>", self._on_file_double_click)
         files_paned.add(file_tree_frame, minsize=100)
-        # Локальные файлы
-        
+        # Локальные файлы        
         local_file_tree_frame = tk.Frame(files_paned)
         local_file_tree_frame.pack(expand=True, fill='both')
         self.local_nav_frame = tk.Frame(local_file_tree_frame)
@@ -87,6 +87,7 @@ class FANUCE_IDE:
         self.file_tree.tag_configure('file', foreground='black')
         self.local_file_tree.tag_configure('folder', foreground='orange')
         self.local_file_tree.tag_configure('file', foreground='black')
+
         '''Правая часть'''
         # Меню кода
         menu_code_frame = tk.Frame(right_frame, height=20)
@@ -160,83 +161,7 @@ class FANUCE_IDE:
         self.update_server_list()
         self.create_menu()
         self._setup_context_menus()
-
-    def copmile_karel(self):
-        self.save_file()
-        try:
-            os.chdir('\\'.join(self.CURRENT_FILE.split('\\')[:-1]))
-            result = subprocess.run(
-                [f'{self.PROJECT_DIRICTORY}\\src\\ktrans.exe', f'{self.CURRENT_FILE}', '/config' , f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'],
-                capture_output=True,
-                text=True,
-                check=True)
-            messagebox.showinfo('Компиляция прошла успешно',
-                                result.stdout)
-            self.update_local_files()
-            self.compile_button.config(text='Скомпилированно!')
-            self.compile_button.config(state='disable')
-            self.send_button.config(state='enable')
-        except Exception as e:
-            messagebox.showerror('Ошибка компиляции',
-                                 e.stdout)
-            self.send_button.config(state='disable')
-        os.chdir(self.PROJECT_DIRICTORY)
     
-    def send_file(self, file=''):
-        if not self.target_server_name:
-            messagebox.showinfo('Инфо',
-                                'Не выбран сервер.')
-            return
-        tmp_path = file if file else self.CURRENT_FILE
-        tmp_path = tmp_path.replace('/', '\\')
-        if os.path.isdir(tmp_path):
-            messagebox.showerror('Предупреждение',
-                                   'Нельзя отправить папку!')
-            return
-        if not messagebox.askyesno(
-            'Подтверждение отправки',
-            f'Вы уверены в отправке файла: {tmp_path}\nНа сервер: {self.target_server_name}?',
-            icon='question'
-        ):
-            return
-        try:
-            if tmp_path.split('\\')[-1].split('.')[-1].lower() == 'kl':
-                tmp_path = f'{tmp_path[:-2]}pc'
-            ftp = FTP(timeout=7)
-            ftp.connect(self.target_server['adress'])
-            ftp.login('admin', '')
-            ftp.voidcmd('TYPE I')
-            with open(tmp_path, 'rb') as s_file:
-                ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file)
-        except Exception as e:
-            messagebox.showerror("Error", f"Не удалось отправить файл: {e}")          
-        self.send_button.config(state='disable')
-        ftp.quit()
-
-    def on_ctrl_keypress(self, event):
-        """Обрабатывает сочетания клавиш с Ctrl."""
-        if event.keycode == 83 or event.keycode == 1067:  # 83 - 's', 1067 - 'ы'
-            self.save_file()
-
-    def _local_nav_back(self):
-        """Переходит в родительскую папку для локальных файлов"""
-        parent = os.path.dirname(self.CURRENT_DIRICTORY.rstrip('/\\'))
-        if os.path.exists(parent):
-            self.CURRENT_DIRICTORY = parent
-            self.update_local_files()
-            self.local_path_label.config(text=self.CURRENT_DIRICTORY)
-            self.CURRENT_DIRICTORY = parent
-        
-    def _create_robot_ini(self, main_dir):
-        with open(f'{main_dir}\\src\\robot.ini', 'w', encoding='utf-8') as f:
-            print('Creating robot.ini...')
-            f.write('[WinOLPC_Util]\n')
-            f.write(f'Robot={main_dir}\\resources\\Robot_1\n')
-            f.write('Version=V9.10-1\n')
-            f.write(f'Path={main_dir}\\resources\\V910-1\\bin\n')
-            f.write(f'Support={main_dir}\\resources\\Robot_1\\support\n')
-            f.write(f'Output={main_dir}\\resources\\Robot_1\\output\n')
-
     def create_menu(self):
         menubar = tk.Menu(self.root)
         # Меню "Файл"
@@ -254,9 +179,13 @@ class FANUCE_IDE:
         lang_menu.add_command(label="English", command=lambda: self.set_language('en'))
         lang_menu.add_command(label="Русский", command=lambda: self.set_language('ru'))
         menubar.add_cascade(label=self.translate('lang_menu'), menu=lang_menu)
+        # Робот
+        robot_menu = tk.Menu(menubar, tearoff=0)
+        robot_menu.add_command(label=self.translate('r_backup'), command=lambda: messagebox.showinfo('not yeat', 'Ещё не готово'))
+        menubar.add_cascade(label=self.translate('robot'), menu=robot_menu)
         self.root.config(menu=menubar)
         self.file_menu = file_menu
-
+    
     def _setup_context_menus(self):
         self._add_text_context_menu(self.text_area)
         self._add_tree_context_menu(self.file_tree)
@@ -295,13 +224,90 @@ class FANUCE_IDE:
         menu.add_command(label=self.translate('send'), command=self._send_local_file)
         menu.add_command(label=self.translate('del'), command=self._delete_selected_local_file)
         menu.add_separator()
-        menu.add_command(label='Открыть папку...', command=self._open_local_folder)
-        menu.add_command(label='Создать папку', command=self._create_folder)
+        menu.add_command(label=self.translate('open_folder'), command=self._open_local_folder)
+        menu.add_command(label=self.translate('create_folder'), command=self._create_folder)
         menu.add_command(label=self.translate('refresh'), command=self.update_local_files)
         widget.bind("<Button-3>", lambda e: menu.tk_popup(e.x_root, e.y_root))
+
+    def copmile_karel(self):
+        self.save_file()
+        try:
+            os.chdir('\\'.join(self.CURRENT_FILE.split('\\')[:-1]))
+            result = subprocess.run(
+                [f'{self.PROJECT_DIRICTORY}\\src\\ktrans.exe', f'{self.CURRENT_FILE}', '/config' , f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'],
+                capture_output=True,
+                text=True,
+                check=True)
+            messagebox.showinfo(self.translate('compile_success'),
+                                result.stdout)
+            self.update_local_files()
+            self.compile_button.config(text=self.translate('compiled'))
+            self.compile_button.config(state='disable')
+            self.send_button.config(state='enable')
+        except Exception as e:
+            messagebox.showerror(self.translate('compilation_error'),
+                                 e.stdout)
+            self.send_button.config(state='disable')
+        os.chdir(self.PROJECT_DIRICTORY)
+    
+    def send_file(self, file=''):
+        if not self.target_server_name:
+            messagebox.showinfo(self.translate('inf'),
+                                self.translate('no_select_server'))
+            return
+        tmp_path = file if file else self.CURRENT_FILE
+        tmp_path = tmp_path.replace('/', '\\')
+        if os.path.isdir(tmp_path):
+            messagebox.showerror(self.translate('warn'),
+                                 self.translate('cant_send_folder'))
+            return
+        if not messagebox.askyesno(self.translate('send_confirm'),
+                                   f'{self.translate('u_sure_to_send')}: {tmp_path}\n{self.translate('to_server')}: {self.target_server_name}?',
+                                   icon='question'):
+            return
+        try:
+            if tmp_path.split('\\')[-1].split('.')[-1].lower() == 'kl':
+                tmp_path = f'{tmp_path[:-2]}pc'
+            ftp = FTP(timeout=7)
+            ftp.connect(self.target_server['adress'])
+            log = self.target_server['login'] if self.target_server['login'] else 'admin'
+            ftp.login(log, self.target_server['pass'])
+            ftp.voidcmd('TYPE I')
+            with open(tmp_path, 'rb') as s_file:
+                ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file)
+            messagebox.showinfo(self.translate('sending_file'),
+                                f'{self.translate('sending_file')} {tmp_path} {self.translate('was_success')}!')
+        except Exception as e:
+            messagebox.showerror(self.translate('err'), f"{self.translate('couldnt_send_file')}: {e}")          
+        self.send_button.config(state='disable')
+        ftp.quit()
+
+    def on_ctrl_keypress(self, event):
+        """Обрабатывает сочетания клавиш с Ctrl."""
+        if event.keycode == 83 or event.keycode == 1067:  # 83 - 's', 1067 - 'ы'
+            self.save_file()
+
+    def _local_nav_back(self):
+        """Переходит в родительскую папку для локальных файлов"""
+        parent = os.path.dirname(self.CURRENT_DIRICTORY.rstrip('/\\'))
+        if os.path.exists(parent):
+            self.CURRENT_DIRICTORY = parent
+            self.update_local_files()
+            self.local_path_label.config(text=self.CURRENT_DIRICTORY)
+            self.CURRENT_DIRICTORY = parent
+        
+    def _create_robot_ini(self, main_dir):
+        with open(f'{main_dir}\\src\\robot.ini', 'w', encoding='utf-8') as f:
+            print('Creating robot.ini...')
+            f.write('[WinOLPC_Util]\n')
+            f.write(f'Robot={main_dir}\\resources\\Robot_1\n')
+            f.write('Version=V9.10-1\n')
+            f.write(f'Path={main_dir}\\resources\\V910-1\\bin\n')
+            f.write(f'Support={main_dir}\\resources\\Robot_1\\support\n')
+            f.write(f'Output={main_dir}\\resources\\Robot_1\\output\n')
     
     def _open_local_folder(self):
-        open_folder = filedialog.askdirectory(title="Выберите папку",
+        open_folder = filedialog.askdirectory(title=self.translate('choice_folder'),
                                               initialdir=self.CURRENT_DIRICTORY)
         if not open_folder:
             return
@@ -311,16 +317,16 @@ class FANUCE_IDE:
     def _create_folder(self):
         while True:
             folder_name = simpledialog.askstring(
-                'Имя папки:',
-                'Введите имя для папки: ',
+                f'{self.translate('folder_name')}:',
+                f'{self.translate('enter_folder_name')}: ',
                 initialvalue='folder1'
             )
             if folder_name is None:
                 return
             if not folder_name.strip():
                 messagebox.showwarning(
-                    'Пустая строка',
-                    'Имя папки пустое'
+                    self.translate('empty_name'),
+                    self.translate('name_empty')
                 )
                 continue
             try:
@@ -371,7 +377,7 @@ class FANUCE_IDE:
         filename = self.file_tree.item(selected[0], 'text')
         if messagebox.askyesno(
             "Подтверждение", 
-            f"Вы точно хотите удалить файл {filename}?",
+            f"Вы точно хотите удалить файл {filename}\nС сервера: {self.target_server_name}?",
             icon='warning'
         ):
             try:
