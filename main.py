@@ -12,28 +12,18 @@ class FANUCE_IDE:
         self.PROJECT_DIRICTORY = '\\'.join(__file__.split('\\')[:-1])
         os.chdir(self.PROJECT_DIRICTORY)
         self.root.iconbitmap(f'{self.PROJECT_DIRICTORY}\\resources\\icon.ico')
-        self.servers_path = f'{self.PROJECT_DIRICTORY}\\resources\\servers_list.json'
-        self.CURRENT_SRC_DIR = f'{self.PROJECT_DIRICTORY}\\src'
+        self.SERVERS_FILE = f'{self.PROJECT_DIRICTORY}\\resources\\servers_list.json'
         self.CURRENT_FILE = None
-        self.CURRENT_DIRICTORY = ''
-        if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\cache.json'):
-            self._change_def_dir()
-            self._create_robot_ini(self.PROJECT_DIRICTORY)
-        with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'r', encoding='utf-8') as f:
-            self.CURRENT_DIRICTORY = json.load(f)
+        self.CURRENT_DIRICTORY = self.PROJECT_DIRICTORY
         if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'):
             self._create_robot_ini(self.PROJECT_DIRICTORY)
-        self.local_dir = self.CURRENT_DIRICTORY
-        self.LOCAL_FILES_DIR = self.CURRENT_DIRICTORY
-        self.buffer_header, self.buffer_asser = '', ''
-        self.target_server = {}
-        self.all_servers = {}
+        self.buffer_header, self.buffer_asser, self.target_server_name = '', '', ''
+        self.target_server, self.all_servers = {}, {}
         self.is_modified = False
         self.SysKeys = ["Control_R", "Control_L", "Alt_L", "Alt_R", "Escape", "Shift_L", "Shift_R"]
         self.del_stoppers = [" ", ",", ".", "!", "?", ";", ":", "-", "(", ")", "\\", "/", "="]
         self.language = 'ru'
         self.is_karel = False
-        self.target_server_name = ''
 
         # Главное окно
         main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
@@ -176,7 +166,7 @@ class FANUCE_IDE:
         try:
             os.chdir('\\'.join(self.CURRENT_FILE.split('\\')[:-1]))
             result = subprocess.run(
-                [f'{self.CURRENT_SRC_DIR}\\ktrans.exe', f'{self.CURRENT_FILE}', '/config' , f'{self.CURRENT_SRC_DIR}\\robot.ini'],
+                [f'{self.PROJECT_DIRICTORY}\\src\\ktrans.exe', f'{self.CURRENT_FILE}', '/config' , f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'],
                 capture_output=True,
                 text=True,
                 check=True)
@@ -230,41 +220,13 @@ class FANUCE_IDE:
 
     def _local_nav_back(self):
         """Переходит в родительскую папку для локальных файлов"""
-        parent = os.path.dirname(self.local_dir.rstrip('/\\'))
+        parent = os.path.dirname(self.CURRENT_DIRICTORY.rstrip('/\\'))
         if os.path.exists(parent):
             self.CURRENT_DIRICTORY = parent
             self.update_local_files()
             self.local_path_label.config(text=self.CURRENT_DIRICTORY)
-            self.local_dir = parent
+            self.CURRENT_DIRICTORY = parent
         
-    def _change_def_dir(self):
-        while True:
-                selected_dir = filedialog.askdirectory(title="Выберите папку для проектов",
-                                                       initialdir='\\'.join(self.PROJECT_DIRICTORY.split('\\')[:-1]))
-                if not selected_dir:  # Пользователь отменил выбор
-                    if self.CURRENT_DIRICTORY:
-                        break
-                    response = messagebox.askquestion("Выход",
-                                                      "Папка не выбрана. Выйти из программы?",
-                                                      icon='warning')
-                    if response == 'yes':
-                        self.on_close()
-                        exit()
-                    else:
-                        continue
-                try:
-                    selected_dir = selected_dir.replace('/', '\\')
-                    test_file = os.path.join(selected_dir, 'test_write.tmp')
-                    with open(test_file, 'w') as f:
-                        f.write('test')
-                    os.remove(test_file)
-                    with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'w', encoding='utf-8') as f:
-                        json.dump(selected_dir, f)
-                    break
-                except Exception as e:
-                    messagebox.showerror(self.translate('err'),
-                                         f"Невозможно записать в выбранную папку:\n{str(e)}\n\nВыберите другую папку.")
-
     def _create_robot_ini(self, main_dir):
         with open(f'{main_dir}\\src\\robot.ini', 'w', encoding='utf-8') as f:
             print('Creating robot.ini...')
@@ -285,7 +247,6 @@ class FANUCE_IDE:
         file_menu.add_command(label=self.translate('save'), command=self.save_file, state=tk.DISABLED)
         file_menu.add_command(label=self.translate('save_as'), command=self.save_file_as)
         file_menu.add_separator()
-        file_menu.add_command(label=self.translate('change_dir'), command=self._change_def_dir)
         file_menu.add_command(label=self.translate('exit'), command=self.on_close)
         menubar.add_cascade(label=self.translate('file'), menu=file_menu)
         # Язык
@@ -342,10 +303,10 @@ class FANUCE_IDE:
     def _open_local_folder(self):
         open_folder = filedialog.askdirectory(title="Выберите папку",
                                               initialdir=self.CURRENT_DIRICTORY)
-        if not open_folder:  # Пользователь отменил выбор
+        if not open_folder:
             return
         self.CURRENT_DIRICTORY = open_folder
-        self.update_local_files
+        self.update_local_files()
     
     def _create_folder(self):
         while True:
@@ -452,11 +413,11 @@ class FANUCE_IDE:
     
     def update_server_list(self):
         if hasattr(self, 'server_combobox'):
-            if not os.path.exists(self.servers_path):
-                with open(self.servers_path, 'w', encoding='utf-8') as file:
+            if not os.path.exists(self.SERVERS_FILE):
+                with open(self.SERVERS_FILE, 'w', encoding='utf-8') as file:
                     return
             try:
-                with open(self.servers_path, 'r', encoding='utf-8') as file:
+                with open(self.SERVERS_FILE, 'r', encoding='utf-8') as file:
                     self.all_servers = json.load(file)
             except Exception as e:
                 if 'Expecting value' in str(e):
@@ -506,7 +467,7 @@ class FANUCE_IDE:
 
         if os.path.isdir(full_path):
             # Если это папка - заходим в нее
-            self.local_dir = os.path.abspath(full_path)
+            self.CURRENT_DIRICTORY = os.path.abspath(full_path)
             self.CURRENT_DIRICTORY = full_path
             self.update_local_files(full_path)
             self.local_path_label.config(text=self.CURRENT_DIRICTORY)
