@@ -67,7 +67,16 @@ LANGUAGES = {
         'connection_error': 'Connection error',
         'couldnt_download_file': "Couldn't download file",
         'couldnt_open_file': "Couldn't open file",
-        'filter': '.ls filter'
+        'filter': '.ls filter',
+
+        'couldnt_connect': "Couldn't connect",
+        'timeout': 'Conenction timeout',
+        'con_success': 'Connection is established',
+        'but_no_files': 'but it was not possible to get a list of files',
+        'found': 'Found',
+        'files': 'files',
+        'no_adress': 'Address not specified',
+        'no_name_or_adress': 'Name or address is missing!'
 
     },
     'ru': {

@@ -18,7 +18,9 @@ class FANUCE_IDE:
         if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\cache.json'):
             self._change_def_dir()
         with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'r', encoding='utf-8') as f:
-            self.CURRENT_DIRICTORY = json.load(f)
+            temp = json.load(f)
+            self.CURRENT_DIRICTORY = temp['path']
+            self.language = temp['lang']
         if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'):
             self._create_robot_ini(self.PROJECT_DIRICTORY)
         self.buffer_header, self.buffer_asser, self.target_server_name = '', '', ''
@@ -26,7 +28,6 @@ class FANUCE_IDE:
         self.is_modified = False
         self.SysKeys = ["Control_R", "Control_L", "Alt_L", "Alt_R", "Escape", "Shift_L", "Shift_R"]
         self.del_stoppers = [" ", ",", ".", "!", "?", ";", ":", "-", "(", ")", "\\", "/", "="]
-        self.language = CURRENT_LANGUAGE
         self.is_karel = False
         self.filter_server_files = tk.IntVar(value=1)
 
@@ -178,11 +179,9 @@ class FANUCE_IDE:
     def highlight_exclamation_lines(self, event=None):
         # Удаляем все теги подсветки
         self.text_area.tag_remove("exclamation", "1.0", tk.END)
-
         # Получаем весь текст
         content = self.text_area.get("1.0", tk.END)
         lines = content.splitlines()
-
         for line_num, line in enumerate(lines, start=1):
             if '!' in line:
                 # Координаты начала и конца строки
@@ -284,7 +283,7 @@ class FANUCE_IDE:
                         f.write('test')
                     os.remove(test_file)
                     with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'w', encoding='utf-8') as f:
-                        json.dump(selected_dir, f)
+                        json.dump({'path': selected_dir, 'lang': CURRENT_LANGUAGE}, f)
                     break
                 except Exception as e:
                     messagebox.showerror(self.translate('err'),
@@ -838,10 +837,18 @@ class FANUCE_IDE:
     
     def _ftp_settings_close(self):
         self.update_server_list()
+
+    def _save_lang(self, lang):
+        with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'r+', encoding='utf-8') as f:
+            temp_path = json.load(f)['path']
+            f.seek(0)
+            f.truncate()
+            json.dump({'path': temp_path, 'lang': lang}, f)
     
     def on_close(self):
         """Обрабатывает закрытие окна."""
         try:
+            self._save_lang(self.language)
             if self.is_modified:
                 response = messagebox.askyesnocancel(
                     self.translate('save_file'),

@@ -12,8 +12,8 @@ class Entry(ttk.Entry):
 class FTPSettingsWindow(tk.Toplevel):
     def __init__(self, parent, lang, callback):
         super().__init__(parent)
-        self.title("FTP settings")
-        self.geometry("800x500")
+        self.title('FTP settings')
+        self.geometry('800x500')
         self.minsize(600, 400)
         self.servers_list = {}
         self.servers_path = './resources/servers_list.json'
@@ -99,10 +99,9 @@ class FTPSettingsWindow(tk.Toplevel):
         if not os.path.exists(self.servers_path):
             return {}
         try:
-            with open(self.servers_path, "r", encoding="utf-8") as file:
+            with open(self.servers_path, 'r', encoding='utf-8') as file:
                 self.servers_list = json.load(file)
         except Exception as e:
-            print(f"Error with servers load: {e}")
             return None 
         self.update_servers_list()       
 
@@ -122,7 +121,7 @@ class FTPSettingsWindow(tk.Toplevel):
             messagebox.showerror("Error", self.translate('serv_already'))
             return
         if not new_name or not adress:
-            messagebox.showwarning(self.translate('err'), "Отсутствует имя или адрес!")
+            messagebox.showwarning(self.translate('err'), self.translate('no_name_or_adress'))
         self.servers_list[new_name] = {
             'adress': adress,
             'login': login,
@@ -140,9 +139,9 @@ class FTPSettingsWindow(tk.Toplevel):
         """Удаляет выбранный сервер"""
         selected = self.servers_tree.selection()
         if not selected:
-            messagebox.showwarning(self.translate('err'), "Сервер не выбран!")            
+            messagebox.showwarning(self.translate('err'), self.translate('no_select_server'))            
         server_name = self.servers_tree.item(selected[0], 'text')
-        if messagebox.askyesno(self.translate('confirm'), f"{self.translate('sel_serv')} '{server_name}'?"):
+        if messagebox.askyesno(self.translate('confirm'), f"{self.translate('del_serv')} '{server_name}'?"):
             self.servers_tree.delete(selected[0])
             del self.servers_list[server_name]
         self.save_servers()
@@ -161,12 +160,12 @@ class FTPSettingsWindow(tk.Toplevel):
             if name == 'conn_name':
                 entry.set_text(self.selected_server)
                 continue
-            entry.set_text(settings.get(name, ""))
+            entry.set_text(settings.get(name, ''))
     
     def _save_settings(self):
         """Сохраняет изменения сервера"""
         if not self.selected_server:
-            messagebox.showwarning(self.translate('err'), "Сервер не выбран!")
+            messagebox.showwarning(self.translate('err'), self.translate('no_select_server'))
             return
             
         new_settings = {
@@ -184,25 +183,25 @@ class FTPSettingsWindow(tk.Toplevel):
             # Получаем текущие настройки из формы
             adress = self.entries['adress'].get()
             if not adress:
-                messagebox.showerror(self.translate('err'), "Не указан адрес!")
+                messagebox.showerror(self.translate('err'), self.translate('no_adress'))
                 return
-            user = 'admin'
             ftp = FTP(timeout=5)
             ftp.connect(adress)
-            pas = ''
-            ftp.login(user, pas)
+            user = self.entries['login'].get()
+            pas = self.entries['pass'].get()
+            ftp.login(user if user else 'admin', pas)
 
             try:
                 files = []
                 ftp.retrlines('LIST', files.append)
                 messagebox.showinfo(
                     self.translate('success'), 
-                    f"Подключение успешно!\nНайдено {len(files)} файлов в корневой директории."
+                    f'{self.translate('con_success')}!\n{self.translate('found')} {len(files)} {self.translate('files')}.'
                 )
             except Exception as e:
                 messagebox.showinfo(
                     self.translate('success'), 
-                    f"Подключение установлено, но не удалось получить список файлов:\n{str(e)}"
+                    f'{self.translate('con_success')}, {self.translate('but_no_files')}:\n{str(e)}'
                 )
             
             # Закрываем соединение
@@ -211,10 +210,10 @@ class FTPSettingsWindow(tk.Toplevel):
         except socket.timeout:
             messagebox.showerror(
                 self.translate('err'), 
-                "Таймаут подключения. Проверьте адрес сервера и сетевые настройки."
+                self.translate('timeout')
             )
         except Exception as e:
             messagebox.showerror(
                 self.translate('err'), 
-                f"Не удалось подключиться:\n{str(e)}"
+                f'{self.translate('couldnt_connect')}:\n{str(e)}'
             )
