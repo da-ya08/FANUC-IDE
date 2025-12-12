@@ -16,11 +16,12 @@ class FANUCE_IDE:
         self.CURRENT_FILE = None
         self.CURRENT_DIRICTORY = self.PROJECT_DIRICTORY
         if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\cache.json'):
-            self._change_def_dir()
+            self._create_config_file()
         with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'r', encoding='utf-8') as f:
             temp = json.load(f)
             self.CURRENT_DIRICTORY = temp['path']
             self.language = temp['lang']
+            self.root.geometry(temp['geo'])
         if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'):
             self._create_robot_ini(self.PROJECT_DIRICTORY)
         self.buffer_header, self.buffer_asser, self.target_server_name = '', '', ''
@@ -263,31 +264,57 @@ class FANUCE_IDE:
     
     def _change_def_dir(self):
         while True:
-                selected_dir = filedialog.askdirectory(title="Выберите папку для проектов",
-                                                       initialdir='\\'.join(self.PROJECT_DIRICTORY.split('\\')[:-1]))
-                if not selected_dir:  # Пользователь отменил выбор
-                    if self.CURRENT_DIRICTORY:
-                        break
-                    response = messagebox.askquestion("Выход",
-                                                      "Папка не выбрана. Выйти из программы?",
-                                                      icon='warning')
-                    if response == 'yes':
-                        self.on_close()
-                        exit()
-                    else:
-                        continue
-                try:
-                    selected_dir = selected_dir.replace('/', '\\')
-                    test_file = os.path.join(selected_dir, 'test_write.tmp')
-                    with open(test_file, 'w') as f:
-                        f.write('test')
-                    os.remove(test_file)
-                    with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'w', encoding='utf-8') as f:
-                        json.dump({'path': selected_dir, 'lang': CURRENT_LANGUAGE}, f)
+            selected_dir = filedialog.askdirectory(title="Выберите папку для проектов",
+                                                   initialdir='\\'.join(self.PROJECT_DIRICTORY.split('\\')[:-1]))
+            if not selected_dir:  # Пользователь отменил выбор
+                return
+            try:
+                self.CURRENT_DIRICTORY = selected_dir.replace('/', '\\')
+                self._save_settings()
+            except Exception as e:
+                messagebox.showerror(self.translate('err'),
+                                     f"Невозможно записать в выбранную папку:\n{str(e)}\n\nВыберите другую папку.")
+                
+    def _create_config_file(self):
+        while True:
+            selected_dir = filedialog.askdirectory(title="Выберите папку для проектов",
+                                                   initialdir='\\'.join(self.PROJECT_DIRICTORY.split('\\')[:-1]))
+            if not selected_dir:  # Пользователь отменил выбор
+                if self.CURRENT_DIRICTORY:
                     break
-                except Exception as e:
-                    messagebox.showerror(self.translate('err'),
-                                         f"Невозможно записать в выбранную папку:\n{str(e)}\n\nВыберите другую папку.")
+                response = messagebox.askquestion("Выход",
+                                                  "Папка не выбрана. Выйти из программы?",
+                                                  icon='warning')
+                if response == 'yes':
+                    self.on_close()
+                    exit()
+                else:
+                    continue
+            try:
+                selected_dir = selected_dir.replace('/', '\\')
+                test_file = os.path.join(selected_dir, 'test_write.tmp')
+                with open(test_file, 'w') as f:
+                    f.write('test')
+                os.remove(test_file)
+                with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'w', encoding='utf-8') as f:
+                    json.dump({'path': selected_dir, 
+                               'lang': CURRENT_LANGUAGE,
+                               'geo': '800x500'},
+                                f)
+                break
+            except Exception as e:
+                messagebox.showerror(self.translate('err'),
+                                     f"Невозможно записать в выбранную папку:\n{str(e)}\n\nВыберите другую папку.")    
+
+    def _save_settings(self):
+        with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'r+', encoding='utf-8') as f:
+            temp_path = json.load(f)['path']
+            f.seek(0)
+            f.truncate()
+            json.dump({'path': temp_path, 
+                       'lang': self.language,
+                       'geo': f'{self.root.geometry()}'}, 
+                       f)
 
     def copmile_karel(self):
         self.save_file()
@@ -837,18 +864,11 @@ class FANUCE_IDE:
     
     def _ftp_settings_close(self):
         self.update_server_list()
-
-    def _save_lang(self, lang):
-        with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'r+', encoding='utf-8') as f:
-            temp_path = json.load(f)['path']
-            f.seek(0)
-            f.truncate()
-            json.dump({'path': temp_path, 'lang': lang}, f)
     
     def on_close(self):
         """Обрабатывает закрытие окна."""
         try:
-            self._save_lang(self.language)
+            self._save_settings()
             if self.is_modified:
                 response = messagebox.askyesnocancel(
                     self.translate('save_file'),

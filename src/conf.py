@@ -20,8 +20,6 @@ LANGUAGES = {
         'send': 'Send',
         'send_link': 'Send via link...',
         'success': 'Success',
-        'suc_dnld': ' downloaded.',
-        'suc_upl': ' uploaded.',
         'menubar_code': 'No saved files',
         'compile': 'Compile',
         'con_test': 'Test connection',
@@ -68,7 +66,6 @@ LANGUAGES = {
         'couldnt_download_file': "Couldn't download file",
         'couldnt_open_file': "Couldn't open file",
         'filter': '.ls filter',
-
         'couldnt_connect': "Couldn't connect",
         'timeout': 'Conenction timeout',
         'con_success': 'Connection is established',
@@ -100,8 +97,6 @@ LANGUAGES = {
         'send': 'Отправить',
         'send_link': 'Отправить по ссылке...',
         'success': 'Успех',
-        'suc_dnld': ' скачан.',
-        'suc_upl': ' отправлен.',
         'menubar_code': 'Нет сохранённого файла',
         'compile': 'Скомпилировать',
         'con_test': 'Тест соединения',
@@ -147,7 +142,15 @@ LANGUAGES = {
         'connection_error': 'Ошибка соединения',
         'couldnt_download_file': "Не удалось скачать файл",
         'couldnt_open_file': "Не удалось открыть файл",
-        'filter': '.ls фильтр'
+        'filter': '.ls фильтр',
+        'couldnt_connect': "Не удалось подключиться",
+        'timeout': 'Время вышло',
+        'con_success': 'Соединение установлено',
+        'but_no_files': 'но не удалось получить файлы',
+        'found': 'Найдено',
+        'files': 'файлов',
+        'no_adress': 'Адрес не указан',
+        'no_name_or_adress': 'Не указано имя или адрес!'
     }
 }
 
