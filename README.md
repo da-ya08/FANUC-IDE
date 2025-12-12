@@ -9,11 +9,15 @@ A program for viewing, downloading, editing and sending LS (TP) files of FANUC r
 - Line numbers
 - Multi-language support (English/Russian)
 - When ls file opened, hides: heading information, numbering in the text, semicolons, points information
-- Uploading and sending files via FTP. Same with a real robot
+- Uploading and sending files via **FTP**. Same with a real robot
 - Saving a list of servers (robots)
-- Compiling KAREL files
+- Compiling **KAREL** files
 - Highlighting comments in ls file viewing mode
 - The ability to view the program without saving it to disk
+
+# ROBOT INFORMATION
+
+To compile the files, information about the robot from <ins>ROGOBUIDE</ins> **v9.10** model **R-2000iC 210F** is used. If you need to replace the virtual robot, then take the Robot_1 folder from the roboguide project and replace it in the resources folder.
 
 ## Installation
 
@@ -35,7 +39,7 @@ python main.py
 
 ## Robot settings
 
-- You need to set up an FTP password on the robot (or, as in my case, remove FTP authorization)
+- You need to set up an **FTP** password on the robot (*or, as in my case, remove FTP authorization*)
 - Have an ethernet connection to the robot
 - Use this data in this application
 
@@ -60,11 +64,7 @@ Download LS files from the robot, edit them and send them back. Create KL progra
 
 - Open the kl file and click "Compile"
 - The program will display the compilation result
-- When you click the "Send" button, the created one will go.pc file
-
-## ROBOT INFORMATION
-
-To compile the files, information about the robot from roboguide v9.10 model R-2000iC 210F is used. If you need to replace the virtual robot, then take the Robot_1 folder from the roboguide project and replace it in the resources folder.
+- When you click the "Send" button, the created one will go .pc file
 
 ## Contributing
 
