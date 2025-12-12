@@ -63,7 +63,11 @@ LANGUAGES = {
         'folder_name': 'Folder name',
         'enter_folder_name': 'Enter the folder name',
         'empty_name': 'Empty name',
-        'name_empty': 'Empty name of folder'
+        'name_empty': 'Empty name of folder',
+        'connection_error': 'Connection error',
+        'couldnt_download_file': "Couldn't download file",
+        'couldnt_open_file': "Couldn't open file",
+        'filter': '.ls filter'
 
     },
     'ru': {
@@ -109,7 +113,6 @@ LANGUAGES = {
         'del_serv': 'Удалить сервер',
         'change_dir': 'Изменить путь к файлам',
         'pass': 'Пароль',
-        #
         'robot': 'Робот',
         'r_backup': 'Бэкап робота',
         'open_folder': 'Открыть папку...',
@@ -131,7 +134,11 @@ LANGUAGES = {
         'folder_name': 'Имя папки',
         'enter_folder_name': 'Введите имя папки',
         'empty_name': 'Пустое имя',
-        'name_empty': 'Не введено имя папки'
+        'name_empty': 'Не введено имя папки',
+        'connection_error': 'Ошибка соединения',
+        'couldnt_download_file': "Не удалось скачать файл",
+        'couldnt_open_file': "Не удалось открыть файл",
+        'filter': '.ls фильтр'
     }
 }
 

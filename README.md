@@ -1,17 +1,19 @@
 # FANUC LS and KL Program Editor
 
-![Screenshot](resources/screenshot.png)
+![Screenshot](resources/screenshot3.1.png)
 
-Cross-platform IDE for FANUC robot programming (LS, KL files).
+A program for viewing, downloading, editing and sending LS (TP) files of FANUC robots, as well as for compilation.kl files.
 
 ## Features
 
 - Line numbers
 - Multi-language support (English/Russian)
-- When opened, hides: heading information, numbering in the text, semicolons, points information
+- When ls file opened, hides: heading information, numbering in the text, semicolons, points information
 - Uploading and sending files via FTP. Same with a real robot
 - Saving a list of servers (robots)
 - Compiling KAREL files
+- Highlighting comments in ls file viewing mode
+- The ability to view the program without saving it to disk
 
 ## Installation
 
@@ -30,6 +32,12 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
+
+## Robot settings
+
+- You need to set up an FTP password on the robot (or, as in my case, remove FTP authorization)
+- Have an ethernet connection to the robot
+- Use this data in this application
 
 ## Get .exe
 
@@ -54,7 +62,7 @@ Download LS files from the robot, edit them and send them back. Create KL progra
 - The program will display the compilation result
 - When you click the "Send" button, the created one will go.pc file
 
-## INFORMATION
+## ROBOT INFORMATION
 
 To compile the files, information about the robot from roboguide v9.10 model R-2000iC 210F is used. If you need to replace the virtual robot, then take the Robot_1 folder from the roboguide project and replace it in the resources folder.
 
@@ -63,7 +71,7 @@ To compile the files, information about the robot from roboguide v9.10 model R-2
 Pull requests are welcome! For major changes, please open an issue first.
 
 ## In the future
-It is planned to add a title and point information generator.
+It is planned to add a title and point information generator, also make also add the ability to create backup
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

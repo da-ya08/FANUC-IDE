@@ -6,3 +6,4 @@ src/__pycache__/
 resources/servers_list.json
 *.tmp
 src/robot.ini
+cache.json
