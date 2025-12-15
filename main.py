@@ -1,6 +1,7 @@
 import tkinter as tk, os, json, shutil, subprocess
 from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
+from src.ls_settings import LSSettingsWindow
 from ftplib import FTP
 from PIL import ImageTk, Image
 from src.conf import LANGUAGES, CURRENT_LANGUAGE
@@ -31,6 +32,7 @@ class FANUCE_IDE:
         self.del_stoppers = [" ", ",", ".", "!", "?", ";", ":", "-", "(", ")", "\\", "/", "="]
         self.is_karel = False
         self.filter_server_files = tk.IntVar(value=1)
+        self.ls_info = {}
 
         ''' Главное окно '''
         main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
@@ -193,6 +195,7 @@ class FANUCE_IDE:
     
     def create_menu(self):
         menubar = tk.Menu(self.root)
+        edit_menu = tk.Menu(menubar, tearoff=0)
         # Меню "Файл"
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label=self.translate('new'), command=self.new_file)
@@ -204,17 +207,28 @@ class FANUCE_IDE:
         file_menu.add_separator()
         file_menu.add_command(label=self.translate('exit'), command=self.on_close)
         menubar.add_cascade(label=self.translate('file'), menu=file_menu)
+        # LS
+        ls_menu = tk.Menu(edit_menu, tearoff=0)
+        ls_menu.add_command(label=self.translate('config_file'), command=self.open_ls_settings)
+        # KL
+        kl_menu = tk.Menu(edit_menu, tearoff=0)
+        kl_menu.add_command(label=self.translate('compile'), command=self.copmile_karel)
+        # Редактировать
+        edit_menu.add_cascade(label='LS', state='disabled', menu=ls_menu)
+        edit_menu.add_cascade(label='KL', state='disabled', menu=kl_menu)
+        menubar.add_cascade(label=self.translate('edit_m'), menu=edit_menu)
+        # Робот
+        robot_menu = tk.Menu(menubar, tearoff=0)
+        robot_menu.add_command(label=self.translate('r_backup'), command=self.open_ls_settings)
+        menubar.add_cascade(label=self.translate('robot'), menu=robot_menu)
         # Язык
         lang_menu = tk.Menu(menubar, tearoff=0)
         lang_menu.add_command(label="English", command=lambda: self.set_language('en'))
         lang_menu.add_command(label="Русский", command=lambda: self.set_language('ru'))
         menubar.add_cascade(label=self.translate('lang_menu'), menu=lang_menu)
-        # Робот
-        robot_menu = tk.Menu(menubar, tearoff=0)
-        robot_menu.add_command(label=self.translate('r_backup'), command=lambda: messagebox.showinfo('not yeat', 'Ещё не готово'))
-        menubar.add_cascade(label=self.translate('robot'), menu=robot_menu)
         self.root.config(menu=menubar)
         self.file_menu = file_menu
+        self.edit_menu = edit_menu
     
     def _setup_context_menus(self):
         self._add_text_context_menu(self.text_area)
@@ -361,7 +375,11 @@ class FANUCE_IDE:
             ftp.login(log, self.target_server['pass'])
             ftp.voidcmd('TYPE I')
             with open(tmp_path, 'rb') as s_file:
-                ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file)
+                if not self.is_karel and tmp_path == self.CURRENT_FILE:
+                    print('test')
+                    ftp.storbinary(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
+                else:
+                    ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file)
             messagebox.showinfo(self.translate('sending_file'),
                                 f'{self.translate('sending_file')} {tmp_path} {self.translate('was_success')}!')
         except Exception as e:
@@ -655,12 +673,25 @@ class FANUCE_IDE:
                 return
         file_path = filedialog.asksaveasfilename(initialdir=self.CURRENT_DIRICTORY,
                                                  defaultextension="new_file.kl",
-                                                 filetypes=[("Karel listing", "*.kl"), ("TP program", "*.ls"), (self.translate('all_files'), "*.*")])
+                                                 filetypes=[("Karel listing", "*.kl"), ("LS program", "*.ls"), (self.translate('all_files'), "*.*")])
         if file_path:
+            if file_path[-1:-3:-1].lower() == 'sl':
+                self.open_ls_settings()
+                if not self.buffer_header:
+                    self.buffer_asser = ''
+                    return
+                self.buffer_asser = '/POS\n/END\n'
+                self.edit_menu.entryconfig('LS', state=tk.NORMAL)
+                self.edit_menu.entryconfig('KL', state=tk.DISABLED)
+            elif file_path[-1:-3:-1].lower() == 'kl':
+                self.edit_menu.entryconfig('LS', state=tk.DISABLED)
+                self.edit_menu.entryconfig('KL', state=tk.NORMAL)
             self.CURRENT_FILE = file_path
             self._save_to_file(file_path)
             self.update_file_path()  # Обновляем заголовок окна
             self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)  # Активируем "Сохранить"
+            self.text_area.config(state='normal')
+            self.update_local_files()
             self.is_modified = False  # Сбрасываем флаг изменений
             self.text_area.delete("1.0", tk.END)
         else:
@@ -678,17 +709,14 @@ class FANUCE_IDE:
         if file_path:
             self.send_button.config(state='disable')
             self.compile_button.config(state='disable')
-            self.buffer_asser = ''
-            self.buffer_header = ''
             if file_path[-1:-3:-1].lower() == 'sl':
-                content = ""
-                one_line = ""
-                header = ""
-                asser = ""
+                content = ''
+                one_line = ''
+                asser = ''
                 header_getted = False
                 text_getted = False
                 try:
-                    with open(file_path, "r", encoding="utf-8") as file:
+                    with open(file_path, "r") as file:
                         one_line = file.readline()
                         if not '/PROG' in one_line:
                             file.seek(0)
@@ -701,12 +729,16 @@ class FANUCE_IDE:
                             self.is_karel = False
                             self.send_button.config(state='disable')
                             return
-                        header += one_line                        
+                        if one_line.strip().split()[-1] == 'Macro':
+                            self.ls_info['macro'] = True
+                            self.ls_info['name'] = one_line.strip().split()[-2]
+                        else:
+                            self.ls_info['macro'] = False
+                            self.ls_info['name'] = one_line.strip().split()[-1]                      
                         while True:
                             one_line = file.readline()
                             if "/MN" in one_line:
                                 header_getted = True
-                                header += one_line
                             elif "/POS" in one_line:
                                 text_getted = True
                                 asser += one_line
@@ -715,19 +747,22 @@ class FANUCE_IDE:
                                 break
                             else:
                                 if not header_getted:
-                                    header += one_line
-                                elif header_getted and text_getted:
-                                    asser += one_line
+                                    if 'OWNER' in one_line:
+                                        self.ls_info['owner'] = one_line.strip().split()[-1].replace(';','')
+                                    elif 'COMMENT' in one_line:
+                                        self.ls_info['comment'] = one_line.split('"')[-2]
+                                    elif 'PROTECT' in one_line:
+                                        self.ls_info['protect'] = False if 'READ_WRITE' in one_line else True
+                                    elif 'DEFAULT_GROUP' in one_line:
+                                        self.ls_info['motion'] = True if '1,' in one_line else False
                                 elif header_getted and not text_getted:
                                     content += one_line[5:]
                                     continue
+                                elif header_getted and text_getted:
+                                    asser += one_line
+                    self.buffer_asser = asser
                     content = content[:-1]
                     content = content.replace(";", "")
-                    self.buffer_header = header
-                    self.buffer_asser = asser
-                    index = self.buffer_header.find("READ;")
-                    if index!= -1:
-                        self.buffer_header = self.buffer_header[:index] + 'READ_WRITE' + self.buffer_header[index+4:]
                     self.text_area.delete("1.0", tk.END) 
                     self.text_area.insert(tk.END, content)
                     self.CURRENT_FILE = file_path  
@@ -736,6 +771,8 @@ class FANUCE_IDE:
                     self.is_modified = False
                     self.update_line_numbers()
                     self.is_karel = False
+                    self.edit_menu.entryconfig('LS', state=tk.NORMAL)
+                    self.edit_menu.entryconfig('KL', state=tk.DISABLED)
                 except Exception as e:
                     messagebox.showerror(self.translate('err'), f'{self.translate('couldnt_open_file')}: {e}')
             elif file_path[-1:-3:-1].lower() == 'lk':
@@ -752,6 +789,8 @@ class FANUCE_IDE:
                     self.compile_button.config(state='enable')
                     self.send_button.config(state='disable')
                     self.is_karel = True
+                    self.edit_menu.entryconfig('LS', state=tk.DISABLED)
+                    self.edit_menu.entryconfig('KL', state=tk.NORMAL)
 
     def save_file(self, event=None):
         """Сохраняет файл, если он уже существует, иначе вызывает 'Сохранить как'."""
@@ -767,7 +806,7 @@ class FANUCE_IDE:
             file_path = filedialog.asksaveasfilename(
                 defaultextension="ls kl",
                 initialfile=self.CURRENT_FILE.split('\\')[-1],
-                filetypes=[("TP", "*.ls"), (self.translate('all_files'), "*.*")]
+                filetypes=[("LS prog", "*.ls"), (self.translate('all_files'), "*.*")]
             )
         elif self.CURRENT_FILE[-1:-3:-1] == 'lk':
             file_path = filedialog.asksaveasfilename(
@@ -784,8 +823,8 @@ class FANUCE_IDE:
 
     def _save_to_file(self, file_path):
         """Сохраняет текст в указанный файл."""
-        if self.buffer_header and self.buffer_asser:
-            text_to_save = self.buffer_header
+        if self.ls_info:
+            text_to_save = self._header_generate()
             temp = self.text_area.get("1.0", tk.END)
             text = self.text_area.get("1.0", tk.END).split("\n")[:-1]
             temp = ""
@@ -801,7 +840,18 @@ class FANUCE_IDE:
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write(self.text_area.get("1.0", tk.END))
         self.is_modified = False 
-        self.update_file_path() 
+        self.update_file_path()
+        
+    def _header_generate(self):
+        header = f'/PROG {self.ls_info['name'].upper()}  {'Macro' if self.ls_info['macro'] else ''}\n'
+        header += f'/ATTR\n'
+        header += f'OWNER  = {self.ls_info['owner'].upper()};\n'
+        header += f'COMMENT  = "{self.ls_info['comment']}";\n'
+        header += f'PROTECT  = {'READ' if self.ls_info['protect'] else 'READ_WRITE'};\n'
+        header += 'TCD:  STACK_SIZE	= 0,\n      TASK_PRIORITY	= 50,\n      TIME_SLICE	= 0,\n      BUSY_LAMP_OFF	= 0,\n      ABORT_REQUEST	= 0,\n      PAUSE_REQUEST	= 0;\n'
+        header += f'DEFAULT_GROUP	= {'1' if self.ls_info['motion'] else '*'},*,*,*,*;\n'
+        header += '/MN\n'
+        return header
 
     def new_input(self, event):
         """Обработка нового ввода."""
@@ -868,6 +918,22 @@ class FANUCE_IDE:
     
     def _ftp_settings_close(self):
         self.update_server_list()
+    
+    def open_ls_settings(self):
+        if hasattr(self, 'lss_window') and self.lss_window.winfo_exists():
+            self.ftp_window.lift()
+            return
+        self.lss_window = LSSettingsWindow(
+            parent=self.root,
+            lang=self.language,
+            callback=self._update_ls_header,
+            current_data=self.ls_info
+        )
+    
+    def _update_ls_header(self, new_data):
+        if new_data:
+            self.ls_info = new_data if new_data else self.ls_info
+        self._save_to_file()
     
     def on_close(self):
         """Обрабатывает закрытие окна."""

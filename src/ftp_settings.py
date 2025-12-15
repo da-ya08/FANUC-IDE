@@ -12,7 +12,7 @@ class Entry(ttk.Entry):
 class FTPSettingsWindow(tk.Toplevel):
     def __init__(self, parent, lang, callback):
         super().__init__(parent)
-        self.title('FTP settings')
+        self.title(self.translate('ftp_set'))
         self.geometry('800x500')
         self.minsize(600, 400)
         self.servers_list = {}

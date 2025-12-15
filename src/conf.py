@@ -73,7 +73,16 @@ LANGUAGES = {
         'found': 'Found',
         'files': 'files',
         'no_adress': 'Address not specified',
-        'no_name_or_adress': 'Name or address is missing!'
+        'no_name_or_adress': 'Name or address is missing!',
+        'prog_name': 'Program name',
+        'owner': 'Author',
+        'comment': 'Comment',
+        'ls_set': 'LS file settings',
+        'ftp_set': 'FTP settings',
+        'cancel': 'Cancel',
+        'save_settings': 'Do you want to save the settings?',
+        'edit_m': 'Edit',
+        'config_file': 'Configure the file'
 
     },
     'ru': {
@@ -150,7 +159,16 @@ LANGUAGES = {
         'found': 'Найдено',
         'files': 'файлов',
         'no_adress': 'Адрес не указан',
-        'no_name_or_adress': 'Не указано имя или адрес!'
+        'no_name_or_adress': 'Не указано имя или адрес!',
+        'prog_name': 'Имя программы',
+        'owner': 'Автор',
+        'comment': 'Комментарий',
+        'ls_set': 'Настройка LS-файла',
+        'ftp_set': 'Настройки FTP',
+        'cancel': 'Закрыть',
+        'save_settings': 'Вы хотите сохранить настройки?',
+        'edit_m': 'Редактировать',
+        'config_file': 'Настроить файл'
     }
 }
 
