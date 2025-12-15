@@ -344,6 +344,8 @@ class FANUCE_IDE:
             return
         tmp_path = file if file else self.CURRENT_FILE
         tmp_path = tmp_path.replace('/', '\\')
+        if tmp_path.split('\\')[-1].split('.')[-1].lower() == 'kl':
+            tmp_path = f'{tmp_path[:-2]}pc'
         if os.path.isdir(tmp_path):
             messagebox.showerror(self.translate('warn'),
                                  self.translate('cant_send_folder'))
@@ -353,8 +355,6 @@ class FANUCE_IDE:
                                    icon='question'):
             return
         try:
-            if tmp_path.split('\\')[-1].split('.')[-1].lower() == 'kl':
-                tmp_path = f'{tmp_path[:-2]}pc'
             ftp = FTP(timeout=7)
             ftp.connect(self.target_server['adress'])
             log = self.target_server['login'] if self.target_server['login'] else 'admin'
@@ -367,6 +367,7 @@ class FANUCE_IDE:
         except Exception as e:
             messagebox.showerror(self.translate('err'), f"{self.translate('couldnt_send_file')}: {e}")          
         self.send_button.config(state='disable')
+        self._on_server_selected()
         ftp.quit()
 
     def on_ctrl_keypress(self, event):
@@ -470,7 +471,8 @@ class FANUCE_IDE:
             try:
                 ftp = FTP(timeout=5)
                 ftp.connect(self.target_server['adress'])
-                ftp.login('admin', '')
+                login = self.target_server['login'] if self.target_server['login'] else 'admin'
+                ftp.login(login, self.target_server['pass'])
                 ftp.delete(filename)
                 self.file_tree.delete(selected[0])
 
@@ -563,7 +565,8 @@ class FANUCE_IDE:
             # Если это файл - открываем его
             self.open_file(full_path)
             self.is_temp = False
-            self.send_button.config(state='enable')
+            if not self.is_karel:
+                self.send_button.config(state='enable')
         
     def _temp_open_file(self, event=None):
         item = self.file_tree.selection()[0]
@@ -747,6 +750,7 @@ class FANUCE_IDE:
                     self.update_line_numbers()
                     self.compile_button.config(text=self.translate('compile'))
                     self.compile_button.config(state='enable')
+                    self.send_button.config(state='disable')
                     self.is_karel = True
 
     def save_file(self, event=None):
