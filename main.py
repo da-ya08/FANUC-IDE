@@ -376,7 +376,6 @@ class FANUCE_IDE:
             ftp.voidcmd('TYPE I')
             with open(tmp_path, 'rb') as s_file:
                 if not self.is_karel and tmp_path == self.CURRENT_FILE:
-                    print('test')
                     ftp.storbinary(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
                 else:
                     ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file)
@@ -581,6 +580,8 @@ class FANUCE_IDE:
             self.local_path_label.config(text=self.CURRENT_DIRICTORY)
         else:
             # Если это файл - открываем его
+            if self.CURRENT_FILE == full_path:
+                return
             self.open_file(full_path)
             self.is_temp = False
             if not self.is_karel:
@@ -705,6 +706,19 @@ class FANUCE_IDE:
                 initialdir=f'{self.CURRENT_DIRICTORY}',
                 filetypes=[("LS and KAREL", "*.ls *.kl"), (self.translate('all_files'), "*.*")]
             )
+        if self.is_modified:
+            response = messagebox.askyesnocancel(
+                self.translate('save_file'),
+                self.translate('quest_bef_cls'),
+                icon=messagebox.WARNING
+            )
+            if response is True:  # Пользователь выбрал "Сохранить"
+                self.save_file()
+            elif response is False:  # Пользователь выбрал "Не сохранять"
+                pass
+            # Если response is None (пользователь выбрал "Отменить"), ничего не делаем
+        else:
+            pass
         self.text_area.config(state='normal')
         if file_path:
             self.send_button.config(state='disable')
@@ -800,15 +814,15 @@ class FANUCE_IDE:
             self.save_file_as()
             self.is_temp = False
 
-    def save_file_as(self):
+    def save_file_as(self): 
         """Открывает диалог сохранения файла и сохраняет текст."""
-        if self.CURRENT_FILE[-1:-3:-1] == 'sl':
+        if self.CURRENT_FILE[-1:-3:-1].lower() == 'sl':
             file_path = filedialog.asksaveasfilename(
                 defaultextension="ls kl",
                 initialfile=self.CURRENT_FILE.split('\\')[-1],
                 filetypes=[("LS prog", "*.ls"), (self.translate('all_files'), "*.*")]
             )
-        elif self.CURRENT_FILE[-1:-3:-1] == 'lk':
+        elif self.CURRENT_FILE[-1:-3:-1].lower() == 'lk':
             file_path = filedialog.asksaveasfilename(
                 defaultextension="kl",
                 initialfile=self.CURRENT_FILE.split('\\')[-1],
