@@ -12,13 +12,13 @@ class Entry(ttk.Entry):
 class FTPSettingsWindow(tk.Toplevel):
     def __init__(self, parent, lang, callback):
         super().__init__(parent)
+        self.language = lang
         self.title(self.translate('ftp_set'))
         self.geometry('800x500')
         self.minsize(600, 400)
         self.servers_list = {}
         self.servers_path = './resources/servers_list.json'
         self.selected_server = None
-        self.language = lang
         self.callback = callback
         self.protocol('WM_DELETE_WINDOW', self._on_close)
         self._setup_ui()

@@ -35,26 +35,30 @@ class FANUCE_IDE:
         self.ls_info = {}
 
         ''' Главное окно '''
+        toolbar = tk.Frame(self.root, height=20)
+        toolbar.pack(side='top', fill='x')
+
         main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
         main_paned.pack(expand=True, fill='both')
+
+        status_frame = tk.Frame(self.root, height=20)
+        status_frame.pack(side='bottom', fill='x')
+
+
         left_paned = tk.PanedWindow(main_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED, sashwidth=4)
-        main_paned.add(left_paned, minsize=50, width=200) 
+        main_paned.add(left_paned, minsize=200, width=200)
         right_frame = tk.Frame(main_paned)
         main_paned.add(right_frame)
 
         '''Левая часть'''
         # Меню-бар
-        menubar_left_menu = tk.Frame(left_paned, height=20)
-        left_paned.add(menubar_left_menu, minsize=20)
-        self.server_combobox = ttk.Combobox(menubar_left_menu, state="readonly")
+        servers_menubar = tk.Frame(left_paned, height=20)
+        left_paned.add(servers_menubar, minsize=20)
+        self.server_combobox = ttk.Combobox(servers_menubar, state="readonly")
         self.server_combobox.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
         self.server_combobox.bind("<<ComboboxSelected>>", self._on_server_selected)
-        original_image = Image.open(f'{self.PROJECT_DIRICTORY}\\resources\\gear.png').resize((16, 16), Image.LANCZOS)
-        self.gear_icon = ImageTk.PhotoImage(original_image)
-        self.ftp_settings_but = ttk.Button(menubar_left_menu, image=self.gear_icon, command=self.show_ftp_settings)
-        self.ftp_settings_but.image = self.gear_icon  
-        self.ftp_settings_but.pack(side=tk.RIGHT, padx=2)
-        # Основная левая часть (файлы + логи)
+        self.ftp_settings_but = ttk.Button(servers_menubar, width=10, text='⚙', command=self.show_ftp_settings)
+        self.ftp_settings_but.pack(side=tk.RIGHT, padx=2, expand=False)
         files_paned = tk.PanedWindow(left_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED)
         left_paned.add(files_paned, minsize=100)  # Основная область с разделителем
         # Панель файлового дерева
@@ -157,6 +161,23 @@ class FANUCE_IDE:
         self.line_numbers.pack(side=tk.LEFT, fill=tk.Y)
         self.scrollbarY.pack(side=tk.RIGHT, fill=tk.Y)
         self.text_area.pack(side=tk.LEFT, expand=True, fill='both')
+
+        # Toolbar
+        t_toolbar = tk.Frame(toolbar, height=20)
+        t_toolbar.pack(side='left', fill='x')
+        self.new_file_button = ttk.Button(t_toolbar,
+                                      text=f'📃{self.translate('new')}',
+                                      command=self.new_file)
+        self.new_file_button.pack(fill='none', side='left')
+        self.open_button = ttk.Button(t_toolbar,
+                                      text=f'📁{self.translate('open')}',
+                                      command=self.open_file)
+        self.open_button.pack(fill='none', side='left')
+        self.toolbar_send_button = ttk.Button(t_toolbar,
+                                      text=f'📤{self.translate('send')}',
+                                      command=self.send_file)
+        self.toolbar_send_button.pack(fill='none', side='left')
+
 
         self.text_area.bind("<KeyPress>", self.new_input)
         self.text_area.bind("<KeyRelease>", self.update_line_numbers)
