@@ -1,6 +1,6 @@
 # FANUC LS and KL Program Editor
 
-![Screenshot](resources/screenshot3.3.png)
+![Screenshot](resources/screenshot3.4.png)
 
 A program for viewing, downloading, editing and sending LS (TP) files of FANUC robots, as well as for compilation.kl files.
 

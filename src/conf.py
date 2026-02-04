@@ -79,10 +79,18 @@ LANGUAGES = {
         'comment': 'Comment',
         'ls_set': 'LS file settings',
         'ftp_set': 'FTP settings',
-        'cancel': 'Cancel',
+        'close': 'Close',
         'save_settings': 'Do you want to save the settings?',
         'edit_m': 'Edit',
-        'config_file': 'Configure the file'
+        'config_file': 'Configure the file',
+        'no_file': 'No opened file',
+        'no_selected_file': 'No selected file',
+        'cant_save_here': 'Cannot be saved in the selected folder: ',
+        'cant_create_folder': 'Cannot create the folder: ',
+        'cant_load_list': 'Cannot load list: ',
+        'saved_succ': 'File saved',
+        'edit': 'Edit',
+        'cancel': 'Cancel'
 
     },
     'ru': {
@@ -165,10 +173,18 @@ LANGUAGES = {
         'comment': 'Комментарий',
         'ls_set': 'Настройка LS-файла',
         'ftp_set': 'Настройки FTP',
-        'cancel': 'Закрыть',
+        'close': 'Закрыть',
         'save_settings': 'Вы хотите сохранить настройки?',
         'edit_m': 'Редактировать',
-        'config_file': 'Настроить файл'
+        'config_file': 'Настроить файл',
+        'no_file': 'Нет открытого файла',
+        'no_selected_file': 'Не выбран файл',
+        'cant_save_here': 'Невозможно сохранить в выбранной папке: ',
+        'cant_create_folder': 'Невозможно создать папку: ',
+        'cant_load_list': 'Не получилось получить список: ',
+        'saved_succ': 'Файл сохранён',
+        'edit': 'Изменить',
+        'cancel': 'Отменить'
     }
 }
 

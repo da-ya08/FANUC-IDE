@@ -10,6 +10,7 @@ class FANUCE_IDE:
     def __init__(self, root):
         self.root = root
         self.root.title("FANUC IDE")
+        self.root.minsize(width=600, height=400) 
         self.PROJECT_DIRICTORY = '\\'.join(__file__.split('\\')[:-1])
         os.chdir(self.PROJECT_DIRICTORY)
         self.root.iconbitmap(f'{self.PROJECT_DIRICTORY}\\resources\\icon.ico')
@@ -38,11 +39,14 @@ class FANUCE_IDE:
         toolbar = tk.Frame(self.root, height=20)
         toolbar.pack(side='top', fill='x')
 
+        status_frame = tk.Frame(self.root, height=20, borderwidth=1, relief='groove')
+        status_frame.pack(side='bottom', fill='x')
+        self.status_label = tk.Label(status_frame)
+        self.status_label.pack(side='left', fill='x')
+        self.show_info(text='DA_YA product')
+
         main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
         main_paned.pack(expand=True, fill='both')
-
-        status_frame = tk.Frame(self.root, height=20)
-        status_frame.pack(side='bottom', fill='x')
 
 
         left_paned = tk.PanedWindow(main_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED, sashwidth=4)
@@ -114,24 +118,6 @@ class FANUCE_IDE:
         )
         self.CURRENT_FILE_path_menubar.pack(side=tk.LEFT, fill=tk.X)
 
-        self.compile_button = ttk.Button(
-            menu_code_frame, 
-            text=self.translate('compile'), 
-            width=20, 
-            state='disabled',
-            command=self.copmile_karel
-        )
-        self.compile_button.pack(side=tk.RIGHT)
-
-        self.send_button = ttk.Button(
-            menu_code_frame, 
-            text=self.translate('send'), 
-            width=20, 
-            state='disabled',
-            command=self.send_file
-
-        )
-        self.send_button.pack(side=tk.RIGHT)
         # Область кода
         code_frame = tk.Frame(right_frame)
         code_frame.pack(expand=True, fill='both')
@@ -173,19 +159,29 @@ class FANUCE_IDE:
                                       text=f'📁{self.translate('open')}',
                                       command=self.open_file)
         self.open_button.pack(fill='none', side='left')
+        self.toolbar_save_button = ttk.Button(t_toolbar,
+                                      text=f'💾{self.translate('save')}',
+                                      command=self.save_file)
+        self.toolbar_save_button.pack(fill='none', side='left')
+        tk.Frame(t_toolbar, background='black', width=2, height=20).pack(fill='none', side='left')
         self.toolbar_send_button = ttk.Button(t_toolbar,
                                       text=f'📤{self.translate('send')}',
-                                      command=self.send_file)
+                                      command=self.send_file,
+                                      state='disable')
         self.toolbar_send_button.pack(fill='none', side='left')
-
+        self.toolbar_compile_button = ttk.Button(t_toolbar,
+                                      text=f'🛠{self.translate('compile')}',
+                                      command=self.copmile_karel,
+                                      state='disable')
+        self.toolbar_compile_button.pack(fill='none', side='left')
 
         self.text_area.bind("<KeyPress>", self.new_input)
         self.text_area.bind("<KeyRelease>", self.update_line_numbers)
-        self.text_area.bind('<<Modified>>', self.highlight_exclamation_lines)
+        self.text_area.bind('<<Modified>>', self.highlight_code)
         self.text_area.bind("<Control-KeyPress>", self.on_ctrl_keypress)
         # Настраиваем тег для подсветки
         self.text_area.tag_config(
-            "exclamation",
+            "comments",
             foreground="black",      # цвет текста
             background="yellow",        # цвет фона
             font=("Consolas", 10, "bold")  # шрифт
@@ -200,19 +196,19 @@ class FANUCE_IDE:
         self.create_menu()
         self._setup_context_menus()
 
-    def highlight_exclamation_lines(self, event=None):
+    def highlight_code(self, event=None):
         # Удаляем все теги подсветки
-        self.text_area.tag_remove("exclamation", "1.0", tk.END)
+        self.text_area.tag_remove("comments", "1.0", tk.END)
         # Получаем весь текст
         content = self.text_area.get("1.0", tk.END)
         lines = content.splitlines()
         for line_num, line in enumerate(lines, start=1):
-            if '!' in line:
+            if '!' in line and line.index('!') < 3:
                 # Координаты начала и конца строки
                 start = f"{line_num}.0"
                 end = f"{line_num}.{len(line)}"
                 # Применяем тег к строке
-                self.text_area.tag_add("exclamation", start, end)
+                self.text_area.tag_add("comments", start, end)
     
     def create_menu(self):
         menubar = tk.Menu(self.root)
@@ -250,6 +246,9 @@ class FANUCE_IDE:
         self.root.config(menu=menubar)
         self.file_menu = file_menu
         self.edit_menu = edit_menu
+        self.new_file_button.config(text=f'📃{self.translate('new')}')
+        self.open_button.config(text=f'📁{self.translate('open')}')
+        self.toolbar_send_button.config(text=f'📤{self.translate('send')}')
     
     def _setup_context_menus(self):
         self._add_text_context_menu(self.text_area)
@@ -307,8 +306,7 @@ class FANUCE_IDE:
                 self.CURRENT_DIRICTORY = selected_dir.replace('/', '\\')
                 self._save_settings()
             except Exception as e:
-                messagebox.showerror(self.translate('err'),
-                                     f"Невозможно записать в выбранную папку:\n{str(e)}\n\nВыберите другую папку.")
+                self.show_info(self.translate('cant_save_here'), 1, 1)
                 
     def _create_config_file(self):
         while True:
@@ -352,6 +350,8 @@ class FANUCE_IDE:
                        f)
 
     def copmile_karel(self):
+        if not self.CURRENT_FILE:
+            return
         self.save_file()
         try:
             os.chdir('\\'.join(self.CURRENT_FILE.split('\\')[:-1]))
@@ -360,30 +360,42 @@ class FANUCE_IDE:
                 capture_output=True,
                 text=True,
                 check=True)
+            self.show_info(self.translate('compile_success'))
             messagebox.showinfo(self.translate('compile_success'),
                                 result.stdout)
             self.update_local_files()
-            self.compile_button.config(text=self.translate('compiled'))
-            self.compile_button.config(state='disable')
-            self.send_button.config(state='enable')
+            self.toolbar_compile_button.config(text=self.translate('compiled'))
+            self.toolbar_compile_button.config(state='disable')
+            self.toolbar_send_button.config(state='enable')
         except Exception as e:
             messagebox.showerror(self.translate('compilation_error'),
                                  e.stdout)
-            self.send_button.config(state='disable')
+            self.toolbar_send_button.config(state='disable')
         os.chdir(self.PROJECT_DIRICTORY)
+    
+    def show_info(self, text, lvl=0, need_message=0):
+        levels = ['INFO:', 'WARN:', 'ERROR:']
+        self.status_label.config(text=f'{levels[lvl]} {text}')
+        if lvl == 0 and need_message:
+            messagebox.showinfo('INFO', text)
+        elif lvl == 1 and need_message:
+            messagebox.showwarning('WARN', text)
+        elif lvl == 2 and need_message:
+            messagebox.showerror('ERROR', text)
     
     def send_file(self, file=''):
         if not self.target_server_name:
-            messagebox.showinfo(self.translate('inf'),
-                                self.translate('no_select_server'))
+            self.show_info(self.translate('no_select_server'), need_message=1)
+            return
+        if not self.CURRENT_FILE and not file:
+            self.show_info(self.translate('no_file'), need_message=1)
             return
         tmp_path = file if file else self.CURRENT_FILE
         tmp_path = tmp_path.replace('/', '\\')
         if tmp_path.split('\\')[-1].split('.')[-1].lower() == 'kl':
             tmp_path = f'{tmp_path[:-2]}pc'
         if os.path.isdir(tmp_path):
-            messagebox.showerror(self.translate('warn'),
-                                 self.translate('cant_send_folder'))
+            self.show_info(self.translate('cant_send_folder'), 1, 1)
             return
         if not messagebox.askyesno(self.translate('send_confirm'),
                                    f'{self.translate('u_sure_to_send')}: {tmp_path}\n{self.translate('to_server')}: {self.target_server_name}?',
@@ -400,11 +412,10 @@ class FANUCE_IDE:
                     ftp.storbinary(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
                 else:
                     ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file)
-            messagebox.showinfo(self.translate('sending_file'),
-                                f'{self.translate('sending_file')} {tmp_path} {self.translate('was_success')}!')
+            self.show_info(f'{self.translate('sending_file')} {tmp_path.split('\\')[-1]} {self.translate('was_success')}!')
         except Exception as e:
             messagebox.showerror(self.translate('err'), f"{self.translate('couldnt_send_file')}: {e}")          
-        self.send_button.config(state='disable')
+        self.toolbar_send_button.config(state='disable')
         self._on_server_selected()
         ftp.quit()
 
@@ -450,18 +461,12 @@ class FANUCE_IDE:
             if folder_name is None:
                 return
             if not folder_name.strip():
-                messagebox.showwarning(
-                    self.translate('empty_name'),
-                    self.translate('name_empty')
-                )
+                self.show_info(self.translate('name_empty'), 1, 1)
                 continue
             try:
                 os.makedirs(f'{self.CURRENT_DIRICTORY}\\{folder_name}')
             except Exception as e:
-                messagebox.showerror(
-                    'Ошибка создания',
-                    f'Не удалось создать папку: {e}'
-                )
+                self.show_info(f'{self.translate('cant_create_folder')}{e}', 1, 1)
             self.update_local_files()
             break
 
@@ -469,10 +474,7 @@ class FANUCE_IDE:
         try:
             item = self.local_file_tree.selection()[0]
         except Exception as e:
-            messagebox.showwarning(
-                'Ошибка удаления',
-                'Не выбран файл'
-            )
+            self.show_info(self.translate('no_selected_file'), 1, 1)
             return
         if item:
             file = self.CURRENT_DIRICTORY + '\\' + self.local_file_tree.item(item, 'text')
@@ -537,12 +539,13 @@ class FANUCE_IDE:
                     extensions = ['.kl', '.ls']  # Нужные расширения
                     files = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)]
             except Exception as e:
-                messagebox.showerror(self.translate('err'), f"{self.translate('connection_error')}: {e}")
+                self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
                 return
             for item in self.file_tree.get_children():
                 self.file_tree.delete(item)
             for name in files:
                 self.file_tree.insert('', 'end', text=name)
+            self.show_info(f'{self.translate('con_success')}: {selected_name}')
             ftp.quit()
     
     def update_server_list(self):
@@ -556,7 +559,7 @@ class FANUCE_IDE:
             except Exception as e:
                 if 'Expecting value' in str(e):
                     return
-                messagebox.showerror(self.translate('err'), f"Не удалось загрузить список: {e}")
+                self.show_info(f'{self.translate('cant_load_list')}{e}', 2, 1)
                 return None 
             self.server_combobox['values'] = list(self.all_servers.keys())
     
@@ -606,7 +609,7 @@ class FANUCE_IDE:
             self.open_file(full_path)
             self.is_temp = False
             if not self.is_karel:
-                self.send_button.config(state='enable')
+                self.toolbar_send_button.config(state='enable')
         
     def _temp_open_file(self, event=None):
         item = self.file_tree.selection()[0]
@@ -620,7 +623,7 @@ class FANUCE_IDE:
             with open(t_filename, 'wb+') as f:
                 ftp.retrbinary(f"RETR {filename}", f.write)
             self.open_file(t_filename)
-            self.update_file_path(custom=f'{self.target_server_name} - {t_filename}')
+            self.update_file_path(custom=f'{self.target_server_name} - {t_filename}', online=1)
             os.remove(t_filename)
             ftp.quit()
             self.is_temp = True
@@ -664,8 +667,9 @@ class FANUCE_IDE:
         self.language = lang_code
         # Пересоздаем меню
         self.create_menu()
-        self.compile_button.config(text=self.translate('compile'))
-        self.send_button.config(text=self.translate('send'))
+        self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+        self.toolbar_send_button.config(text=self.translate('send'))
+        self.toolbar_save_button.config(text=self.translate('save'))
         if not self.CURRENT_FILE:
             self.CURRENT_FILE_path_menubar.config(text=self.translate('menubar_code'))
         self._setup_context_menus()
@@ -674,12 +678,12 @@ class FANUCE_IDE:
         """Получение перевода по ключу"""
         return LANGUAGES[self.language].get(key, key)
 
-    def update_file_path(self, custom=''):
+    def update_file_path(self, custom='', online=0):
         """Обновляет заголовок окна."""
         if custom:
-            self.CURRENT_FILE_path_menubar.config(text=custom)
+            self.CURRENT_FILE_path_menubar.config(text=custom, background='yellow' if online else '#F2F3F4')
         elif self.CURRENT_FILE and not custom:
-            self.CURRENT_FILE_path_menubar.config(text=self.CURRENT_FILE)
+            self.CURRENT_FILE_path_menubar.config(text=self.CURRENT_FILE, background='#F2F3F4')
 
     def new_file(self):
         """Создание нового файла."""
@@ -742,8 +746,8 @@ class FANUCE_IDE:
             pass
         self.text_area.config(state='normal')
         if file_path:
-            self.send_button.config(state='disable')
-            self.compile_button.config(state='disable')
+            self.toolbar_send_button.config(state='disable')
+            self.toolbar_compile_button.config(state='disable')
             if file_path[-1:-3:-1].lower() == 'sl':
                 content = ''
                 one_line = ''
@@ -762,7 +766,7 @@ class FANUCE_IDE:
                             self.update_file_path() 
                             self.update_line_numbers()
                             self.is_karel = False
-                            self.send_button.config(state='disable')
+                            self.toolbar_send_button.config(state='disable')
                             return
                         if one_line.strip().split()[-1] == 'Macro':
                             self.ls_info['macro'] = True
@@ -808,6 +812,7 @@ class FANUCE_IDE:
                     self.is_karel = False
                     self.edit_menu.entryconfig('LS', state=tk.NORMAL)
                     self.edit_menu.entryconfig('KL', state=tk.DISABLED)
+                    self.toolbar_send_button.config(state='enable')
                 except Exception as e:
                     messagebox.showerror(self.translate('err'), f'{self.translate('couldnt_open_file')}: {e}')
             elif file_path[-1:-3:-1].lower() == 'lk':
@@ -820,9 +825,9 @@ class FANUCE_IDE:
                     self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
                     self.is_modified = False
                     self.update_line_numbers()
-                    self.compile_button.config(text=self.translate('compile'))
-                    self.compile_button.config(state='enable')
-                    self.send_button.config(state='disable')
+                    self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+                    self.toolbar_compile_button.config(state='enable')
+                    self.toolbar_send_button.config(state='disable')
                     self.is_karel = True
                     self.edit_menu.entryconfig('LS', state=tk.DISABLED)
                     self.edit_menu.entryconfig('KL', state=tk.NORMAL)
@@ -832,29 +837,43 @@ class FANUCE_IDE:
         if self.CURRENT_FILE and not self.is_temp:
             self._save_to_file(self.CURRENT_FILE)
         else:
-            self.save_file_as()
-            self.is_temp = False
+            if self.save_file_as():
+                self.is_temp = False
 
     def save_file_as(self): 
         """Открывает диалог сохранения файла и сохраняет текст."""
         if self.CURRENT_FILE[-1:-3:-1].lower() == 'sl':
-            file_path = filedialog.asksaveasfilename(
-                defaultextension="ls kl",
-                initialfile=self.CURRENT_FILE.split('\\')[-1],
-                filetypes=[("LS prog", "*.ls"), (self.translate('all_files'), "*.*")]
-            )
+            if self.is_temp:
+                file_path = filedialog.asksaveasfilename(
+                    defaultextension="ls kl",
+                    initialfile=f'{self.CURRENT_FILE.split('\\')[-1][10:-1]}s',
+                    filetypes=[("LS prog", "*.ls"), (self.translate('all_files'), "*.*")]
+                )
+            else:
+                file_path = filedialog.asksaveasfilename(
+                    defaultextension="ls kl",
+                    initialfile=self.CURRENT_FILE.split('\\')[-1],
+                    filetypes=[("LS prog", "*.ls"), (self.translate('all_files'), "*.*")]
+                )
         elif self.CURRENT_FILE[-1:-3:-1].lower() == 'lk':
             file_path = filedialog.asksaveasfilename(
                 defaultextension="kl",
                 initialfile=self.CURRENT_FILE.split('\\')[-1],
                 filetypes=[("Karel", "*.kl"), (self.translate('all_files'), "*.*")]
             )
+        else:
+            file_path = filedialog.asksaveasfilename(
+                initialfile=self.CURRENT_FILE.split('\\')[-1],
+                filetypes=[(self.translate('all_files'), f'*.{self.CURRENT_FILE.split('\\')[-1].split('.')[-1]}')]
+            )
         if file_path:
             self.CURRENT_FILE = file_path
             self._save_to_file(file_path)
             self.update_file_path() 
             self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
-            self.is_modified = False 
+            self.is_modified = False
+            return True
+        return False
 
     def _save_to_file(self, file_path):
         """Сохраняет текст в указанный файл."""
@@ -870,12 +889,13 @@ class FANUCE_IDE:
             text_to_save += self.buffer_asser
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write(text_to_save)
-            self.send_button.config(state='enable')
+            self.toolbar_send_button.config(state='enable')
         else:
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write(self.text_area.get("1.0", tk.END))
         self.is_modified = False 
         self.update_file_path()
+        self.show_info(self.translate('saved_succ'))
         
     def _header_generate(self):
         header = f'/PROG {self.ls_info['name'].upper()}  {'Macro' if self.ls_info['macro'] else ''}\n'
@@ -890,6 +910,8 @@ class FANUCE_IDE:
 
     def new_input(self, event):
         """Обработка нового ввода."""
+        if not self.CURRENT_FILE or self.is_temp:
+            return
         if event.keycode == 9: # 9 - tab
             self.text_area.insert(tk.INSERT, " " * 4)
             return "break"  # Предотвращает стандартное поведение Tab
@@ -909,15 +931,13 @@ class FANUCE_IDE:
                 return "break"  # Предотвращает стандартное поведение BackSpace
         else:
             self.is_modified = True
-        if not self.CURRENT_FILE:
-            return
         self.update_line_numbers()
         self.update_file_path(self.CURRENT_FILE + '*')
         if self.is_karel and not self.is_temp:
-            self.compile_button.config(text=self.translate('compile'))
-            self.compile_button.config(state='enable')
+            self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+            self.toolbar_compile_button.config(state='enable')
         elif not self.is_temp and not self.is_karel:
-            self.send_button.config(state='enable')
+            self.toolbar_send_button.config(state='enable')
 
     def update_line_numbers(self, event=None):
         """Обновляет номера строк с выравниванием по правому краю"""
@@ -937,7 +957,7 @@ class FANUCE_IDE:
         self.line_numbers.config(state=tk.DISABLED)
         # Синхронизируем прокрутку
         self.line_numbers.yview_moveto(self.text_area.yview()[0])
-        self.highlight_exclamation_lines()
+        self.highlight_code()
 
     def show_ftp_settings(self):
         """Открывает окно настроек FTP"""
@@ -956,7 +976,7 @@ class FANUCE_IDE:
     
     def open_ls_settings(self):
         if hasattr(self, 'lss_window') and self.lss_window.winfo_exists():
-            self.ftp_window.lift()
+            self.lss_window.lift()
             return
         self.lss_window = LSSettingsWindow(
             parent=self.root,
@@ -968,7 +988,7 @@ class FANUCE_IDE:
     def _update_ls_header(self, new_data):
         if new_data:
             self.ls_info = new_data if new_data else self.ls_info
-        self._save_to_file()
+        self._save_to_file(self.CURRENT_FILE)
     
     def on_close(self):
         """Обрабатывает закрытие окна."""

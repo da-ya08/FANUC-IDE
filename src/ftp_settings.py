@@ -14,8 +14,9 @@ class FTPSettingsWindow(tk.Toplevel):
         super().__init__(parent)
         self.language = lang
         self.title(self.translate('ftp_set'))
-        self.geometry('800x500')
-        self.minsize(600, 400)
+        self.geometry('450x500')
+        self.minsize(300, 400)
+        self.maxsize(500, 550)
         self.servers_list = {}
         self.servers_path = './resources/servers_list.json'
         self.selected_server = None
@@ -32,7 +33,7 @@ class FTPSettingsWindow(tk.Toplevel):
         parent_y = self.master.winfo_y()
         parent_width = self.master.winfo_width()
         parent_height = self.master.winfo_height()        
-        x = parent_x + (parent_width // 2) - (800 // 2)
+        x = parent_x + (parent_width // 2) - (450 // 2)
         y = parent_y + (parent_height // 2) - (500 // 2)        
         self.geometry(f"+{x}+{y}")
     
@@ -42,48 +43,32 @@ class FTPSettingsWindow(tk.Toplevel):
         main_paned.pack(expand=True, fill='both', padx=5, pady=5)        
         # Левая панель - список серверов
         left_frame = tk.Frame(main_paned, width=200, bg='#f0f0f0')
-        main_paned.add(left_frame)        
-        # Правая панель - форма редактирования
-        right_frame = tk.Frame(main_paned)
-        main_paned.add(right_frame)        
+        main_paned.add(left_frame)
         self._create_servers_list(left_frame)
-        self._create_edit_form(right_frame)
     
     def _create_servers_list(self, parent):
         """Создает список серверов"""
         tk.Label(parent, text=self.translate('saved_servs'), bg='#f0f0f0', 
                 font=('Arial', 10, 'bold')).pack(fill='x', padx=5, pady=5)
-        self.servers_tree = ttk.Treeview(parent, show='tree', selectmode='browse')
+        self.servers_tree = ttk.Treeview(parent, show='headings', selectmode='browse', columns=('name', 'ip'))
         self.servers_tree.pack(expand=True, fill='both', padx=5, pady=5)
+        self.servers_tree.heading('name', text='Name')
+        self.servers_tree.heading('ip', text='IP')
+        self.servers_tree.column(0, anchor='center', width=70, minwidth=50, stretch=False)
+        self.servers_tree.column(1, anchor='center', minwidth=80)
         btn_frame = tk.Frame(parent, bg='#f0f0f0')
         btn_frame.pack(fill='x', padx=5, pady=5)
-        ttk.Button(btn_frame, text=self.translate('del'), command=self._delete_server).pack(side='left', padx=2)
-        self.servers_tree.bind('<<TreeviewSelect>>', self._on_server_selected)        
+        ttk.Button(btn_frame, text=self.translate('add'), command=self._call_add_window).pack(side='left', padx=2)
+        # ttk.Button(btn_frame, text=self.translate('edit'), command=self.).pack(side='left', padx=2)
+        ttk.Button(btn_frame, text=self.translate('del'), command=self._delete_server).pack(side='left', padx=2)      
         self.load_servers_list()
     
-    def _create_edit_form(self, parent):
-        """Создает форму редактирования"""
-        form_frame = tk.Frame(parent, padx=10, pady=10)
-        form_frame.pack(expand=True, fill='both')        
-        # Поля формы
-        fields = [
-            (self.translate('con_name'), 'conn_name'),
-            (self.translate('adr'), 'adress'),
-            (self.translate('login'), 'login'),
-            (self.translate('pass'), 'pass')
-        ]        
-        self.entries = {}
-        for i, (label_text, name) in enumerate(fields):
-            tk.Label(form_frame, text=label_text).grid(row=i, column=0, sticky='e', pady=2)
-            entry = Entry(form_frame, width=30, show='')
-            entry.grid(row=i, column=1, sticky='ew', pady=2)
-            self.entries[name] = entry  
-        # Кнопки
-        btn_frame = tk.Frame(form_frame)
-        btn_frame.grid(row=len(fields)+2, column=1, sticky='e', pady=10)   
-        ttk.Button(btn_frame, text=self.translate('add'), command=self._add_server).pack(side='left', padx=2)     
-        ttk.Button(btn_frame, text=self.translate('save'), command=self._save_settings).pack(side='right', padx=5)
-        ttk.Button(btn_frame, text=self.translate('con_test'), command=self._test_connection).pack(side='right', padx=5)
+    def _call_add_window(self):
+        self.add_window = FTPAddWindow(
+            parent=self,
+            lang=self.language,
+            callback=self._add_server
+        )
     
     def _on_close(self):
         """Вызывается при закрытии окна"""
@@ -102,21 +87,21 @@ class FTPSettingsWindow(tk.Toplevel):
             with open(self.servers_path, 'r', encoding='utf-8') as file:
                 self.servers_list = json.load(file)
         except Exception as e:
-            return None 
+            return None
         self.update_servers_list()       
 
     def update_servers_list(self):
         for item in self.servers_tree.get_children():
             self.servers_tree.delete(item)
         for name in self.servers_list:
-            self.servers_tree.insert('', 'end', text=name)
+            self.servers_tree.insert('', 'end', values=(name, self.servers_list[name]['adress']))
 
-    def _add_server(self):
+    def _add_server(self, name, adr, login='admin', pas=''):
         """Добавляет новый сервер"""
-        new_name = self.entries['conn_name'].get()
-        adress = self.entries['adress'].get()
-        login = self.entries['login'].get()
-        password = self.entries['pass'].get()
+        new_name = name
+        adress = adr
+        login = login
+        password = pas
         if new_name in self.servers_list:
             messagebox.showerror("Error", self.translate('serv_already'))
             return
@@ -127,7 +112,7 @@ class FTPSettingsWindow(tk.Toplevel):
             'login': login,
             'pass': password
         }
-        self.servers_tree.insert('', 'end', text=new_name)
+        self.servers_tree.insert('', 'end', values=(new_name, adress))
         self.save_servers()
         self.update_servers_list()
 
@@ -140,42 +125,78 @@ class FTPSettingsWindow(tk.Toplevel):
         selected = self.servers_tree.selection()
         if not selected:
             messagebox.showwarning(self.translate('err'), self.translate('no_select_server'))            
-        server_name = self.servers_tree.item(selected[0], 'text')
+        server_name = self.servers_tree.item(selected[0])['values'][0]
         if messagebox.askyesno(self.translate('confirm'), f"{self.translate('del_serv')} '{server_name}'?"):
             self.servers_tree.delete(selected[0])
             del self.servers_list[server_name]
         self.save_servers()
         self.update_servers_list()
-    
-    def _on_server_selected(self, event):
-        """Загружает данные выбранного сервера в форму"""
-        selected = self.servers_tree.selection()
-        if not selected:
-            return
             
-        self.selected_server = self.servers_tree.item(selected[0], 'text')
-        settings = self.servers_list.get(self.selected_server, {})
-        
-        for name, entry in self.entries.items():
-            if name == 'conn_name':
-                entry.set_text(self.selected_server)
-                continue
-            entry.set_text(settings.get(name, ''))
+class FTPAddWindow(tk.Toplevel):
+    def __init__(self, parent, lang, callback):
+        super().__init__(parent)
+        self.language = lang
+        self.title(self.translate('ftp_set'))
+        self.geometry('500x250')
+        self.servers_path = './resources/servers_list.json'
+        try:
+            with open(self.servers_path, 'r', encoding='utf-8') as file:
+                self.servers_list = json.load(file)
+        except Exception as e:
+            messagebox.showerror()
+        self.callback = callback
+        self.protocol('WM_DELETE_WINDOW', self._on_close)
+        self._create_edit_form(self)
+        self._center_window()
+        self.grab_set()
     
-    def _save_settings(self):
-        """Сохраняет изменения сервера"""
-        if not self.selected_server:
-            messagebox.showwarning(self.translate('err'), self.translate('no_select_server'))
-            return
-            
-        new_settings = {
-            'adress': self.entries['adress'].get(),
-            'login': self.entries['login'].get(),
-            'pass': self.entries['pass'].get()
-        }
-        
-        self.servers_list[self.selected_server] = new_settings
-        self.save_servers()
+    def _center_window(self):
+        """Центрирует окно относительно родительского"""
+        self.update_idletasks()
+        parent_x = self.master.winfo_x()
+        parent_y = self.master.winfo_y()
+        parent_width = self.master.winfo_width()
+        parent_height = self.master.winfo_height()        
+        x = parent_x + (parent_width // 2) - (500 // 2)
+        y = parent_y + (parent_height // 2) - (250 // 2)        
+        self.geometry(f"+{x}+{y}")
+
+    def _create_edit_form(self, parent):
+        """Создает форму редактирования"""
+        form_frame = tk.Frame(parent, padx=10, pady=10)
+        form_frame.pack(expand=True, fill='both')        
+        # Поля формы
+        fields = [
+            (self.translate('con_name'), 'conn_name'),
+            (self.translate('adr'), 'adress'),
+            (self.translate('login'), 'login'),
+            (self.translate('pass'), 'pass')
+        ]        
+        self.entries = {}
+        for i, (label_text, name) in enumerate(fields):
+            tk.Label(form_frame, text=label_text).grid(row=i, column=0, sticky='e', pady=2)
+            entry = Entry(form_frame, width=50, show='')
+            entry.grid(row=i, column=1, sticky='ew', pady=2)
+            self.entries[name] = entry  
+        # Кнопки
+        btn_frame = tk.Frame(form_frame)
+        btn_frame.grid(row=len(fields)+2, column=1, sticky='e', pady=10)   
+        ttk.Button(btn_frame, text=self.translate('save'), command=self._close_and_save).pack(side='left', padx=2)     
+        ttk.Button(btn_frame, text=self.translate('con_test'), command=self._test_connection).pack(side='right', padx=5)
+        ttk.Button(btn_frame, text=self.translate('cancel'), command=self._on_close).pack(side='right', padx=5)
+
+    def _on_close(self):
+        """Вызывается при закрытии окна"""
+        self.destroy()
+
+    def translate(self, key):
+        """Получение перевода по ключу"""
+        return LANGUAGES[self.language].get(key, key)
+    
+    def _close_and_save(self):
+        """Добавляет сервер"""
+        self.callback(self.entries['conn_name'].get(), self.entries['adress'].get(), self.entries['login'].get(), self.entries['pass'].get())
+        self._on_close
     
     def _test_connection(self):
         """Тестирует подключение"""        
