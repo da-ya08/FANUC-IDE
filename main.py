@@ -1,4 +1,4 @@
-import tkinter as tk, os, json, shutil, subprocess
+import tkinter as tk, os, json, shutil, subprocess, aioftp, asyncio
 from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
 from src.ls_settings import LSSettingsWindow
@@ -34,6 +34,7 @@ class FANUCE_IDE:
         self.is_karel = False
         self.filter_server_files = tk.IntVar(value=1)
         self.ls_info = {}
+        self.is_temp = False
 
         ''' Главное окно '''
         toolbar = tk.Frame(self.root, height=20)
@@ -57,6 +58,7 @@ class FANUCE_IDE:
         '''Левая часть'''
         # Меню-бар
         servers_menubar = tk.Frame(left_paned, height=20)
+        # servers_menubar.pack(side='top', anchor='center')
         left_paned.add(servers_menubar, minsize=20)
         self.server_combobox = ttk.Combobox(servers_menubar, state="readonly")
         self.server_combobox.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
@@ -163,7 +165,7 @@ class FANUCE_IDE:
                                       text=f'💾{self.translate('save')}',
                                       command=self.save_file)
         self.toolbar_save_button.pack(fill='none', side='left')
-        tk.Frame(t_toolbar, background='black', width=2, height=20).pack(fill='none', side='left')
+        tk.Frame(t_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
         self.toolbar_send_button = ttk.Button(t_toolbar,
                                       text=f'📤{self.translate('send')}',
                                       command=self.send_file,
@@ -236,7 +238,7 @@ class FANUCE_IDE:
         menubar.add_cascade(label=self.translate('edit_m'), menu=edit_menu)
         # Робот
         robot_menu = tk.Menu(menubar, tearoff=0)
-        robot_menu.add_command(label=self.translate('r_backup'), command=self.open_ls_settings)
+        robot_menu.add_command(label=self.translate('r_backup'), command=self.robot_backup)
         menubar.add_cascade(label=self.translate('robot'), menu=robot_menu)
         # Язык
         lang_menu = tk.Menu(menubar, tearoff=0)
@@ -295,6 +297,44 @@ class FANUCE_IDE:
         menu.add_command(label=self.translate('create_folder'), command=self._create_folder)
         menu.add_command(label=self.translate('refresh'), command=self.update_local_files)
         widget.bind("<Button-3>", lambda e: menu.tk_popup(e.x_root, e.y_root))
+    
+    def robot_backup(self, event=''):
+        """Обрабатывает выбор сервера в Combobox"""
+        selected_name = self.server_combobox.get()
+        if not selected_name:
+            self.show_info(self.language('no_select_server'), 1, 1)
+            return
+        selected_dir = filedialog.askdirectory(title="Backup папка",
+                                                   initialdir=self.CURRENT_DIRICTORY)
+        if not selected_dir:
+            return
+        target_server = self.all_servers[selected_name]
+        total_files = 0
+        fact_files = 0
+        try:
+            ftp = FTP(timeout=5)
+            ftp.connect(target_server['adress'])
+            login = target_server['login'] if target_server['login'] else 'admin'
+            ftp.login(login, target_server['pass'])
+            files = ftp.nlst()
+            needed_files = ['conslog.dg', 'dcschg01.dg', 'dcschg02.dg', 'dcschg03.dg', 'dcsdiff.dg', 'dcsvrfy.dg', 'eiplog.dg', 'ethernet.dg', 'flexevent.dg', 'ftplog.dg', 'gigelog.dg', 'memcheck.dg', 'notify.dg', 'rcmerr.dg', 'rcmsglib.dg', 'seclog.dg', 'shadow.dg', 'summary.dg', 'tpaccn.dg', 'tpdram.dg', 'zdlog.dg']
+            extensions = ['.xml', '.dat', '.cm', '.ini', '.df', '.dt', '.gif', '.io', '.jpg', '.jpeg', '.pc', '.stm', '.sv', '.tp', '.vr', '.zip']  # Нужные расширения
+            files = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)] + needed_files
+            os.makedirs(os.path.dirname(selected_dir), exist_ok=True)
+            total_files = len(files)
+            for file in files:
+                try:
+                    with open(f'{selected_dir}\\{file}', 'wb+') as f:
+                        ftp.retrbinary(f"RETR {file}", f.write)
+                        fact_files += 1
+                except:
+                    pass
+        except Exception as e:            
+            self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
+            ftp.quit()
+            return        
+        self.show_info(f'{fact_files}/{total_files}', 0, 1)
+        ftp.quit()
     
     def _change_def_dir(self):
         while True:
@@ -409,14 +449,14 @@ class FANUCE_IDE:
             ftp.voidcmd('TYPE I')
             with open(tmp_path, 'rb') as s_file:
                 if not self.is_karel and tmp_path == self.CURRENT_FILE:
+                    print(self.ls_info['name'])
                     ftp.storbinary(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
                 else:
-                    ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file)
+                    ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file) 
+            self.refresh_file_list()
             self.show_info(f'{self.translate('sending_file')} {tmp_path.split('\\')[-1]} {self.translate('was_success')}!')
         except Exception as e:
-            messagebox.showerror(self.translate('err'), f"{self.translate('couldnt_send_file')}: {e}")          
-        self.toolbar_send_button.config(state='disable')
-        self._on_server_selected()
+            self.show_info(f'{self.translate('couldnt_send_file')}: {e}', 2, 1)
         ftp.quit()
 
     def on_ctrl_keypress(self, event):
@@ -668,8 +708,8 @@ class FANUCE_IDE:
         # Пересоздаем меню
         self.create_menu()
         self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
-        self.toolbar_send_button.config(text=self.translate('send'))
-        self.toolbar_save_button.config(text=self.translate('save'))
+        self.toolbar_send_button.config(text=f'📤{self.translate('send')}')
+        self.toolbar_save_button.config(text=f'💾{self.translate('save')}')
         if not self.CURRENT_FILE:
             self.CURRENT_FILE_path_menubar.config(text=self.translate('menubar_code'))
         self._setup_context_menus()
@@ -730,7 +770,7 @@ class FANUCE_IDE:
             file_path = filedialog.askopenfilename(
                 initialdir=f'{self.CURRENT_DIRICTORY}',
                 filetypes=[("LS and KAREL", "*.ls *.kl"), (self.translate('all_files'), "*.*")]
-            )
+            ).replace('/', '\\')
         if self.is_modified:
             response = messagebox.askyesnocancel(
                 self.translate('save_file'),
@@ -867,7 +907,7 @@ class FANUCE_IDE:
                 filetypes=[(self.translate('all_files'), f'*.{self.CURRENT_FILE.split('\\')[-1].split('.')[-1]}')]
             )
         if file_path:
-            self.CURRENT_FILE = file_path
+            self.CURRENT_FILE = file_path.replace('/', '\\')
             self._save_to_file(file_path)
             self.update_file_path() 
             self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
