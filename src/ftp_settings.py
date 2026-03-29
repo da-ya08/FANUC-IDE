@@ -160,7 +160,8 @@ class FTPAddWindow(tk.Toplevel):
             with open(self.servers_path, 'r', encoding='utf-8') as file:
                 self.servers_list = json.load(file)
         except Exception as e:
-            messagebox.showerror()
+            with open(self.servers_path, 'w', encoding='utf-8') as file:
+                print('Created servers file...')
         self.callback = callback
         self.protocol('WM_DELETE_WINDOW', self._on_close)
         self._create_edit_form(self)
