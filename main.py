@@ -1,9 +1,8 @@
-import tkinter as tk, os, json, shutil, subprocess, aioftp, asyncio
+import tkinter as tk, os, json, shutil, subprocess
 from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
 from src.ls_settings import LSSettingsWindow
 from ftplib import FTP
-from PIL import ImageTk, Image
 from src.conf import LANGUAGES, CURRENT_LANGUAGE
 
 class FANUCE_IDE:
@@ -49,7 +48,6 @@ class FANUCE_IDE:
         main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
         main_paned.pack(expand=True, fill='both')
 
-
         left_paned = tk.PanedWindow(main_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED, sashwidth=4)
         main_paned.add(left_paned, minsize=200, width=200)
         right_frame = tk.Frame(main_paned)
@@ -80,7 +78,7 @@ class FANUCE_IDE:
         )
         self.file_tree.pack(expand=True, fill='both', padx=2, pady=2)
         tree_scroll.config(command=self.file_tree.yview)
-        self.file_tree.bind("<Double-1>", self._temp_open_file)
+        self.file_tree.bind('<Double-1>', self._temp_open_file)
         files_paned.add(file_tree_frame, minsize=100)
         # Локальные файлы        
         local_file_tree_frame = tk.Frame(files_paned)
@@ -182,12 +180,10 @@ class FANUCE_IDE:
         self.text_area.bind('<<Modified>>', self.highlight_code)
         self.text_area.bind("<Control-KeyPress>", self.on_ctrl_keypress)
         # Настраиваем тег для подсветки
-        self.text_area.tag_config(
-            "comments",
-            foreground="black",      # цвет текста
-            background="yellow",        # цвет фона
-            font=("Consolas", 10, "bold")  # шрифт
-        )
+        self.text_area.tag_config("comments",
+                                  foreground="black",      # цвет текста
+                                  background="yellow",        # цвет фона
+                                  font=("Consolas", 10, "bold"))  # шрифт
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)  # Обработка закрытия окна
         # Настройка прокрутки
         self.text_area.config(yscrollcommand=self.sync_scroll)
@@ -305,7 +301,7 @@ class FANUCE_IDE:
             self.show_info(self.language('no_select_server'), 1, 1)
             return
         selected_dir = filedialog.askdirectory(title="Backup папка",
-                                                   initialdir=self.CURRENT_DIRICTORY)
+                                               initialdir=self.CURRENT_DIRICTORY)
         if not selected_dir:
             return
         target_server = self.all_servers[selected_name]
@@ -317,9 +313,6 @@ class FANUCE_IDE:
             login = target_server['login'] if target_server['login'] else 'admin'
             ftp.login(login, target_server['pass'])
             files = ftp.nlst()
-            needed_files = ['conslog.dg', 'dcschg01.dg', 'dcschg02.dg', 'dcschg03.dg', 'dcsdiff.dg', 'dcsvrfy.dg', 'eiplog.dg', 'ethernet.dg', 'flexevent.dg', 'ftplog.dg', 'gigelog.dg', 'memcheck.dg', 'notify.dg', 'rcmerr.dg', 'rcmsglib.dg', 'seclog.dg', 'shadow.dg', 'summary.dg', 'tpaccn.dg', 'tpdram.dg', 'zdlog.dg']
-            extensions = ['.xml', '.dat', '.cm', '.ini', '.df', '.dt', '.gif', '.io', '.jpg', '.jpeg', '.pc', '.stm', '.sv', '.tp', '.vr', '.zip']  # Нужные расширения
-            files = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)] + needed_files
             os.makedirs(os.path.dirname(selected_dir), exist_ok=True)
             total_files = len(files)
             for file in files:
@@ -327,13 +320,14 @@ class FANUCE_IDE:
                     with open(f'{selected_dir}\\{file}', 'wb+') as f:
                         ftp.retrbinary(f"RETR {file}", f.write)
                         fact_files += 1
+                        self.show_info(f'{self.translate('downloaded')}{fact_files}/{total_files}')
                 except:
                     pass
         except Exception as e:            
             self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
             ftp.quit()
             return        
-        self.show_info(f'{fact_files}/{total_files}', 0, 1)
+        self.show_info(f'{self.translate('downloaded')}{fact_files}/{total_files}', 0, 1)
         ftp.quit()
     
     def _change_def_dir(self):
@@ -493,11 +487,9 @@ class FANUCE_IDE:
     
     def _create_folder(self):
         while True:
-            folder_name = simpledialog.askstring(
-                f'{self.translate('folder_name')}:',
-                f'{self.translate('enter_folder_name')}: ',
-                initialvalue='folder1'
-            )
+            folder_name = simpledialog.askstring(f'{self.translate('folder_name')}:',
+                                                 f'{self.translate('enter_folder_name')}: ',
+                                                 initialvalue='folder1')
             if folder_name is None:
                 return
             if not folder_name.strip():
@@ -519,8 +511,8 @@ class FANUCE_IDE:
         if item:
             file = self.CURRENT_DIRICTORY + '\\' + self.local_file_tree.item(item, 'text')
             if not messagebox.askyesno('Подтверждение',
-                                f'Удалить файл: {file}?',
-                                icon='warning'):
+                                       f'Удалить файл: {file}?',
+                                       icon='warning'):
                 return
             if os.path.isdir(file):
                 try:
@@ -543,11 +535,9 @@ class FANUCE_IDE:
         if not selected:
             return
         filename = self.file_tree.item(selected[0], 'text')
-        if messagebox.askyesno(
-            "Подтверждение", 
-            f"Вы точно хотите удалить файл {filename}\nС сервера: {self.target_server_name}?",
-            icon='warning'
-        ):
+        if messagebox.askyesno("Подтверждение", 
+                               f"Вы точно хотите удалить файл {filename}\nС сервера: {self.target_server_name}?",
+                               icon='warning'):
             try:
                 ftp = FTP(timeout=5)
                 ftp.connect(self.target_server['adress'])
@@ -607,7 +597,6 @@ class FANUCE_IDE:
         """Обновляет список локальных файлов и папок"""
         if path is None:
             path = self.CURRENT_DIRICTORY
-
         for item in self.local_file_tree.get_children():
             self.local_file_tree.delete(item)
         self.local_file_tree.insert('', 'end', text='...', tags=('folder',))
@@ -628,14 +617,12 @@ class FANUCE_IDE:
         selected = self.local_file_tree.selection()
         if not selected:
             return
-
         item = selected[0]
         name = self.local_file_tree.item(item, 'text')
         if name == '...':
             self._local_nav_back()
             return
         full_path = self.local_file_tree.item(item, 'values')[0]
-
         if os.path.isdir(full_path):
             # Если это папка - заходим в нее
             self.CURRENT_DIRICTORY = os.path.abspath(full_path)
@@ -676,9 +663,9 @@ class FANUCE_IDE:
             filename = self.file_tree.item(item, 'text')
         while True:
             file_path = filedialog.asksaveasfilename(initialdir=f'{self.CURRENT_DIRICTORY}',
-                                                   filetypes=[(self.translate('all_files'), "*.*")],
-                                                   initialfile=filename,
-                                                   title=self.translate('dnld')).replace('/', '\\')
+                                                     filetypes=[(self.translate('all_files'), "*.*")],
+                                                     initialfile=filename,
+                                                     title=self.translate('dnld')).replace('/', '\\')
             if not file_path:
                 ans = messagebox.askyesno('Отмена загрузки',
                                           'Вы хотите отменить загрузку?',

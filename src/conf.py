@@ -90,7 +90,8 @@ LANGUAGES = {
         'cant_load_list': 'Cannot load list: ',
         'saved_succ': 'File saved',
         'edit': 'Edit',
-        'cancel': 'Cancel'
+        'cancel': 'Cancel',
+        'downloaded': 'Downloaded: '
 
     },
     'ru': {
@@ -184,7 +185,8 @@ LANGUAGES = {
         'cant_load_list': 'Не получилось получить список: ',
         'saved_succ': 'Файл сохранён',
         'edit': 'Изменить',
-        'cancel': 'Отменить'
+        'cancel': 'Отменить',
+        'downloaded': 'Скачано: '
     }
 }
 

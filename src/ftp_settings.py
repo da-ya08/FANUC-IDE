@@ -58,16 +58,30 @@ class FTPSettingsWindow(tk.Toplevel):
         self.servers_tree.column(1, anchor='center', minwidth=80)
         btn_frame = tk.Frame(parent, bg='#f0f0f0')
         btn_frame.pack(fill='x', padx=5, pady=5)
-        ttk.Button(btn_frame, text=self.translate('add'), command=self._call_add_window).pack(side='left', padx=2)
-        # ttk.Button(btn_frame, text=self.translate('edit'), command=self.).pack(side='left', padx=2)
+        ttk.Button(btn_frame, text=self.translate('add'), command=self._show_add_window).pack(side='left', padx=2)
+        ttk.Button(btn_frame, text=self.translate('edit'), command=self._show_edit_window).pack(side='left', padx=2)
         ttk.Button(btn_frame, text=self.translate('del'), command=self._delete_server).pack(side='left', padx=2)      
         self.load_servers_list()
+        self.servers_tree.bind('<Double-1>', self._show_edit_window)
     
-    def _call_add_window(self):
+    def _show_add_window(self):
         self.add_window = FTPAddWindow(
             parent=self,
             lang=self.language,
             callback=self._add_server
+        )
+    
+    def _show_edit_window(self, e=''):
+        selected = self.servers_tree.selection()
+        if not selected:
+            return
+        server_name = self.servers_tree.item(selected[0])['values'][0]
+        self.edit_window = FTPEditWindow(
+            parent=self,
+            lang=self.language,
+            callback=self._save_servers,
+            server=self.servers_list[server_name],
+            name=server_name
         )
     
     def _on_close(self):
@@ -115,6 +129,9 @@ class FTPSettingsWindow(tk.Toplevel):
         self.servers_tree.insert('', 'end', values=(new_name, adress))
         self.save_servers()
         self.update_servers_list()
+    
+    def _save_servers(self, name, data):
+        pass
 
     def save_servers(self):
         with open(self.servers_path, 'w', encoding='utf-8') as file:
@@ -177,6 +194,118 @@ class FTPAddWindow(tk.Toplevel):
             tk.Label(form_frame, text=label_text).grid(row=i, column=0, sticky='e', pady=2)
             entry = Entry(form_frame, width=50, show='')
             entry.grid(row=i, column=1, sticky='ew', pady=2)
+            self.entries[name] = entry  
+        # Кнопки
+        btn_frame = tk.Frame(form_frame)
+        btn_frame.grid(row=len(fields)+2, column=1, sticky='e', pady=10)   
+        ttk.Button(btn_frame, text=self.translate('save'), command=self._close_and_save).pack(side='left', padx=2)     
+        ttk.Button(btn_frame, text=self.translate('con_test'), command=self._test_connection).pack(side='right', padx=5)
+        ttk.Button(btn_frame, text=self.translate('cancel'), command=self._on_close).pack(side='right', padx=5)
+
+    def _on_close(self):
+        """Вызывается при закрытии окна"""
+        self.destroy()
+
+    def translate(self, key):
+        """Получение перевода по ключу"""
+        return LANGUAGES[self.language].get(key, key)
+    
+    def _close_and_save(self):
+        """Добавляет сервер"""
+        self.callback(self.entries['conn_name'].get(), self.entries['adress'].get(), self.entries['login'].get(), self.entries['pass'].get())
+        self._on_close() 
+    
+    def _test_connection(self):
+        """Тестирует подключение"""        
+        try:
+            # Получаем текущие настройки из формы
+            adress = self.entries['adress'].get()
+            if not adress:
+                messagebox.showerror(self.translate('err'), self.translate('no_adress'))
+                return
+            ftp = FTP(timeout=5)
+            ftp.connect(adress)
+            user = self.entries['login'].get()
+            pas = self.entries['pass'].get()
+            ftp.login(user if user else 'admin', pas)
+
+            try:
+                files = []
+                ftp.retrlines('LIST', files.append)
+                messagebox.showinfo(
+                    self.translate('success'), 
+                    f'{self.translate('con_success')}!\n{self.translate('found')} {len(files)} {self.translate('files')}.'
+                )
+            except Exception as e:
+                messagebox.showinfo(
+                    self.translate('success'), 
+                    f'{self.translate('con_success')}, {self.translate('but_no_files')}:\n{str(e)}'
+                )
+            
+            # Закрываем соединение
+            ftp.quit()
+            
+        except socket.timeout:
+            messagebox.showerror(
+                self.translate('err'), 
+                self.translate('timeout')
+            )
+        except Exception as e:
+            messagebox.showerror(
+                self.translate('err'), 
+                f'{self.translate('couldnt_connect')}:\n{str(e)}'
+            )
+
+class FTPEditWindow(tk.Toplevel):
+    def __init__(self, parent, lang, callback, server, name):
+        super().__init__(parent)
+        self.language = lang
+        self.title(self.translate('ftp_set'))
+        self.geometry('500x250')
+        self.servers_path = './resources/servers_list.json'
+        try:
+            with open(self.servers_path, 'r', encoding='utf-8') as file:
+                self.servers_list = json.load(file)
+        except Exception as e:
+            messagebox.showerror()
+        self.callback = callback
+        self.protocol('WM_DELETE_WINDOW', self._on_close)
+        self._create_edit_form(self, server, name)
+        self._center_window()
+        self.grab_set()
+    
+    def _center_window(self):
+        """Центрирует окно относительно родительского"""
+        self.update_idletasks()
+        parent_x = self.master.winfo_x()
+        parent_y = self.master.winfo_y()
+        parent_width = self.master.winfo_width()
+        parent_height = self.master.winfo_height()        
+        x = parent_x + (parent_width // 2) - (500 // 2)
+        y = parent_y + (parent_height // 2) - (250 // 2)        
+        self.geometry(f"+{x}+{y}")
+
+    def _create_edit_form(self, parent, serv_list, name_s):
+        """Создает форму редактирования"""
+        form_frame = tk.Frame(parent, padx=10, pady=10)
+        form_frame.pack(expand=True, fill='both')        
+        # Поля формы
+        self.entries = {}
+        tk.Label(form_frame, text=self.translate('con_name')).grid(row=0, column=0, sticky='e', pady=2)
+        entry = Entry(form_frame, width=50, show='')
+        entry.insert(0, name_s)
+        entry.grid(row=0, column=1, sticky='ew', pady=2)
+        self.entries['conn_name'] = entry  
+        fields = [
+            (self.translate('adr'), 'adress'),
+            (self.translate('login'), 'login'),
+            (self.translate('pass'), 'pass')
+        ]
+        for i, (label_text, name) in enumerate(fields):
+            tk.Label(form_frame, text=label_text).grid(row=i+1, column=0, sticky='e', pady=2)
+            entry = Entry(form_frame, width=50, show='')
+            entry.insert(0, serv_list[name])
+            entry.grid(row=i+1, column=1, sticky='ew', pady=2)
             self.entries[name] = entry  
         # Кнопки
         btn_frame = tk.Frame(form_frame)
