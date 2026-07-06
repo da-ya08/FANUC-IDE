@@ -132,6 +132,7 @@ class FANUCE_IDE:
             height=25,
             state='disabled'
         )
+        self.search_bar = SearchBar(self.text_area)
         self.line_numbers = tk.Text(
             code_frame,
             width=4,
@@ -843,6 +844,7 @@ class FANUCE_IDE:
                 except Exception as e:
                     messagebox.showerror(self.translate('err'), f'{self.translate('couldnt_open_file')}: {e}')
             elif file_path[-1:-3:-1].lower() == 'lk':
+                self.ls_info = ''
                 with open(file_path, "r", encoding="utf-8") as file:
                     content = file.read()
                     self.text_area.delete("1.0", tk.END) 
@@ -904,7 +906,7 @@ class FANUCE_IDE:
 
     def _save_to_file(self, file_path):
         """Сохраняет текст в указанный файл."""
-        if self.ls_info:
+        if self.ls_info and self.CURRENT_FILE[-1:-3:-1].lower() == 'sl':
             text_to_save = self._header_generate()
             temp = self.text_area.get("1.0", tk.END)
             text = self.text_area.get("1.0", tk.END).split("\n")[:-1]
@@ -1048,6 +1050,100 @@ class FANUCE_IDE:
         """Обработчик движения скроллбара"""
         self.text_area.yview(*args)
         self.line_numbers.yview(*args)
+
+class SearchBar:
+    def __init__(self, text_widget):
+        self.text = text_widget
+        self.frame = tk.Frame(self.text, bg="#9E9E9E", bd=1, relief='solid')        
+        # Поле ввода
+        self.entry = ttk.Entry(self.frame, width=30)
+        self.entry.pack(side='left', padx=5, pady=5)        
+        # Кнопки
+        self.btn_next = ttk.Button(self.frame, text='Найти', command=self.find_next)
+        self.btn_next.pack(side='left', padx=2)
+        
+        # Закрыть (крестик)
+        self.btn_close = ttk.Button(self.frame, text='✖', width=2.2, command=self.hide)
+        self.btn_close.pack(side='right', padx=2)        
+        # Инициализация позиции и видимости
+        self.hide()        
+        # Настройка тега для подсветки найденного
+        self.text.tag_configure('search', background="#CA9FC1", foreground="#CCCCCC")
+        
+        # Привязка горячих клавиш
+        self.text.bind('<Control-f>', lambda e: self.show())
+        self.text.bind('<Escape>', lambda e: self.hide())
+        # Поиск при вводе текста (опционально)
+        self.entry.bind('<KeyRelease>', lambda e: self.find_all())
+        self.entry.bind('<Return>', lambda e: self.find_next())
+        
+    def show(self):
+        """Показать панель поиска"""
+        # Размещаем в правом верхнем углу текстового виджета
+        self.frame.place(relx=1.0, x=-5, y=5, anchor='ne')
+        self.entry.focus_set()
+        self.entry.delete(0, 'end')
+        self.find_all()  # обновить подсветку
+        
+    def hide(self):
+        """Скрыть панель поиска и снять подсветку"""
+        self.frame.place_forget()
+        self.text.tag_remove('search', '1.0', 'end')
+        
+    def find_all(self, no_first=False):
+        """Найти все вхождения и подсветить их"""
+        self.text.tag_remove('search', '1.0', 'end')
+        query = self.entry.get()
+        if not query:
+            return
+        
+        # Настройки поиска
+        start = '1.0'
+        count = 0
+        while True:
+            pos = self.text.search(query, start, stopindex='end', nocase=True)
+            if not pos:
+                break
+            # Вычисляем конец найденного фрагмента
+            end = f"{pos}+{len(query)}c"
+            self.text.tag_add('search', pos, end)
+            start = end
+            count += 1
+        
+        # Если есть результаты, переходим к первому
+        if count > 0 and not no_first:
+            self.text.tag_remove('sel', '1.0', 'end')
+            self.text.tag_add('sel', '1.0', f"1.0+{len(query)}c")
+            self.text.see('1.0')
+    
+    def find_next(self):
+        """Найти следующее вхождение"""
+        query = self.entry.get()
+        if not query:
+            return        
+        # Текущая позиция курсора (начало выделения или позиция вставки)
+        try:
+            sel_start = self.text.index('sel.first')
+        except tk.TclError:
+            sel_start = self.text.index('insert')        
+        # Ищем от текущей позиции
+        pos = self.text.search(query, sel_start, stopindex='end', nocase=True)
+        if pos:
+            end = f"{pos}+{len(query)}c"
+            self.text.tag_remove('sel', '1.0', 'end')
+            self.text.tag_add('sel', pos, end)
+            self.text.see(pos)
+            # Дополнительно подсветим все вхождения
+            self.find_all(True)
+        else:
+            # Если не нашли, можно зациклить с начала (опционально)
+            pos = self.text.search(query, '1.0', stopindex='end', nocase=True)
+            if pos:
+                end = f"{pos}+{len(query)}c"
+                self.text.tag_remove('sel', '1.0', 'end')
+                self.text.tag_add('sel', pos, end)
+                self.text.see(pos)
+                self.find_all()
 
 if __name__ == "__main__":
     root = tk.Tk()
