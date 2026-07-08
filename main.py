@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
 from src.ls_settings import LSSettingsWindow
 from ftplib import FTP
+from datetime import datetime
 from src.conf import LANGUAGES, CURRENT_LANGUAGE
 
 class FANUCE_IDE:
@@ -117,6 +118,10 @@ class FANUCE_IDE:
             text=self.translate('menubar_code')
         )
         self.CURRENT_FILE_path_menubar.pack(side=tk.LEFT, fill=tk.X)
+        search_button = ttk.Button(menu_code_frame,
+                                      text='🔎',
+                                      width=5)
+        search_button.pack(fill='none', side='right')
 
         # Область кода
         code_frame = tk.Frame(right_frame)
@@ -132,7 +137,8 @@ class FANUCE_IDE:
             height=25,
             state='disabled'
         )
-        self.search_bar = SearchBar(self.text_area)
+        self.search_bar = SearchBar(self.text_area, self.translate)
+        search_button.config(command=self.search_bar.show)
         self.line_numbers = tk.Text(
             code_frame,
             width=4,
@@ -281,7 +287,6 @@ class FANUCE_IDE:
         menu.add_separator()
         menu.add_command(label=self.translate('refresh'), command=self.refresh_file_list)
         menu.add_checkbutton(label=self.translate('filter'), command=self.refresh_file_list, variable=self.filter_server_files)
-        # menu.add_command(label='Фильтр ls', command=self._filter_files_ls, state='active')
         widget.bind("<Button-3>", lambda e: menu.tk_popup(e.x_root, e.y_root))
     
     def _add_local_tree_context_menu(self, widget):
@@ -296,15 +301,16 @@ class FANUCE_IDE:
         widget.bind("<Button-3>", lambda e: menu.tk_popup(e.x_root, e.y_root))
     
     def robot_backup(self, event=''):
-        """Обрабатывает выбор сервера в Combobox"""
+        """Создание резервной копии робота"""
         selected_name = self.server_combobox.get()
         if not selected_name:
-            self.show_info(self.language('no_select_server'), 1, 1)
+            self.show_info(self.translate('no_select_server'), 1, 1)
             return
         selected_dir = filedialog.askdirectory(title="Backup папка",
-                                               initialdir=self.CURRENT_DIRICTORY)
+                                               initialdir=self.CURRENT_DIRICTORY).replace('/', '\\')
         if not selected_dir:
             return
+        selected_dir = selected_dir+f'\\{selected_name}_{datetime.now().strftime("%d%m%Y_%H%M")}'
         target_server = self.all_servers[selected_name]
         total_files = 0
         fact_files = 0
@@ -314,7 +320,9 @@ class FANUCE_IDE:
             login = target_server['login'] if target_server['login'] else 'admin'
             ftp.login(login, target_server['pass'])
             files = ftp.nlst()
-            os.makedirs(os.path.dirname(selected_dir), exist_ok=True)
+            os.makedirs(os.path.dirname(selected_dir))
+            print(selected_dir)
+            return
             total_files = len(files)
             for file in files:
                 try:
@@ -698,6 +706,8 @@ class FANUCE_IDE:
         self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
         self.toolbar_send_button.config(text=f'📤{self.translate('send')}')
         self.toolbar_save_button.config(text=f'💾{self.translate('save')}')
+        self.search_bar.hide()
+        self.search_bar.show()
         if not self.CURRENT_FILE:
             self.CURRENT_FILE_path_menubar.config(text=self.translate('menubar_code'))
         self._setup_context_menus()
@@ -860,6 +870,23 @@ class FANUCE_IDE:
                     self.is_karel = True
                     self.edit_menu.entryconfig('LS', state=tk.DISABLED)
                     self.edit_menu.entryconfig('KL', state=tk.NORMAL)
+            else:
+                self.ls_info = ''
+                with open(file_path, "r", encoding="utf-8") as file:
+                    content = file.read()
+                    self.text_area.delete("1.0", tk.END) 
+                    self.text_area.insert(tk.END, content)
+                    self.CURRENT_FILE = file_path 
+                    self.update_file_path() 
+                    self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
+                    self.is_modified = False
+                    self.update_line_numbers()
+                    self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+                    self.toolbar_compile_button.config(state='disable')
+                    self.toolbar_send_button.config(state='disable')
+                    self.is_karel = False
+                    self.edit_menu.entryconfig('LS', state=tk.DISABLED)
+                    self.edit_menu.entryconfig('KL', state=tk.DISABLED)
 
     def save_file(self, event=None):
         """Сохраняет файл, если он уже существует, иначе вызывает 'Сохранить как'."""
@@ -1052,18 +1079,19 @@ class FANUCE_IDE:
         self.line_numbers.yview(*args)
 
 class SearchBar:
-    def __init__(self, text_widget):
+    def __init__(self, text_widget, translater):
+        self.translate = translater
         self.text = text_widget
         self.frame = tk.Frame(self.text, bg="#9E9E9E", bd=1, relief='solid')        
         # Поле ввода
         self.entry = ttk.Entry(self.frame, width=30)
         self.entry.pack(side='left', padx=5, pady=5)        
         # Кнопки
-        self.btn_next = ttk.Button(self.frame, text='Найти', command=self.find_next)
+        self.btn_next = ttk.Button(self.frame, text=self.translate('find'), command=self.find_next, cursor='arrow')
         self.btn_next.pack(side='left', padx=2)
         
         # Закрыть (крестик)
-        self.btn_close = ttk.Button(self.frame, text='✖', width=2.2, command=self.hide)
+        self.btn_close = ttk.Button(self.frame, text='✖', width=2.2, command=self.hide, cursor='arrow')
         self.btn_close.pack(side='right', padx=2)        
         # Инициализация позиции и видимости
         self.hide()        
@@ -1081,6 +1109,7 @@ class SearchBar:
         """Показать панель поиска"""
         # Размещаем в правом верхнем углу текстового виджета
         self.frame.place(relx=1.0, x=-5, y=5, anchor='ne')
+        self.btn_next.config(text=self.translate('find'))
         self.entry.focus_set()
         self.entry.delete(0, 'end')
         self.find_all()  # обновить подсветку

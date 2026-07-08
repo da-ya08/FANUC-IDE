@@ -91,7 +91,10 @@ LANGUAGES = {
         'saved_succ': 'File saved',
         'edit': 'Edit',
         'cancel': 'Cancel',
-        'downloaded': 'Downloaded: '
+        'downloaded': 'Downloaded: ',
+        'find': 'Find',
+        'protect': 'Write protect',
+        'movement': 'Movement',
 
     },
     'ru': {
@@ -186,7 +189,10 @@ LANGUAGES = {
         'saved_succ': 'Файл сохранён',
         'edit': 'Изменить',
         'cancel': 'Отменить',
-        'downloaded': 'Скачано: '
+        'downloaded': 'Скачано: ',
+        'find': 'Найти',
+        'protect': 'Защита записи',
+        'movement': 'Движения',
     }
 }
 

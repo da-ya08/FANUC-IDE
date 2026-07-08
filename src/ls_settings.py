@@ -43,10 +43,10 @@ class LSSettingsWindow(tk.Toplevel):
         self.entries['owner'].insert(0, self.header['owner'])
         self.entries['comment'].insert(0, self.header['comment'])
         
-        tk.Label(form_frame, text='Защита').grid(row=3, column=0, sticky='e', pady=2)
+        tk.Label(form_frame, text=self.translate('protect')).grid(row=3, column=0, sticky='e', pady=2)
         self.entries['protect'] = tk.Checkbutton(form_frame, anchor='w', variable=self.protect)
         self.entries['protect'].grid(row=3, column=1, sticky='ew', pady=2)
-        tk.Label(form_frame, text='Движения').grid(row=4, column=0, sticky='e', pady=2)
+        tk.Label(form_frame, text=self.translate('movement')).grid(row=4, column=0, sticky='e', pady=2)
         self.entries['motion'] = tk.Checkbutton(form_frame, anchor='w', variable=self.motion)
         self.entries['motion'].grid(row=4, column=1, sticky='ew', pady=2)
 
