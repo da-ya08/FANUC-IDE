@@ -95,7 +95,8 @@ LANGUAGES = {
         'find': 'Find',
         'protect': 'Write protect',
         'movement': 'Movement',
-
+        'download_cancel': 'Canceling the download',
+        'ask_download_cancel': 'Do you want to cancel the download?',
     },
     'ru': {
         'file': 'Файл',
@@ -193,6 +194,8 @@ LANGUAGES = {
         'find': 'Найти',
         'protect': 'Защита записи',
         'movement': 'Движения',
+        'download_cancel': 'Отмена загрузки',
+        'ask_download_cancel': 'Вы хотите отменить загрузку?',
     }
 }
 

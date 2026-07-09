@@ -3,12 +3,14 @@ from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
 from src.ls_settings import LSSettingsWindow
 from ftplib import FTP
+from threading import Thread
 from datetime import datetime
 from src.conf import LANGUAGES, CURRENT_LANGUAGE
 
 class FANUCE_IDE:
     def __init__(self, root):
         self.root = root
+        self.root.after(100, self.tread_service)
         self.root.title("FANUC IDE")
         self.root.minsize(width=600, height=400) 
         self.PROJECT_DIRICTORY = '\\'.join(__file__.split('\\')[:-1])
@@ -26,6 +28,7 @@ class FANUCE_IDE:
             self.root.geometry(temp['geo'])
         if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'):
             self._create_robot_ini(self.PROJECT_DIRICTORY)
+        self.files_queue = []
         self.buffer_header, self.buffer_asser, self.target_server_name = '', '', ''
         self.target_server, self.all_servers = {}, {}
         self.is_modified = False
@@ -310,29 +313,38 @@ class FANUCE_IDE:
                                                initialdir=self.CURRENT_DIRICTORY).replace('/', '\\')
         if not selected_dir:
             return
-        selected_dir = selected_dir+f'\\{selected_name}_{datetime.now().strftime("%d%m%Y_%H%M")}'
+        selected_dir = selected_dir+f'\\{selected_name}_{datetime.now().strftime("%d%m%Y_%H%M")}\\'
         target_server = self.all_servers[selected_name]
+        tread = Thread(target=self.tread_backup,
+                       args=(target_server, selected_dir),
+                       daemon=True)
+        tread.start()
+        
+
+    def tread_backup(self, server, dir):
         total_files = 0
         fact_files = 0
         try:
             ftp = FTP(timeout=5)
-            ftp.connect(target_server['adress'])
-            login = target_server['login'] if target_server['login'] else 'admin'
-            ftp.login(login, target_server['pass'])
+            ftp.connect(server['adress'])
+            login = server['login'] if server['login'] else 'admin'
+            ftp.login(login, server['pass'])
             files = ftp.nlst()
-            os.makedirs(os.path.dirname(selected_dir))
-            print(selected_dir)
-            return
+            extensions = ['.va']  # NEНужные расширения
+            files = [f for f in files if any(not f.lower().endswith(ext) for ext in extensions)]
+            os.makedirs(os.path.dirname(dir))
             total_files = len(files)
             for file in files:
                 try:
-                    with open(f'{selected_dir}\\{file}', 'wb+') as f:
+                    if file[-1:-3:-1].lower() == 'av':
+                        continue
+                    with open(f'{dir}\\{file}', 'wb+') as f:
                         ftp.retrbinary(f"RETR {file}", f.write)
                         fact_files += 1
-                        self.show_info(f'{self.translate('downloaded')}{fact_files}/{total_files}')
-                except:
-                    pass
-        except Exception as e:            
+                    self.files_queue.append(f'{self.translate('downloaded')}{fact_files}/{total_files}')
+                except Exception as e:
+                    self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
+        except Exception as e:
             self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
             ftp.quit()
             return        
@@ -576,15 +588,15 @@ class FANUCE_IDE:
                 files = ftp.nlst()
                 if self.filter_server_files.get():
                     extensions = ['.kl', '.ls']  # Нужные расширения
-                    files = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)]
+                    files_ = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)]
             except Exception as e:
                 self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
                 return
             for item in self.file_tree.get_children():
                 self.file_tree.delete(item)
-            for name in files:
+            for name in files_:
                 self.file_tree.insert('', 'end', text=name)
-            self.show_info(f'{self.translate('con_success')}: {selected_name}')
+            self.show_info(f'{self.translate('con_success')}: {selected_name} - {len(files)} {self.translate('files')}')
             ftp.quit()
     
     def update_server_list(self):
@@ -655,7 +667,7 @@ class FANUCE_IDE:
             login = self.target_server['login'] if self.target_server['login'] else 'admin'
             ftp.login(login, self.target_server['pass'])
             filename = self.file_tree.item(item, 'text')
-            t_filename = f'TEMP_FILE-{filename}'
+            t_filename = f'[TEMP_FILE] {filename}'
             with open(t_filename, 'wb+') as f:
                 ftp.retrbinary(f"RETR {filename}", f.write)
             self.open_file(t_filename)
@@ -676,8 +688,8 @@ class FANUCE_IDE:
                                                      initialfile=filename,
                                                      title=self.translate('dnld')).replace('/', '\\')
             if not file_path:
-                ans = messagebox.askyesno('Отмена загрузки',
-                                          'Вы хотите отменить загрузку?',
+                ans = messagebox.askyesno(self.translate('download_cancel'),
+                                          self.translate('ask_download_cancel'),
                                           icon='question')
                 if ans:
                     return
@@ -706,8 +718,9 @@ class FANUCE_IDE:
         self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
         self.toolbar_send_button.config(text=f'📤{self.translate('send')}')
         self.toolbar_save_button.config(text=f'💾{self.translate('save')}')
-        self.search_bar.hide()
-        self.search_bar.show()
+        if self.search_bar.view:
+            self.search_bar.hide()
+            self.search_bar.show()
         if not self.CURRENT_FILE:
             self.CURRENT_FILE_path_menubar.config(text=self.translate('menubar_code'))
         self._setup_context_menus()
@@ -1077,9 +1090,16 @@ class FANUCE_IDE:
         """Обработчик движения скроллбара"""
         self.text_area.yview(*args)
         self.line_numbers.yview(*args)
+    
+    def tread_service(self):
+        if self.files_queue:
+            for text in self.files_queue:
+                self.show_info(text)
+        self.root.after(100, self.tread_service)
 
 class SearchBar:
     def __init__(self, text_widget, translater):
+        self.view = False
         self.translate = translater
         self.text = text_widget
         self.frame = tk.Frame(self.text, bg="#9E9E9E", bd=1, relief='solid')        
@@ -1111,6 +1131,7 @@ class SearchBar:
         self.frame.place(relx=1.0, x=-5, y=5, anchor='ne')
         self.btn_next.config(text=self.translate('find'))
         self.entry.focus_set()
+        self.view = True
         self.entry.delete(0, 'end')
         self.find_all()  # обновить подсветку
         
@@ -1118,6 +1139,7 @@ class SearchBar:
         """Скрыть панель поиска и снять подсветку"""
         self.frame.place_forget()
         self.text.tag_remove('search', '1.0', 'end')
+        self.view = False
         
     def find_all(self, no_first=False):
         """Найти все вхождения и подсветить их"""
@@ -1165,7 +1187,7 @@ class SearchBar:
             # Дополнительно подсветим все вхождения
             self.find_all(True)
         else:
-            # Если не нашли, можно зациклить с начала (опционально)
+            # Если не нашли, можно зациклить с начала
             pos = self.text.search(query, '1.0', stopindex='end', nocase=True)
             if pos:
                 end = f"{pos}+{len(query)}c"
