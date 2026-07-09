@@ -15,6 +15,8 @@ A program for viewing, downloading, editing and sending LS (TP) files of FANUC r
 - Highlighting comments in ls file viewing mode
 - The ability to view the program without saving it to disk
 - Editing the header information of an ls file (Edit -> LS -> Configure the file)
+- Program search (Ctrl+F)
+- The ability to download a backup (Robot -> Robot backup) *(now in a parallel stream)*
 
 # ROBOT INFORMATION
 
@@ -72,7 +74,8 @@ Download LS files from the robot, edit them and send them back. Create KL progra
 Pull requests are welcome! For major changes, please open an issue first.
 
 ## In the future
-It is planned to add a title and point information generator, also make also add the ability to create backup
+- Creating a download manager? for uploading to multiple streams, rather than in one separate one. 
+- Add more syntax highlighting.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
