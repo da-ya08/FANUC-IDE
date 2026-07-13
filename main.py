@@ -1,4 +1,5 @@
 import tkinter as tk, os, json, shutil, subprocess
+from tkinter.ttk import Progressbar
 from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
 from src.ls_settings import LSSettingsWindow
@@ -43,10 +44,11 @@ class FANUCE_IDE:
         toolbar = tk.Frame(self.root, height=20)
         toolbar.pack(side='top', fill='x')
 
-        status_frame = tk.Frame(self.root, height=20, borderwidth=1, relief='groove')
-        status_frame.pack(side='bottom', fill='x')
-        self.status_label = tk.Label(status_frame)
+        self.status_frame = tk.Frame(self.root, height=20, borderwidth=1, relief='groove')
+        self.status_frame.pack(side='bottom', fill='x')
+        self.status_label = tk.Label(self.status_frame)
         self.status_label.pack(side='left', fill='x')
+        self.download_progress_bar = Progressbar(self.status_frame, orient='horizontal', length=150)
         self.show_info(text='DA_YA product')
 
         main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
@@ -315,6 +317,7 @@ class FANUCE_IDE:
             return
         selected_dir = selected_dir+f'\\{selected_name}_{datetime.now().strftime("%d%m%Y_%H%M")}\\'
         target_server = self.all_servers[selected_name]
+        self.download_progress_bar.pack(fill='none', side='right')
         tread = Thread(target=self.tread_backup,
                        args=(target_server, selected_dir),
                        daemon=True)
@@ -342,6 +345,8 @@ class FANUCE_IDE:
                         ftp.retrbinary(f"RETR {file}", f.write)
                         fact_files += 1
                     self.files_queue.append(f'{self.translate('downloaded')}{fact_files}/{total_files}')
+                    self.download_progress_bar.config(value=fact_files/total_files*100)
+                    print(fact_files/total_files*100)
                 except Exception as e:
                     self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
         except Exception as e:
@@ -349,6 +354,8 @@ class FANUCE_IDE:
             ftp.quit()
             return        
         self.show_info(f'{self.translate('downloaded')}{fact_files}/{total_files}', 0, 1)
+        self.download_progress_bar.pack_forget()
+        self.download_progress_bar.config(value=0)
         ftp.quit()
     
     def _change_def_dir(self):
