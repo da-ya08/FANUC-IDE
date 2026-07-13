@@ -767,9 +767,13 @@ class FANUCE_IDE:
                 self.buffer_asser = '/POS\n/END\n'
                 self.edit_menu.entryconfig('LS', state=tk.NORMAL)
                 self.edit_menu.entryconfig('KL', state=tk.DISABLED)
+                self.toolbar_send_button.config(state='enable')
+                self.toolbar_compile_button.config(state='disable')
             elif file_path[-1:-3:-1].lower() == 'kl':
                 self.edit_menu.entryconfig('LS', state=tk.DISABLED)
                 self.edit_menu.entryconfig('KL', state=tk.NORMAL)
+                self.toolbar_send_button.config(state='disable')
+                self.toolbar_compile_button.config(state='enable')
             self.CURRENT_FILE = file_path
             self._save_to_file(file_path)
             self.update_file_path()  # Обновляем заголовок окна
@@ -872,41 +876,47 @@ class FANUCE_IDE:
                     self.edit_menu.entryconfig('KL', state=tk.DISABLED)
                     self.toolbar_send_button.config(state='enable')
                 except Exception as e:
-                    messagebox.showerror(self.translate('err'), f'{self.translate('couldnt_open_file')}: {e}')
+                    self.show_info(f'{self.translate('couldnt_open_file')}: {e}', 2, 1)
             elif file_path[-1:-3:-1].lower() == 'lk':
-                self.ls_info = ''
-                with open(file_path, "r", encoding="utf-8") as file:
-                    content = file.read()
-                    self.text_area.delete("1.0", tk.END) 
-                    self.text_area.insert(tk.END, content)
-                    self.CURRENT_FILE = file_path 
-                    self.update_file_path() 
-                    self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
-                    self.is_modified = False
-                    self.update_line_numbers()
-                    self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
-                    self.toolbar_compile_button.config(state='enable')
-                    self.toolbar_send_button.config(state='disable')
-                    self.is_karel = True
-                    self.edit_menu.entryconfig('LS', state=tk.DISABLED)
-                    self.edit_menu.entryconfig('KL', state=tk.NORMAL)
+                self.ls_info = {}
+                try:
+                    with open(file_path, "r", encoding="utf-8") as file:
+                        content = file.read()
+                        self.text_area.delete("1.0", tk.END) 
+                        self.text_area.insert(tk.END, content)
+                        self.CURRENT_FILE = file_path 
+                        self.update_file_path() 
+                        self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
+                        self.is_modified = False
+                        self.update_line_numbers()
+                        self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+                        self.toolbar_compile_button.config(state='enable')
+                        self.toolbar_send_button.config(state='disable')
+                        self.is_karel = True
+                        self.edit_menu.entryconfig('LS', state=tk.DISABLED)
+                        self.edit_menu.entryconfig('KL', state=tk.NORMAL)
+                except Exception as e:
+                    self.show_info(f'{self.translate('couldnt_open_file')}: {e}', 2, 1)
             else:
-                self.ls_info = ''
-                with open(file_path, "r", encoding="utf-8") as file:
-                    content = file.read()
-                    self.text_area.delete("1.0", tk.END) 
-                    self.text_area.insert(tk.END, content)
-                    self.CURRENT_FILE = file_path 
-                    self.update_file_path() 
-                    self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
-                    self.is_modified = False
-                    self.update_line_numbers()
-                    self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
-                    self.toolbar_compile_button.config(state='disable')
-                    self.toolbar_send_button.config(state='disable')
-                    self.is_karel = False
-                    self.edit_menu.entryconfig('LS', state=tk.DISABLED)
-                    self.edit_menu.entryconfig('KL', state=tk.DISABLED)
+                self.ls_info = {}
+                try:
+                    with open(file_path, "r", encoding="utf-8") as file:
+                        content = file.read()
+                        self.text_area.delete("1.0", tk.END) 
+                        self.text_area.insert(tk.END, content)
+                        self.CURRENT_FILE = file_path 
+                        self.update_file_path() 
+                        self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
+                        self.is_modified = False
+                        self.update_line_numbers()
+                        self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+                        self.toolbar_compile_button.config(state='disable')
+                        self.toolbar_send_button.config(state='disable')
+                        self.is_karel = False
+                        self.edit_menu.entryconfig('LS', state=tk.DISABLED)
+                        self.edit_menu.entryconfig('KL', state=tk.DISABLED)
+                except Exception as e:
+                    self.show_info(f'{self.translate('couldnt_open_file')}: {e}', 2, 1)
 
     def save_file(self, event=None):
         """Сохраняет файл, если он уже существует, иначе вызывает 'Сохранить как'."""
