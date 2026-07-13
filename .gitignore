@@ -7,3 +7,4 @@ resources/servers_list.json
 *.tmp
 src/robot.ini
 cache.json
+resources\Robot_1\RecoveryLog.txt
