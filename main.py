@@ -1,4 +1,4 @@
-import tkinter as tk, os, json, shutil, subprocess
+import tkinter as tk, os, json, shutil, subprocess, sys
 from tkinter.ttk import Progressbar
 from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
@@ -11,7 +11,6 @@ from src.conf import LANGUAGES, CURRENT_LANGUAGE
 class FANUCE_IDE:
     def __init__(self, root):
         self.root = root
-        self.root.after(100, self.tread_service)
         self.root.title("FANUC IDE")
         self.root.minsize(width=600, height=400) 
         self.PROJECT_DIRICTORY = '\\'.join(__file__.split('\\')[:-1])
@@ -39,6 +38,7 @@ class FANUCE_IDE:
         self.filter_server_files = tk.IntVar(value=1)
         self.ls_info = {}
         self.is_temp = False
+        self.backuping = False
 
         ''' Главное окно '''
         toolbar = tk.Frame(self.root, height=20)
@@ -205,6 +205,9 @@ class FANUCE_IDE:
         self.update_server_list()
         self.create_menu()
         self._setup_context_menus()
+        if len(sys.argv) > 1:
+            self.open_file(sys.argv[1])
+
 
     def highlight_code(self, event=None):
         # Удаляем все теги подсветки
@@ -318,6 +321,8 @@ class FANUCE_IDE:
         selected_dir = selected_dir+f'\\{selected_name}_{datetime.now().strftime("%d%m%Y_%H%M")}\\'
         target_server = self.all_servers[selected_name]
         self.download_progress_bar.pack(fill='none', side='right')
+        self.root.after(100, self.tread_service)
+        self.backuping = True
         tread = Thread(target=self.tread_backup,
                        args=(target_server, selected_dir),
                        daemon=True)
@@ -352,11 +357,12 @@ class FANUCE_IDE:
         except Exception as e:
             self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
             ftp.quit()
-            return        
+            return
+        ftp.quit()
         self.show_info(f'{self.translate('downloaded')}{fact_files}/{total_files}', 0, 1)
         self.download_progress_bar.pack_forget()
         self.download_progress_bar.config(value=0)
-        ftp.quit()
+        self.backuping = False
     
     def _change_def_dir(self):
         while True:
@@ -375,8 +381,11 @@ class FANUCE_IDE:
             selected_dir = filedialog.askdirectory(title="Выберите папку для проектов",
                                                    initialdir='\\'.join(self.PROJECT_DIRICTORY.split('\\')[:-1]))
             if not selected_dir:  # Пользователь отменил выбор
-                if self.CURRENT_DIRICTORY:
-                    break
+                try:
+                    if self.CURRENT_DIRICTORY:
+                        break
+                except:
+                    pass
                 response = messagebox.askquestion("Выход",
                                                   "Папка не выбрана. Выйти из программы?",
                                                   icon='warning')
@@ -1112,7 +1121,8 @@ class FANUCE_IDE:
         if self.files_queue:
             for text in self.files_queue:
                 self.show_info(text)
-        self.root.after(100, self.tread_service)
+        if self.backuping:
+            self.root.after(100, self.tread_service)
 
 class SearchBar:
     def __init__(self, text_widget, translater):
