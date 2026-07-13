@@ -57,9 +57,11 @@ Download LS files from the robot, edit them and send them back. Create KL progra
 ## Use FTP
 
 - Click on the gear icon next to the server drop-down menu
+
 ![Screenshot](resources/screenshots/ftp_settings_screenshot.png)
 - Check, change, or add new servers using the appropriate buttons in the window
 - When adding, fill in the necessary fields: name, ip, login, password (if login and password are empty, "admin" and "" will be used)
+
 ![Screenshot](resources/screenshots/server_addition_screenshot.png)
 - Click on "Connection Test" to check the connection
 - Click "Add" to save the server from the list
