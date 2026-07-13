@@ -14,14 +14,16 @@ class FANUCE_IDE:
         self.root.title("FANUC IDE")
         self.root.minsize(width=600, height=400) 
         self.PROJECT_DIRICTORY = '\\'.join(__file__.split('\\')[:-1])
+        self.language = 'en'
         os.chdir(self.PROJECT_DIRICTORY)
         self.root.iconbitmap(f'{self.PROJECT_DIRICTORY}\\resources\\icon.ico')
-        self.SERVERS_FILE = f'{self.PROJECT_DIRICTORY}\\resources\\servers_list.json'
+        self.cache_folder = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE'
+        self.SERVERS_FILE = f'{self.cache_folder}\\servers_list.json'
         self.CURRENT_FILE = None
         self.CURRENT_DIRICTORY = self.PROJECT_DIRICTORY
-        if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\cache.json'):
+        if not os.path.exists(f'{self.cache_folder}\\cache.json'):
             self._create_config_file()
-        with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'r', encoding='utf-8') as f:
+        with open(f'{self.cache_folder}\\cache.json', 'r', encoding='utf-8') as f:
             temp = json.load(f)
             self.CURRENT_DIRICTORY = temp['path']
             self.language = temp['lang']
@@ -351,7 +353,6 @@ class FANUCE_IDE:
                         fact_files += 1
                     self.files_queue.append(f'{self.translate('downloaded')}{fact_files}/{total_files}')
                     self.download_progress_bar.config(value=fact_files/total_files*100)
-                    print(fact_files/total_files*100)
                 except Exception as e:
                     self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
         except Exception as e:
@@ -400,7 +401,8 @@ class FANUCE_IDE:
                 with open(test_file, 'w') as f:
                     f.write('test')
                 os.remove(test_file)
-                with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'w', encoding='utf-8') as f:
+                os.makedirs(f'{self.cache_folder}', exist_ok=True)
+                with open(f'{self.cache_folder}\\cache.json', 'w', encoding='utf-8') as f:
                     json.dump({'path': selected_dir, 
                                'lang': CURRENT_LANGUAGE,
                                'geo': '800x500'},
@@ -411,7 +413,7 @@ class FANUCE_IDE:
                                      f"Невозможно записать в выбранную папку:\n{str(e)}\n\nВыберите другую папку.")    
 
     def _save_settings(self):
-        with open(f'{self.PROJECT_DIRICTORY}\\cache.json', 'r+', encoding='utf-8') as f:
+        with open(f'{self.cache_folder}\\cache.json', 'r+', encoding='utf-8') as f:
             temp_path = json.load(f)['path']
             f.seek(0)
             f.truncate()
@@ -480,7 +482,6 @@ class FANUCE_IDE:
             ftp.voidcmd('TYPE I')
             with open(tmp_path, 'rb') as s_file:
                 if not self.is_karel and tmp_path == self.CURRENT_FILE:
-                    print(self.ls_info['name'])
                     ftp.storbinary(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
                 else:
                     ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file) 

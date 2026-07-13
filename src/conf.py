@@ -97,6 +97,12 @@ LANGUAGES = {
         'movement': 'Movement',
         'download_cancel': 'Canceling the download',
         'ask_download_cancel': 'Do you want to cancel the download?',
+        'import': 'Import',
+        'export': 'Export',
+        'imported': 'Servers imported',
+        'import_error': 'Import error: ',
+        'exported': 'Servers exported',
+        'export_error': 'Export error: ',
     },
     'ru': {
         'file': 'Файл',
@@ -196,6 +202,12 @@ LANGUAGES = {
         'movement': 'Движения',
         'download_cancel': 'Отмена загрузки',
         'ask_download_cancel': 'Вы хотите отменить загрузку?',
+        'import': 'Импорт',
+        'export': 'Экспорт',
+        'imported': 'Сервера импортированы',
+        'import_error': 'Ошибка при импорте: ',
+        'exported': 'Сервера экспортированы',
+        'export_error': 'Ошибка при экспорте: ',
     }
 }
 

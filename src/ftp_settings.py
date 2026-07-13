@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import json, os, socket
 from ftplib import FTP
 from .conf import LANGUAGES
@@ -18,7 +18,7 @@ class FTPSettingsWindow(tk.Toplevel):
         self.minsize(300, 400)
         self.maxsize(500, 550)
         self.servers_list = {}
-        self.servers_path = './resources/servers_list.json'
+        self.servers_path = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE\\servers_list.json'
         self.selected_server = None
         self.callback = callback
         self.protocol('WM_DELETE_WINDOW', self._on_close)
@@ -60,10 +60,48 @@ class FTPSettingsWindow(tk.Toplevel):
         btn_frame.pack(fill='x', padx=5, pady=5)
         ttk.Button(btn_frame, text=self.translate('add'), command=self._show_add_window).pack(side='left', padx=2)
         ttk.Button(btn_frame, text=self.translate('edit'), command=self._show_edit_window).pack(side='left', padx=2)
-        ttk.Button(btn_frame, text=self.translate('del'), command=self._delete_server).pack(side='left', padx=2)      
+        ttk.Button(btn_frame, text=self.translate('del'), command=self._delete_server).pack(side='left', padx=2)
+        tk.Frame(btn_frame, background='gray', width=2, height=20).pack(fill='none', side='left')
+        ttk.Button(btn_frame, text=self.translate('export'), command=self._export_servers).pack(side='right', padx=2)
+        ttk.Button(btn_frame, text=self.translate('import'), command=self._import_servers).pack(side='right', padx=2)
+        tk.Frame(btn_frame, background='gray', width=2, height=20).pack(fill='none', side='right')
         self.load_servers_list()
         self.servers_tree.bind('<Double-1>', self._show_edit_window)
     
+    def _import_servers(self):
+        file_path = filedialog.askopenfilename(
+                initialdir='.\\',
+                filetypes=[("JSON", "*.json")]
+            ).replace('/', '\\')
+        if not file_path:
+            return
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                self.servers_list = json.load(file)
+        except Exception as e:
+            messagebox.showerror(self.translate('err'),
+                                 f'{self.translate('import_error')}{e}')
+            return None
+        self.update_servers_list()
+        messagebox.showinfo(self.translate('success'),
+                            self.translate('imported'))
+        self.save_servers()
+    
+    def _export_servers(self):
+        file_path = filedialog.asksaveasfilename(initialdir='.\\',
+                                                 defaultextension="servers.json",
+                                                 filetypes=[("JSON", "*.json")])
+        if not file_path:
+            return
+        try:
+            with open(file_path, 'w', encoding='utf-8') as file:
+                json.dump(self.servers_list, file, indent=4)
+        except Exception as e:
+            messagebox.showerror(self.translate('err'),
+                                 f'{self.translate('export_error')}{e}')
+        messagebox.showinfo(self.translate('success'),
+                            self.translate('exported'))
+
     def _show_add_window(self):
         self.add_window = FTPAddWindow(
             parent=self,
@@ -161,7 +199,7 @@ class FTPAddWindow(tk.Toplevel):
                 self.servers_list = json.load(file)
         except Exception as e:
             with open(self.servers_path, 'w', encoding='utf-8') as file:
-                print('Created servers file...')
+                pass
         self.callback = callback
         self.protocol('WM_DELETE_WINDOW', self._on_close)
         self._create_edit_form(self)
