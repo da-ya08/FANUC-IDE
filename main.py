@@ -28,8 +28,8 @@ class FANUCE_IDE:
             self.CURRENT_DIRICTORY = temp['path']
             self.language = temp['lang']
             self.root.geometry(temp['geo'])
-        if not os.path.exists(f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'):
-            self._create_robot_ini(self.PROJECT_DIRICTORY)
+        if not os.path.exists(f'{self.cache_folder}\\robot.ini'):
+            self._create_robot_ini(self.cache_folder)
         self.files_queue = []
         self.buffer_header, self.buffer_asser, self.target_server_name = '', '', ''
         self.target_server, self.all_servers = {}, {}
@@ -506,7 +506,7 @@ class FANUCE_IDE:
             self.CURRENT_DIRICTORY = parent
         
     def _create_robot_ini(self, main_dir):
-        with open(f'{main_dir}\\src\\robot.ini', 'w', encoding='utf-8') as f:
+        with open(f'{main_dir}\\robot.ini', 'w', encoding='utf-8') as f:
             print('Creating robot.ini...')
             f.write('[WinOLPC_Util]\n')
             f.write(f'Robot={main_dir}\\resources\\Robot_1\n')

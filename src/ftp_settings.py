@@ -193,13 +193,13 @@ class FTPAddWindow(tk.Toplevel):
         self.language = lang
         self.title(self.translate('ftp_set'))
         self.geometry('500x250')
-        self.servers_path = './resources/servers_list.json'
-        try:
-            with open(self.servers_path, 'r', encoding='utf-8') as file:
-                self.servers_list = json.load(file)
-        except Exception as e:
-            with open(self.servers_path, 'w', encoding='utf-8') as file:
-                pass
+        self.servers_path = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE\\servers_list.json'
+        # try:
+        #     with open(self.servers_path, 'r', encoding='utf-8') as file:
+        #         self.servers_list = json.load(file)
+        # except Exception as e:
+        #     with open(self.servers_path, 'w', encoding='utf-8') as file:
+        #         pass
         self.callback = callback
         self.protocol('WM_DELETE_WINDOW', self._on_close)
         self._create_edit_form(self)
@@ -301,7 +301,7 @@ class FTPEditWindow(tk.Toplevel):
         self.language = lang
         self.title(self.translate('ftp_set'))
         self.geometry('500x250')
-        self.servers_path = './resources/servers_list.json'
+        self.servers_path = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE\\servers_list.json'
         try:
             with open(self.servers_path, 'r', encoding='utf-8') as file:
                 self.servers_list = json.load(file)
