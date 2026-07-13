@@ -1,6 +1,6 @@
 # FANUC LS and KL Program Editor
 
-![Screenshot](resources/screenshot3.5.png)
+![Screenshot](resources/screenshots/workspace_screenshot.png)
 
 A program for viewing, downloading, editing and sending LS (TP) files of FANUC robots, as well as for compilation.kl files.
 
@@ -16,7 +16,7 @@ A program for viewing, downloading, editing and sending LS (TP) files of FANUC r
 - The ability to view the program without saving it to disk
 - Editing the header information of an ls file (Edit -> LS -> Configure the file)
 - Program search (Ctrl+F)
-- The ability to download a backup (Robot -> Robot backup) *(now in a parallel stream)*
+- The ability to download a backup (Robot -> Robot backup)
 
 # ROBOT INFORMATION
 
@@ -56,8 +56,10 @@ Download LS files from the robot, edit them and send them back. Create KL progra
 
 ## Use FTP
 
-- Click on the settings button next to the server drop-down menu
+- Click on the settings button next to the server drop-down menu 
+![Screenshot](resources/screenshots/ftp_settings_screenshot.png)
 - Enter the data for the server (if there is no password, leave the login and password fields empty)
+![Screenshot](resources/screenshots/server_addition_screenshot.png)
 - Click on "Connection Test" to check the connection
 - Click "Add" to save the server from the list
 - Close the window and select the server in the drop-down list, the LS files will be displayed.
@@ -68,6 +70,12 @@ Download LS files from the robot, edit them and send them back. Create KL progra
 - Open the kl file and click "Compile"
 - The program will display the compilation result
 - When you click the "Send" button, the created one will go .pc file
+
+## ROBOT BACKUP
+
+- Select the target robot from the drop-down menu
+- After successful connection, start backup (Robot -> Robot backup)
+- Select a folder to save, where the IDE will independently create a subfolder with the server name and the backup date and time (ddmmyyy_hhmm)
 
 ## Contributing
 
