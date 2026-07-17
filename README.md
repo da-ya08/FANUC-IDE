@@ -2,7 +2,7 @@
 
 ![Screenshot](resources/screenshots/workspace_screenshot.png)
 
-A program for viewing, downloading, editing and sending LS (TP) files of FANUC robots, as well as for compilation.kl files.
+A program for viewing, downloading, editing and sending LS (TP) and PC (KL) files of FANUC robots, as well as for backup from robot.
 
 ## Features
 
@@ -17,8 +17,9 @@ A program for viewing, downloading, editing and sending LS (TP) files of FANUC r
 - Editing the header information of an ls file (Edit -> LS -> Configure the file)
 - Program search (Ctrl+F)
 - The ability to download a backup (Robot -> Robot backup)
+- Import\export saved servers
 
-# ROBOT INFORMATION
+## ROBOT INFORMATION
 
 To compile the files, information about the robot from <ins>ROGOBUIDE</ins> **v9.10** model **R-2000iC 210F** is used. If you need to replace the virtual robot, then take the Robot_1 folder from the roboguide project and replace it in the resources folder.
 
@@ -35,15 +36,13 @@ cd fanuc-ide
 python main.py
 ```
 
+- You can also [download .exe](https://github.com/da-ya08/FANUC-IDE/releases) (poratable or setup).
+
 ## Robot settings
 
 - You need to set up an **FTP** password on the robot (*or, as in my case, remove FTP authorization*)
 - Have an ethernet connection to the robot
 - Use this data in this application
-
-## Get .exe
-
-You can also [download .exe](https://github.com/da-ya08/FANUC-IDE/releases).
 
 ## Usage
 
