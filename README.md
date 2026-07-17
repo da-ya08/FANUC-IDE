@@ -30,12 +30,7 @@ git clone https://github.com/da-ya08/FANUC-IDE.git
 cd fanuc-ide
 ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Run:
+2. Run:
 ```bash
 python main.py
 ```
