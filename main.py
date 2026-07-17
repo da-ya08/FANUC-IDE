@@ -58,7 +58,7 @@ class FANUCE_IDE:
 
         left_paned = tk.PanedWindow(main_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED, sashwidth=4)
         main_paned.add(left_paned, minsize=200, width=200)
-        right_frame = tk.Frame(main_paned)
+        right_frame = tk.Frame(main_paned)  
         main_paned.add(right_frame)
 
         '''Левая часть'''
@@ -110,8 +110,9 @@ class FANUCE_IDE:
         files_paned.add(local_file_tree_frame, minsize=100)
         self.file_tree.tag_configure('folder', foreground='blue')
         self.file_tree.tag_configure('file', foreground='black')
-        self.local_file_tree.tag_configure('folder', foreground='orange')
-        self.local_file_tree.tag_configure('file', foreground='black')
+        self.local_file_tree.tag_configure('back', foreground='#000000')
+        self.local_file_tree.tag_configure('folder', foreground='#303030')
+        self.local_file_tree.tag_configure('file', foreground='#424242')
 
         '''Правая часть'''
         # Меню кода
@@ -405,7 +406,7 @@ class FANUCE_IDE:
                 with open(f'{self.cache_folder}\\cache.json', 'w', encoding='utf-8') as f:
                     json.dump({'path': selected_dir, 
                                'lang': CURRENT_LANGUAGE,
-                               'geo': '800x500'},
+                               'geo': '650x750'},
                                 f)
                 break
             except Exception as e:
@@ -637,16 +638,16 @@ class FANUCE_IDE:
             path = self.CURRENT_DIRICTORY
         for item in self.local_file_tree.get_children():
             self.local_file_tree.delete(item)
-        self.local_file_tree.insert('', 'end', text='...', tags=('folder',))
+        self.local_file_tree.insert('', 'end', text='<—', tags=('back',))
         try:
             items = os.listdir(path)
             # Сначала добавляем папки, потом файлы
             for name in sorted(items, key=lambda x: not os.path.isdir(os.path.join(path, x))):
                 full_path = os.path.join(path, name)
                 if os.path.isdir(full_path):
-                    self.local_file_tree.insert('', 'end', text=name, values=[full_path], tags=('folder',))
+                    self.local_file_tree.insert('', 'end', text=f'📂{name}', values=[full_path], tags=('folder',))
                 else:
-                    self.local_file_tree.insert('', 'end', text=name, values=[full_path], tags=('file',))
+                    self.local_file_tree.insert('', 'end', text=f'📃{name}', values=[full_path], tags=('file',))
         except Exception as e:
             messagebox.showerror(self.translate('wee'), f"Не удалось прочитать папку: {str(e)}")
     
@@ -657,7 +658,7 @@ class FANUCE_IDE:
             return
         item = selected[0]
         name = self.local_file_tree.item(item, 'text')
-        if name == '...':
+        if name == '<—':
             self._local_nav_back()
             return
         full_path = self.local_file_tree.item(item, 'values')[0]
