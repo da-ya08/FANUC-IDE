@@ -430,7 +430,7 @@ class FANUCE_IDE:
         try:
             os.chdir('\\'.join(self.CURRENT_FILE.split('\\')[:-1]))
             result = subprocess.run(
-                [f'{self.PROJECT_DIRICTORY}\\src\\ktrans.exe', f'{self.CURRENT_FILE}', '/config' , f'{self.PROJECT_DIRICTORY}\\src\\robot.ini'],
+                [f'{self.PROJECT_DIRICTORY}\\src\\ktrans.exe', f'{self.CURRENT_FILE}', '/config' , f'{self.cache_folder}\\robot.ini'],
                 capture_output=True,
                 text=True,
                 check=True)
@@ -685,7 +685,7 @@ class FANUCE_IDE:
             login = self.target_server['login'] if self.target_server['login'] else 'admin'
             ftp.login(login, self.target_server['pass'])
             filename = self.file_tree.item(item, 'text')
-            t_filename = f'[TEMP_FILE] {filename}'
+            t_filename = f'{self.cache_folder}\\[TEMP_FILE] {filename}'
             with open(t_filename, 'wb+') as f:
                 ftp.retrbinary(f"RETR {filename}", f.write)
             self.open_file(t_filename)
