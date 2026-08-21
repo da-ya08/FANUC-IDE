@@ -607,6 +607,8 @@ class FANUCE_IDE:
                 if self.filter_server_files.get():
                     extensions = ['.kl', '.ls']  # Нужные расширения
                     files_ = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)]
+                else:
+                    files_ = files
             except Exception as e:
                 self.show_info(f'{self.translate('connection_error')}: {e}', 2, 1)
                 return
