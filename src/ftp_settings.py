@@ -262,7 +262,7 @@ class FTPAddWindow(tk.Toplevel):
             if not adress:
                 messagebox.showerror(self.translate('err'), self.translate('no_adress'))
                 return
-            ftp = FTP(timeout=5)
+            ftp = FTP(timeout=5, encoding='cp1251')
             ftp.connect(adress)
             user = self.entries['login'].get()
             pas = self.entries['pass'].get()
@@ -374,7 +374,7 @@ class FTPEditWindow(tk.Toplevel):
             if not adress:
                 messagebox.showerror(self.translate('err'), self.translate('no_adress'))
                 return
-            ftp = FTP(timeout=5)
+            ftp = FTP(timeout=5, encoding='cp1251')
             ftp.connect(adress)
             user = self.entries['login'].get()
             pas = self.entries['pass'].get()

@@ -336,7 +336,7 @@ class FANUCE_IDE:
         total_files = 0
         fact_files = 0
         try:
-            ftp = FTP(timeout=5)
+            ftp = FTP(timeout=5, encoding='cp1251')
             ftp.connect(server['adress'])
             login = server['login'] if server['login'] else 'admin'
             ftp.login(login, server['pass'])
@@ -476,7 +476,7 @@ class FANUCE_IDE:
                                    icon='question'):
             return
         try:
-            ftp = FTP(timeout=7)
+            ftp = FTP(timeout=7, encoding='cp1251')
             ftp.connect(self.target_server['adress'])
             log = self.target_server['login'] if self.target_server['login'] else 'admin'
             ftp.login(log, self.target_server['pass'])
@@ -489,7 +489,21 @@ class FANUCE_IDE:
             self.refresh_file_list()
             self.show_info(f'{self.translate('sending_file')} {tmp_path.split('\\')[-1]} {self.translate('was_success')}!')
         except Exception as e:
-            self.show_info(f'{self.translate('couldnt_send_file')}: {e}', 2, 1)
+            try:
+                ftp = FTP(timeout=7, encoding='cp1251')
+                ftp.connect(self.target_server['adress'])
+                log = self.target_server['login'] if self.target_server['login'] else 'admin'
+                ftp.login(log, self.target_server['pass'])
+                ftp.voidcmd('TYPE I')
+                with open(tmp_path, 'rb') as s_file:
+                    if not self.is_karel and tmp_path == self.CURRENT_FILE:
+                        ftp.storbinary(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
+                    else:
+                        ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file) 
+                self.refresh_file_list()
+                self.show_info(f'{self.translate('sending_file')} {tmp_path.split('\\')[-1]} {self.translate('was_success')}!')
+            except:
+                self.show_info(f'{self.translate('couldnt_send_file')}: {e}', 2, 1)
         ftp.quit()
 
     def on_ctrl_keypress(self, event):
@@ -578,7 +592,7 @@ class FANUCE_IDE:
                                f"Вы точно хотите удалить файл {filename}\nС сервера: {self.target_server_name}?",
                                icon='warning'):
             try:
-                ftp = FTP(timeout=5)
+                ftp = FTP(timeout=5, encoding='cp1251')
                 ftp.connect(self.target_server['adress'])
                 login = self.target_server['login'] if self.target_server['login'] else 'admin'
                 ftp.login(login, self.target_server['pass'])
@@ -599,7 +613,7 @@ class FANUCE_IDE:
         if selected_name in self.all_servers:
             self.target_server = self.all_servers[selected_name]
             try:
-                ftp = FTP(timeout=5)
+                ftp = FTP(timeout=5, encoding='cp1251')
                 ftp.connect(self.target_server['adress'])
                 login = self.target_server['login'] if self.target_server['login'] else 'admin'
                 ftp.login(login, self.target_server['pass'])
@@ -682,7 +696,7 @@ class FANUCE_IDE:
     def _temp_open_file(self, event=None):
         item = self.file_tree.selection()[0]
         if item:
-            ftp = FTP(timeout=5)
+            ftp = FTP(timeout=5, encoding='cp1251')
             ftp.connect(self.target_server['adress'])
             login = self.target_server['login'] if self.target_server['login'] else 'admin'
             ftp.login(login, self.target_server['pass'])
@@ -716,7 +730,7 @@ class FANUCE_IDE:
             elif file_path:
                 break
         try:
-            ftp = FTP(timeout=5)
+            ftp = FTP(timeout=5, encoding='cp1251')
             ftp.connect(self.target_server['adress'])
             login = self.target_server['login'] if self.target_server['login'] else 'admin'
             ftp.login(login, self.target_server['pass'])
@@ -945,7 +959,7 @@ class FANUCE_IDE:
             if self.is_temp:
                 file_path = filedialog.asksaveasfilename(
                     defaultextension="ls kl",
-                    initialfile=f'{self.CURRENT_FILE.split('\\')[-1][10:-1]}s',
+                    initialfile=f'{self.CURRENT_FILE.split('\\')[-1][12:-1]}s',
                     filetypes=[("LS prog", "*.ls"), (self.translate('all_files'), "*.*")]
                 )
             else:
