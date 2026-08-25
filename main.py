@@ -374,7 +374,9 @@ class FANUCE_IDE:
                 return
             try:
                 self.CURRENT_DIRICTORY = selected_dir.replace('/', '\\')
-                self._save_settings()
+                self._save_settings(self.CURRENT_DIRICTORY)
+                self._open_local_folder(self.CURRENT_DIRICTORY)
+                break
             except Exception as e:
                 self.show_info(self.translate('cant_save_here'), 1, 1)
                 
@@ -413,9 +415,9 @@ class FANUCE_IDE:
                 messagebox.showerror(self.translate('err'),
                                      f"Невозможно записать в выбранную папку:\n{str(e)}\n\nВыберите другую папку.")    
 
-    def _save_settings(self):
+    def _save_settings(self, new_path=''):
         with open(f'{self.cache_folder}\\cache.json', 'r+', encoding='utf-8') as f:
-            temp_path = json.load(f)['path']
+            temp_path = new_path if new_path else json.load(f)['path']
             f.seek(0)
             f.truncate()
             json.dump({'path': temp_path, 
@@ -530,8 +532,8 @@ class FANUCE_IDE:
             f.write(f'Support={main_dir}\\resources\\Robot_1\\support\n')
             f.write(f'Output={main_dir}\\resources\\Robot_1\\output\n')
     
-    def _open_local_folder(self):
-        open_folder = filedialog.askdirectory(title=self.translate('choice_folder'),
+    def _open_local_folder(self, l_path=''):
+        open_folder = l_path if l_path else filedialog.askdirectory(title=self.translate('choice_folder'),
                                               initialdir=self.CURRENT_DIRICTORY)
         if not open_folder:
             return
@@ -722,11 +724,7 @@ class FANUCE_IDE:
                                                      initialfile=filename,
                                                      title=self.translate('dnld')).replace('/', '\\')
             if not file_path:
-                ans = messagebox.askyesno(self.translate('download_cancel'),
-                                          self.translate('ask_download_cancel'),
-                                          icon='question')
-                if ans:
-                    return
+                return
             elif file_path:
                 break
         try:
