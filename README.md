@@ -16,7 +16,7 @@ A program for viewing, downloading, editing and sending LS (TP) and PC (KL) file
 - The ability to view the program without saving it to disk
 - Editing the header information of an ls file (Edit -> LS -> Configure the file)
 - Program search (Ctrl+F)
-- The ability to download a backup (Robot -> Robot backup)
+- The ability to download a **backup** (Robot -> Robot backup)
 - Import\export saved servers
 
 ## ROBOT INFORMATION
