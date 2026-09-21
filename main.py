@@ -1,4 +1,4 @@
-import tkinter as tk, os, json, shutil, subprocess, sys
+import tkinter as tk, os, json, shutil, subprocess, sys, configparser
 from tkinter.ttk import Progressbar
 from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
@@ -6,7 +6,7 @@ from src.ls_settings import LSSettingsWindow
 from ftplib import FTP
 from threading import Thread
 from datetime import datetime
-from src.conf import LANGUAGES, CURRENT_LANGUAGE
+from src.conf import LANGUAGES, CURRENT_LANGUAGE, SINTAX_WORDS
 
 class FANUCE_IDE:
     def __init__(self, root):
@@ -28,14 +28,17 @@ class FANUCE_IDE:
             self.CURRENT_DIRICTORY = temp['path']
             self.language = temp['lang']
             self.root.geometry(temp['geo'])
-        if not os.path.exists(f'{self.cache_folder}\\robot.ini'):
-            self._create_robot_ini(self.cache_folder)
+        self.check_robot_ini(self.cache_folder, self.PROJECT_DIRICTORY)
         self.files_queue = []
         self.buffer_header, self.buffer_asser, self.target_server_name = '', '', ''
         self.target_server, self.all_servers = {}, {}
         self.is_modified = False
         self.SysKeys = ["Control_R", "Control_L", "Alt_L", "Alt_R", "Escape", "Shift_L", "Shift_R"]
         self.del_stoppers = [" ", ",", ".", "!", "?", ";", ":", "-", "(", ")", "\\", "/", "="]
+        self.keywords = SINTAX_WORDS['keywords']
+        self.logic = SINTAX_WORDS['logic']
+        self.data = SINTAX_WORDS['data']
+        self.point = SINTAX_WORDS['point']
         self.is_karel = False
         self.filter_server_files = tk.IntVar(value=1)
         self.ls_info = {}
@@ -140,12 +143,12 @@ class FANUCE_IDE:
             yscrollcommand=self.scrollbarY.set,
             wrap=tk.NONE, 
             pady=2,
-            font=("Consolas", 10),
+            font=("Consolas", 12),
             width=80, 
             height=25,
-            state='disabled'
+            state='disable'
         )
-        self.search_bar = SearchBar(self.text_area, self.translate)
+        self.search_bar = SearchBar(self.text_area, self.translate, self)
         search_button.config(command=self.search_bar.show)
         self.line_numbers = tk.Text(
             code_frame,
@@ -154,7 +157,7 @@ class FANUCE_IDE:
             pady=2,
             takefocus=0,
             border=0,
-            font=("Consolas", 10),
+            font=("Consolas", 12),
             background='lightgray',
             foreground='gray',
             state='disabled'
@@ -195,10 +198,16 @@ class FANUCE_IDE:
         self.text_area.bind('<<Modified>>', self.highlight_code)
         self.text_area.bind("<Control-KeyPress>", self.on_ctrl_keypress)
         # Настраиваем тег для подсветки
-        self.text_area.tag_config("comments",
+        self.text_area.tag_config('comments',
                                   foreground="black",      # цвет текста
-                                  background="yellow",        # цвет фона
-                                  font=("Consolas", 10, "bold"))  # шрифт
+                                  background="#f0ff6a",        # цвет фона
+                                  font=("Consolas", 10, 'italic'))  # шрифт
+        self.text_area.tag_configure('keywords', foreground="#FA8A0B", font=('bold'))
+        self.text_area.tag_configure('logic', foreground="#BA7AC7", font=('bold'))
+        self.text_area.tag_configure('ON', foreground="#00c020", font=('bold'))
+        self.text_area.tag_configure('OFF', foreground="#910000", font=('bold'))
+        self.text_area.tag_configure('data', foreground="#278fb8")
+        self.text_area.tag_configure('point', foreground="#3337ff")
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)  # Обработка закрытия окна
         # Настройка прокрутки
         self.text_area.config(yscrollcommand=self.sync_scroll)
@@ -212,19 +221,64 @@ class FANUCE_IDE:
             self.open_file(sys.argv[1])
 
 
-    def highlight_code(self, event=None):
+    def highlight_code(self, event=None, find=''):
+        print("kbfgy")
         # Удаляем все теги подсветки
         self.text_area.tag_remove("comments", "1.0", tk.END)
+        self.text_area.tag_remove("search", "1.0", tk.END)
+        self.text_area.tag_remove("sel", "1.0", tk.END)
+        self.text_area.tag_remove("keywords", "1.0", tk.END)
+        self.text_area.tag_remove("logic", "1.0", tk.END)
+        self.text_area.tag_remove("data", "1.0", tk.END)
+        self.text_area.tag_remove("point", "1.0", tk.END)
+        self.text_area.tag_remove("ON", "1.0", tk.END)
+        self.text_area.tag_remove("OFF", "1.0", tk.END)
         # Получаем весь текст
         content = self.text_area.get("1.0", tk.END)
         lines = content.splitlines()
         for line_num, line in enumerate(lines, start=1):
+            for word in self.keywords:
+                if word in line:
+                    start = f'{line_num}.{line.index(word)}'
+                    end = f'{start}+{len(word)}c'
+                    self.text_area.tag_add("keywords", start, end)
+            for word in self.logic:
+                if word in line:
+                    start = f'{line_num}.{line.index(word)}'
+                    end = f'{start}+{len(word)}c'
+                    self.text_area.tag_add("logic", start, end)
+            for word in self.point:
+                if word in line and line.index(word) <= 2:
+                    start = f'{line_num}.{line.index(word)}'
+                    end = f'{start}+{len(word)}c'
+                    self.text_area.tag_add("point", start, end)
+            if '=ON' in line:
+                start = f'{line_num}.{line.index('=ON')+1}'
+                end = f'{start}+{len('=ON')-1}c'
+                self.text_area.tag_add("ON", start, end)
+            if '=OFF' in line:
+                start = f'{line_num}.{line.index('=OFF')+1}'
+                end = f'{start}+{len('=OFF')-1}c'
+                self.text_area.tag_add("OFF", start, end)
             if '!' in line and line.index('!') < 3:
                 # Координаты начала и конца строки
-                start = f"{line_num}.0"
+                start = f"{line_num}.{line.index('!')}"
                 end = f"{line_num}.{len(line)}"
                 # Применяем тег к строке
                 self.text_area.tag_add("comments", start, end)
+        if find:
+            start = '1.0'
+            count = 0
+            while True:
+                pos = self.text_area.search(find, start, stopindex='end', nocase=True)
+                if not pos:
+                    break
+                # Вычисляем конец найденного фрагмента
+                end = f"{pos}+{len(find)}c"
+                self.text_area.tag_remove('comments', pos, end)
+                self.text_area.tag_add('search', pos, end)
+                start = end
+                count += 1
     
     def create_menu(self):
         menubar = tk.Menu(self.root)
@@ -522,15 +576,25 @@ class FANUCE_IDE:
             self.local_path_label.config(text=self.CURRENT_DIRICTORY)
             self.CURRENT_DIRICTORY = parent
         
-    def _create_robot_ini(self, main_dir):
-        with open(f'{main_dir}\\robot.ini', 'w', encoding='utf-8') as f:
+    def check_robot_ini(self, cache_dir, project_dir):
+        if not os.path.exists(f'{self.cache_folder}\\robot.ini'):
+            self._create_robot_ini(cache_dir, project_dir)
+        else:
+            config = configparser.ConfigParser()
+            config.read(f'{self.cache_folder}\\robot.ini')
+            path = config["WinOLPC_Util"]["Robot"]
+            if not self.PROJECT_DIRICTORY in path:
+                self._create_robot_ini(cache_dir, project_dir)
+
+    def _create_robot_ini(self, cache_dir, project_dir):
+        with open(f'{cache_dir}\\robot.ini', 'w', encoding='utf-8') as f:
             print('Creating robot.ini...')
             f.write('[WinOLPC_Util]\n')
-            f.write(f'Robot={main_dir}\\resources\\Robot_1\n')
+            f.write(f'Robot={project_dir}\\resources\\Robot_1\n')
             f.write('Version=V9.10-1\n')
-            f.write(f'Path={main_dir}\\resources\\V910-1\\bin\n')
-            f.write(f'Support={main_dir}\\resources\\Robot_1\\support\n')
-            f.write(f'Output={main_dir}\\resources\\Robot_1\\output\n')
+            f.write(f'Path={project_dir}\\resources\\V910-1\\bin\n')
+            f.write(f'Support={project_dir}\\resources\\Robot_1\\support\n')
+            f.write(f'Output={project_dir}\\resources\\Robot_1\\output\n')
     
     def _open_local_folder(self, l_path=''):
         open_folder = l_path if l_path else filedialog.askdirectory(title=self.translate('choice_folder'),
@@ -942,6 +1006,7 @@ class FANUCE_IDE:
                         self.edit_menu.entryconfig('KL', state=tk.DISABLED)
                 except Exception as e:
                     self.show_info(f'{self.translate('couldnt_open_file')}: {e}', 2, 1)
+        self.highlight_code()
 
     def save_file(self, event=None):
         """Сохраняет файл, если он уже существует, иначе вызывает 'Сохранить как'."""
@@ -1021,6 +1086,7 @@ class FANUCE_IDE:
 
     def new_input(self, event):
         """Обработка нового ввода."""
+        print(event)
         if not self.CURRENT_FILE or self.is_temp:
             return
         if event.keycode == 9: # 9 - tab
@@ -1040,6 +1106,8 @@ class FANUCE_IDE:
             if self.text_area.get(start_index, cursor_index) == " " * 4:
                 self.text_area.delete(start_index, cursor_index)
                 return "break"  # Предотвращает стандартное поведение BackSpace
+        elif event.keysym == 'Control_L':
+            return "continue"
         else:
             self.is_modified = True
         self.update_line_numbers()
@@ -1068,7 +1136,7 @@ class FANUCE_IDE:
         self.line_numbers.config(state=tk.DISABLED)
         # Синхронизируем прокрутку
         self.line_numbers.yview_moveto(self.text_area.yview()[0])
-        self.highlight_code()
+        # self.highlight_code()
 
     def show_ftp_settings(self):
         """Открывает окно настроек FTP"""
@@ -1141,7 +1209,8 @@ class FANUCE_IDE:
             self.root.after(100, self.tread_service)
 
 class SearchBar:
-    def __init__(self, text_widget, translater):
+    def __init__(self, text_widget, translater, ide):
+        self.ide = ide
         self.view = False
         self.translate = translater
         self.text = text_widget
@@ -1159,7 +1228,8 @@ class SearchBar:
         # Инициализация позиции и видимости
         self.hide()        
         # Настройка тега для подсветки найденного
-        self.text.tag_configure('search', background="#CA9FC1", foreground="#CCCCCC")
+        self.text.tag_configure('search', background="#BAEBEC", foreground="#000000")
+        self.text.tag_configure('sel', background="#4C56DF", foreground="#000000")
         
         # Привязка горячих клавиш
         self.text.bind('<Control-f>', lambda e: self.show())
@@ -1181,34 +1251,15 @@ class SearchBar:
     def hide(self):
         """Скрыть панель поиска и снять подсветку"""
         self.frame.place_forget()
-        self.text.tag_remove('search', '1.0', 'end')
+        self.ide.highlight_code(find='')
         self.view = False
         
     def find_all(self, no_first=False):
         """Найти все вхождения и подсветить их"""
-        self.text.tag_remove('search', '1.0', 'end')
         query = self.entry.get()
         if not query:
             return
-        
-        # Настройки поиска
-        start = '1.0'
-        count = 0
-        while True:
-            pos = self.text.search(query, start, stopindex='end', nocase=True)
-            if not pos:
-                break
-            # Вычисляем конец найденного фрагмента
-            end = f"{pos}+{len(query)}c"
-            self.text.tag_add('search', pos, end)
-            start = end
-            count += 1
-        
-        # Если есть результаты, переходим к первому
-        if count > 0 and not no_first:
-            self.text.tag_remove('sel', '1.0', 'end')
-            self.text.tag_add('sel', '1.0', f"1.0+{len(query)}c")
-            self.text.see('1.0')
+        self.ide.highlight_code(find=query)
     
     def find_next(self):
         """Найти следующее вхождение"""
@@ -1216,28 +1267,19 @@ class SearchBar:
         if not query:
             return        
         # Текущая позиция курсора (начало выделения или позиция вставки)
-        try:
-            sel_start = self.text.index('sel.first')
-        except tk.TclError:
-            sel_start = self.text.index('insert')        
+        sel_start = self.text.index('insert')
         # Ищем от текущей позиции
         pos = self.text.search(query, sel_start, stopindex='end', nocase=True)
-        if pos:
-            end = f"{pos}+{len(query)}c"
-            self.text.tag_remove('sel', '1.0', 'end')
-            self.text.tag_add('sel', pos, end)
-            self.text.see(pos)
-            # Дополнительно подсветим все вхождения
-            self.find_all(True)
-        else:
-            # Если не нашли, можно зациклить с начала
+        if not pos:
             pos = self.text.search(query, '1.0', stopindex='end', nocase=True)
-            if pos:
-                end = f"{pos}+{len(query)}c"
-                self.text.tag_remove('sel', '1.0', 'end')
-                self.text.tag_add('sel', pos, end)
-                self.text.see(pos)
-                self.find_all()
+        self.find_all()
+        end = self.text.index(f"{pos}+{len(query)}c")
+        self.text.tag_remove('comments', pos, end)
+        self.text.tag_remove('search', pos, end)
+        self.text.tag_add('sel', pos, end)
+        self.text.see(pos)
+        self.text.mark_set("insert", f'{pos}+{len(query)}c')
+        self.text.focus_set()
 
 if __name__ == "__main__":
     root = tk.Tk()
