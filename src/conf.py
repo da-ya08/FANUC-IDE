@@ -213,17 +213,17 @@ LANGUAGES = {
 
 SINTAX_WORDS = {
 'keywords': [
-            'WAIT', 'CALL', 'PAUSE',
-            'SKIP', 'JMP', 'RUN'
+            ' WAIT', ' CALL', ' PAUSE',
+            ' SKIP', ' JMP', ' RUN'
             ],
 'logic': [
-         'ENDIF','THEN', 'ELSE', 'IF', ' AND ', ' OR '
+         'ENDIF',' THEN', 'ELSE', 'IF', ' AND ', ' OR '
          ],
 'data': [
          'DO', 'DI', 'F', 'R', 'P', 'PR',
          ],
 'point': [
-         'J ', 'L '
+         ' J ', ' L '
          ]
 }
 
