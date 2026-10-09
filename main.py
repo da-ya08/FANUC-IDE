@@ -609,7 +609,6 @@ class FANUCE_IDE:
 
     def _create_robot_ini(self, cache_dir, project_dir):
         with open(f'{cache_dir}\\robot.ini', 'w', encoding='utf-8') as f:
-            self.show_info('Creating robot.ini...')
             f.write('[WinOLPC_Util]\n')
             f.write(f'Robot={project_dir}\\resources\\Robot_1\n')
             f.write('Version=V9.10-1\n')
