@@ -1,49 +1,47 @@
 import tkinter as tk, os, json, shutil, subprocess, sys, configparser
-from tkinter.ttk import Progressbar
-from tkinter import filedialog, messagebox, ttk, Menu, simpledialog
+from tkinter.ttk import Progressbar, Combobox, Treeview, Button, Scrollbar, Label, Entry
+from tkinter import filedialog, messagebox, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
 from src.ls_settings import LSSettingsWindow
+from src.conf import LANGUAGES, CURRENT_LANGUAGE, SINTAX_WORDS
 from ftplib import FTP
 from threading import Thread
 from datetime import datetime
-from src.conf import LANGUAGES, CURRENT_LANGUAGE, SINTAX_WORDS
 
 class FANUCE_IDE:
     def __init__(self, root):
-        self.root = root
-        self.root.title("FANUC IDE")
-        self.root.minsize(width=600, height=400) 
-        self.PROJECT_DIRICTORY = '\\'.join(__file__.split('\\')[:-1])
-        self.language = 'en'
-        os.chdir(self.PROJECT_DIRICTORY)
-        self.root.iconbitmap(f'{self.PROJECT_DIRICTORY}\\resources\\icon.ico')
-        self.cache_folder = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE'
-        self.SERVERS_FILE = f'{self.cache_folder}\\servers_list.json'
-        self.CURRENT_FILE: str = ''
-        self.CURRENT_DIRICTORY = self.PROJECT_DIRICTORY
-        if not os.path.exists(f'{self.cache_folder}\\cache.json'):
-            self._create_config_file()
-        with open(f'{self.cache_folder}\\cache.json', 'r', encoding='utf-8') as f:
-            temp = json.load(f)
-            self.CURRENT_DIRICTORY = temp['path']
-            self.language = temp['lang']
-            self.root.geometry(temp['geo'])
-        self.check_robot_ini(self.cache_folder, self.PROJECT_DIRICTORY)
         self.files_queue = []
-        self.buffer_header, self.buffer_asser, self.target_server_name = '', '', ''
-        self.target_server, self.all_servers = {}, {}
-        self.is_modified = False
-        self.SysKeys = ["Control_R", "Control_L", "Alt_L", "Alt_R", "Escape", "Shift_L", "Shift_R"]
-        self.del_stoppers = [" ", ",", ".", "!", "?", ";", ":", "-", "(", ")", "\\", "/", "="]
+        self.buffer_header, self.buffer_asser, self.target_server_name, self.CURRENT_FILE = '', '', '', ''
+        self.target_server, self.all_servers, self.ls_info = {}, {}, {}
+        self.del_stoppers = [' ', ',', '.', '!', '?', ';', ':', '-', '(', ')', '\\', '/', '=']
         self.keywords = SINTAX_WORDS['keywords']
         self.logic = SINTAX_WORDS['logic']
         self.data = SINTAX_WORDS['data']
         self.point = SINTAX_WORDS['point']
-        self.is_karel = False
         self.filter_server_files = tk.IntVar(value=1)
-        self.ls_info = {}
+        self.is_modified = False
+        self.is_karel = False
         self.is_temp = False
         self.backuping = False
+        self.language = 'en'
+        self.cache_folder = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE'
+        self.SERVERS_FILE = f'{self.cache_folder}\\servers_list.json'
+
+        self.root = root
+        self.root.title('FANUC IDE')
+        self.root.minsize(width=600, height=400) 
+        self.PROJECT_DIRICTORY = '\\'.join(__file__.split('\\')[:-1])
+        self.CURRENT_DIRICTORY = self.PROJECT_DIRICTORY
+        os.chdir(self.PROJECT_DIRICTORY)
+        self.root.iconbitmap(f'{self.PROJECT_DIRICTORY}\\resources\\icon.ico')
+        if not os.path.exists(f'{self.cache_folder}\\cache.json'):
+            self._create_config_file()
+        with open(f'{self.cache_folder}\\cache.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            self.CURRENT_DIRICTORY = data['path']
+            self.language = data['lang']
+            self.root.geometry(data['geo'])
+        self.check_robot_ini(self.cache_folder, self.PROJECT_DIRICTORY)
 
         ''' Главное окно '''
         toolbar = tk.Frame(self.root, height=20)
@@ -69,19 +67,19 @@ class FANUCE_IDE:
         servers_menubar = tk.Frame(left_paned, height=20)
         left_paned.add(servers_menubar, minsize=20)
         tk.Label(servers_menubar, text=f'{self.translate('robot')}:').pack(side=tk.LEFT, expand=False, padx=2)
-        self.server_combobox = ttk.Combobox(servers_menubar, state="readonly")
+        self.server_combobox = Combobox(servers_menubar, state='readonly')
         self.server_combobox.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
         self.server_combobox.bind('<<ComboboxSelected>>', self._on_server_selected)
-        self.ftp_settings_but = ttk.Button(servers_menubar, width=4, text='⚙', command=self.show_ftp_settings)
+        self.ftp_settings_but = Button(servers_menubar, width=4, text='⚙', command=self.show_ftp_settings)
         self.ftp_settings_but.pack(side=tk.RIGHT, padx=2, expand=False)
         files_paned = tk.PanedWindow(left_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED)
         left_paned.add(files_paned, minsize=100)  # Основная область с разделителем
         # Панель файлового дерева
         file_tree_frame = tk.Frame(files_paned)
         file_tree_frame.pack(expand=True, fill='both')
-        tree_scroll = ttk.Scrollbar(file_tree_frame)
+        tree_scroll = Scrollbar(file_tree_frame)
         tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
-        self.file_tree = ttk.Treeview(
+        self.file_tree = Treeview(
             file_tree_frame,
             yscrollcommand=tree_scroll.set,
             show='tree',
@@ -97,11 +95,11 @@ class FANUCE_IDE:
         self.local_nav_frame = tk.Frame(local_file_tree_frame)
         self.local_nav_frame.pack(fill='x')
 
-        self.local_path_label = ttk.Label(self.local_nav_frame, text=self.CURRENT_DIRICTORY)
+        self.local_path_label = Label(self.local_nav_frame, text=self.CURRENT_DIRICTORY)
         self.local_path_label.pack(side='left', fill='x', expand=True)
-        local_tree_scroll = ttk.Scrollbar(local_file_tree_frame)
+        local_tree_scroll = Scrollbar(local_file_tree_frame)
         local_tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
-        self.local_file_tree = ttk.Treeview(
+        self.local_file_tree = Treeview(
             local_file_tree_frame,
             yscrollcommand=local_tree_scroll.set,
             show='tree',
@@ -109,7 +107,7 @@ class FANUCE_IDE:
         )
         self.local_file_tree.pack(expand=True, fill='both', padx=2, pady=2)
         local_tree_scroll.config(command=self.local_file_tree.yview)
-        self.local_file_tree.bind("<Double-1>", self._on_local_file_double_click)
+        self.local_file_tree.bind('<Double-1>', self._on_local_file_double_click)
         files_paned.add(local_file_tree_frame, minsize=100)
         self.file_tree.tag_configure('folder', foreground='blue')
         self.file_tree.tag_configure('file', foreground='black')
@@ -123,13 +121,13 @@ class FANUCE_IDE:
         menu_code_frame.pack(side=tk.TOP, fill=tk.X)
         self.CURRENT_FILE_path_menubar = tk.Label(
             menu_code_frame, 
-            justify="left", 
-            font=("Calibri", 10), 
-            cursor="arrow", 
+            justify='left', 
+            font=('Calibri', 10), 
+            cursor='arrow', 
             text=self.translate('menubar_code')
         )
         self.CURRENT_FILE_path_menubar.pack(side=tk.LEFT, fill=tk.X)
-        search_button = ttk.Button(menu_code_frame,
+        search_button = Button(menu_code_frame,
                                       text='🔎',
                                       width=5)
         search_button.pack(fill='none', side='right')
@@ -143,7 +141,7 @@ class FANUCE_IDE:
             yscrollcommand=self.scrollbarY.set,
             wrap=tk.NONE, 
             pady=2,
-            font=("Consolas", 12),
+            font=('Consolas', 12),
             width=80, 
             height=25,
             state='disabled'
@@ -157,7 +155,7 @@ class FANUCE_IDE:
             pady=2,
             takefocus=0,
             border=0,
-            font=("Consolas", 12),
+            font=('Consolas', 12),
             background='lightgray',
             foreground='gray',
             state='disabled'
@@ -169,25 +167,25 @@ class FANUCE_IDE:
         # Toolbar
         t_toolbar = tk.Frame(toolbar, height=20)
         t_toolbar.pack(side='left', fill='x')
-        self.new_file_button = ttk.Button(t_toolbar,
+        self.new_file_button = Button(t_toolbar,
                                       text=f'📃{self.translate('new')}',
                                       command=self.new_file)
         self.new_file_button.pack(fill='none', side='left')
-        self.open_button = ttk.Button(t_toolbar,
+        self.open_button = Button(t_toolbar,
                                       text=f'📁{self.translate('open')}',
                                       command=self.open_file)
         self.open_button.pack(fill='none', side='left')
-        self.toolbar_save_button = ttk.Button(t_toolbar,
+        self.toolbar_save_button = Button(t_toolbar,
                                       text=f'💾{self.translate('save')}',
                                       command=self.save_file)
         self.toolbar_save_button.pack(fill='none', side='left')
         tk.Frame(t_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
-        self.toolbar_send_button = ttk.Button(t_toolbar,
+        self.toolbar_send_button = Button(t_toolbar,
                                       text=f'📤{self.translate('send')}',
                                       command=self.send_file,
                                       state='disable')
         self.toolbar_send_button.pack(fill='none', side='left')
-        self.toolbar_compile_button = ttk.Button(t_toolbar,
+        self.toolbar_compile_button = Button(t_toolbar,
                                       text=f'🛠{self.translate('compile')}',
                                       command=self.copmile_karel,
                                       state='disable')
@@ -196,28 +194,26 @@ class FANUCE_IDE:
         tr_toolbar = tk.Frame(toolbar, height=20)
         tr_toolbar.pack(side='right', fill='x')
         tk.Frame(tr_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
-        self.toolbar_backup_button = ttk.Button(tr_toolbar,
+        self.toolbar_backup_button = Button(tr_toolbar,
                                                 text=f'🗃{self.translate('r_backup')}',
                                                 command=self.robot_backup,
                                                 state='enable')
         self.toolbar_backup_button.pack(fill='none', side='right')
 
-        self.text_area.bind("<KeyPress>", self.new_input)
-        self.text_area.bind("<KeyRelease>", self.update_line_numbers)
-        self.text_area.bind('<<Modified>>', self.highlight_code)
-        self.text_area.bind("<Control-KeyPress>", self.on_ctrl_keypress)
+        self.text_area.bind('<KeyPress>', self.new_input)
+        self.text_area.bind('<KeyRelease>', self.update_line_numbers)
         # Настраиваем тег для подсветки
         self.text_area.tag_config('comments',
-                                  foreground="black",      # цвет текста
-                                  background="#f0ff6a",        # цвет фона
-                                  font=("Consolas", 10, 'italic'))  # шрифт
-        self.text_area.tag_configure('keywords', foreground="#FA8A0B", font=('bold'))
-        self.text_area.tag_configure('logic', foreground="#BA7AC7", font=('bold'))
-        self.text_area.tag_configure('ON', foreground="#00c020", font=('bold'))
-        self.text_area.tag_configure('OFF', foreground="#910000", font=('bold'))
-        self.text_area.tag_configure('data', foreground="#278fb8")
-        self.text_area.tag_configure('point', foreground="#3337ff")
-        self.root.protocol("WM_DELETE_WINDOW", self.on_close)  # Обработка закрытия окна
+                                  foreground='black',      # цвет текста
+                                  background='#f0ff6a',        # цвет фона
+                                  font=('Consolas', 10, 'italic'))  # шрифт
+        self.text_area.tag_configure('keywords', foreground='#FA8A0B', font=('bold'))
+        self.text_area.tag_configure('logic', foreground='#BA7AC7', font=('bold'))
+        self.text_area.tag_configure('ON', foreground='#00c020', font=('bold'))
+        self.text_area.tag_configure('OFF', foreground='#910000', font=('bold'))
+        self.text_area.tag_configure('data', foreground='#278fb8')
+        self.text_area.tag_configure('point', foreground='#3337ff')
+        self.root.protocol('WM_DELETE_WINDOW', self.on_close)  # Обработка закрытия окна
         # Настройка прокрутки
         self.text_area.config(yscrollcommand=self.sync_scroll)
         self.line_numbers.config(yscrollcommand=self.sync_scroll)
@@ -232,15 +228,15 @@ class FANUCE_IDE:
 
     def highlight_code(self, event=None, find=''):
         # Удаляем все теги подсветки
-        self.text_area.tag_remove("comments", "1.0", tk.END)
-        self.text_area.tag_remove("search", "1.0", tk.END)
-        self.text_area.tag_remove("sel", "1.0", tk.END)
-        self.text_area.tag_remove("keywords", "1.0", tk.END)
-        self.text_area.tag_remove("logic", "1.0", tk.END)
-        self.text_area.tag_remove("data", "1.0", tk.END)
-        self.text_area.tag_remove("point", "1.0", tk.END)
-        self.text_area.tag_remove("ON", "1.0", tk.END)
-        self.text_area.tag_remove("OFF", "1.0", tk.END)
+        self.text_area.tag_remove('comments', "1.0", tk.END)
+        self.text_area.tag_remove('search', "1.0", tk.END)
+        self.text_area.tag_remove('sel', "1.0", tk.END)
+        self.text_area.tag_remove('keywords', "1.0", tk.END)
+        self.text_area.tag_remove('logic', "1.0", tk.END)
+        self.text_area.tag_remove('data', "1.0", tk.END)
+        self.text_area.tag_remove('point', "1.0", tk.END)
+        self.text_area.tag_remove('ON', "1.0", tk.END)
+        self.text_area.tag_remove('OFF', "1.0", tk.END)
         # Получаем весь текст
         content = self.text_area.get("1.0", tk.END)
         lines = content.splitlines()
@@ -333,24 +329,24 @@ class FANUCE_IDE:
         self._add_tree_context_menu(self.file_tree)
         self._add_local_tree_context_menu(self.local_file_tree)
 
-    def _add_text_context_menu(self, text_widget, level=1):
+    def _add_text_context_menu(self, text_widget):
         """Добавляет контекстное меню для Text виджетов"""
         menu = Menu(text_widget, tearoff=0)
         menu.add_command(label=self.translate('copy'), command=lambda: text_widget.event_generate("<<Copy>>"))
-        if level == 1:
-            menu.add_command(label=self.translate('paste'), command=lambda: text_widget.event_generate("<<Paste>>"))
-            menu.add_command(label=self.translate('cut'), command=lambda: text_widget.event_generate("<<Cut>>"))
+        menu.add_command(label=self.translate('paste'), command=lambda: text_widget.event_generate("<<Paste>>"))
+        menu.add_command(label=self.translate('cut'), command=lambda: text_widget.event_generate("<<Cut>>"))
         menu.add_separator()
         menu.add_command(label=self.translate('select_all'), 
                        command=lambda: text_widget.tag_add("sel", "1.0", "end"))
 
         # Привязка к правой кнопке мыши
-        text_widget.bind("<Button-3>", lambda e: menu.tk_popup(e.x_root, e.y_root))
+        text_widget.bind('<Button-3>', lambda e: menu.tk_popup(e.x_root, e.y_root))
 
         # Добавляем горячие клавиши
-        text_widget.bind("<Control-c>", lambda e: text_widget.event_generate("<<Copy>>"))
-        text_widget.bind("<Control-x>", lambda e: text_widget.event_generate("<<Cut>>"))
-        text_widget.bind("<Control-a>", lambda e: text_widget.tag_add("sel", "1.0", "end"))
+        text_widget.bind('<Control-c>', lambda e: text_widget.event_generate("<<Copy>>"))
+        text_widget.bind('<Control-x>', lambda e: text_widget.event_generate("<<Cut>>"))
+        text_widget.bind('<Control-a>', lambda e: text_widget.tag_add("sel", "1.0", "end"))
+        text_widget.bind('<Control-s>', self.save_file)
     
     def _add_tree_context_menu(self, widget):
         menu = Menu(widget, tearoff=0)
@@ -360,7 +356,7 @@ class FANUCE_IDE:
         menu.add_separator()
         menu.add_command(label=self.translate('refresh'), command=self.refresh_file_list)
         menu.add_checkbutton(label=self.translate('filter'), command=self.refresh_file_list, variable=self.filter_server_files)
-        widget.bind("<Button-3>", lambda e: menu.tk_popup(e.x_root, e.y_root))
+        widget.bind('<Button-3>', lambda e: menu.tk_popup(e.x_root, e.y_root))
     
     def _add_local_tree_context_menu(self, widget):
         menu = Menu(widget, tearoff=0)
@@ -371,7 +367,7 @@ class FANUCE_IDE:
         menu.add_command(label=self.translate('open_folder'), command=self._open_local_folder)
         menu.add_command(label=self.translate('create_folder'), command=self._create_folder)
         menu.add_command(label=self.translate('refresh'), command=self.update_local_files)
-        widget.bind("<Button-3>", lambda e: menu.tk_popup(e.x_root, e.y_root))
+        widget.bind('<Button-3>', lambda e: menu.tk_popup(e.x_root, e.y_root))
     
     def robot_backup(self, event=''):
         """Создание резервной копии робота"""
@@ -379,11 +375,11 @@ class FANUCE_IDE:
         if not selected_name:
             self.show_info(self.translate('no_select_server'), 1, True)
             return
-        selected_dir = filedialog.askdirectory(title="Backup папка",
+        selected_dir = filedialog.askdirectory(title='Backup папка',
                                                initialdir=self.CURRENT_DIRICTORY).replace('/', '\\')
         if not selected_dir:
             return
-        selected_dir = selected_dir+f'\\{selected_name}_{datetime.now().strftime("%d%m%Y_%H%M")}\\'
+        selected_dir = selected_dir+f'\\{selected_name}_{datetime.now().strftime('%d%m%Y_%H%M')}\\'
         target_server = self.all_servers[selected_name]
         self.download_progress_bar.pack(fill='none', side='right')
         self.root.after(100, self.tread_service)
@@ -426,6 +422,7 @@ class FANUCE_IDE:
         self.show_info(f'{self.translate('downloaded')}{fact_files}/{total_files}', 0, True)
         self.download_progress_bar.pack_forget()
         self.download_progress_bar.config(value=0)
+        self.files_queue = []
         self.backuping = False
     
     def _change_def_dir(self):
@@ -579,11 +576,6 @@ class FANUCE_IDE:
             except:
                 self.show_info(f'{self.translate('couldnt_send_file')}: {e}', 2, True)
         ftp.quit()
-
-    def on_ctrl_keypress(self, event):
-        """Обрабатывает сочетания клавиш с Ctrl."""
-        if event.keycode == 83 or event.keycode == 1067:  # 83 - 's', 1067 - 'ы'
-            self.save_file()
 
     def _local_nav_back(self):
         """Переходит в родительскую папку для локальных файлов"""
@@ -1138,6 +1130,7 @@ class FANUCE_IDE:
             self.toolbar_compile_button.config(state='enable')
         elif not self.is_temp and not self.is_karel:
             self.toolbar_send_button.config(state='enable')
+        self.highlight_code()
 
     def update_line_numbers(self, event=None):
         """Обновляет номера строк с выравниванием по правому краю"""
@@ -1165,10 +1158,10 @@ class FANUCE_IDE:
             return
 
         self.ftp_window = FTPSettingsWindow(
-            parent=self.root,         # Передаем иконку
+            parent=self.root,
             lang=self.language,
-            callback=self._ftp_settings_close
-        )
+            callback=self._ftp_settings_close,
+            show_info=self.show_info)
     
     def _ftp_settings_close(self):
         self.update_server_list()
@@ -1181,8 +1174,7 @@ class FANUCE_IDE:
             parent=self.root,
             lang=self.language,
             callback=self._update_ls_header,
-            current_data=self.ls_info
-        )
+            current_data=self.ls_info)
     
     def _update_ls_header(self, new_data):
         if new_data:
@@ -1223,27 +1215,26 @@ class FANUCE_IDE:
     
     def tread_service(self):
         if self.files_queue:
-            for text in self.files_queue:
-                self.show_info(text)
+            self.show_info(self.files_queue[-1])
         if self.backuping:
             self.root.after(100, self.tread_service)
 
 class SearchBar:
-    def __init__(self, text_widget, translater, ide):
+    def __init__(self, text_widget: tk.Text, translater, ide):
         self.ide = ide
         self.view = False
         self.translate = translater
         self.text = text_widget
         self.frame = tk.Frame(self.text, bg="#9E9E9E", bd=1, relief='solid')        
         # Поле ввода
-        self.entry = ttk.Entry(self.frame, width=30)
+        self.entry = Entry(self.frame, width=30)
         self.entry.pack(side='left', padx=5, pady=5)        
         # Кнопки
-        self.btn_next = ttk.Button(self.frame, text=self.translate('find'), command=self.find_next, cursor='arrow')
+        self.btn_next = Button(self.frame, text=self.translate('find'), command=self.find_next, cursor='arrow')
         self.btn_next.pack(side='left', padx=2)
         
         # Закрыть (крестик)
-        self.btn_close = ttk.Button(self.frame, text='✖', width=2, command=self.hide, cursor='arrow')
+        self.btn_close = Button(self.frame, text='✖', width=2, command=self.hide, cursor='arrow')
         self.btn_close.pack(side='right', padx=2)        
         # Инициализация позиции и видимости
         self.hide()        
@@ -1254,6 +1245,7 @@ class SearchBar:
         # Привязка горячих клавиш
         self.text.bind('<Control-f>', lambda e: self.show())
         self.text.bind('<Escape>', lambda e: self.hide())
+        self.entry.bind('<Escape>', lambda e: self.hide())
         # Поиск при вводе текста (опционально)
         self.entry.bind('<KeyRelease>', lambda e: self.find_all())
         self.entry.bind('<Return>', lambda e: self.find_next())

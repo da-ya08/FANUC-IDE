@@ -10,8 +10,9 @@ class Entry(ttk.Entry):
         self.insert(0, text)
 
 class FTPSettingsWindow(tk.Toplevel):
-    def __init__(self, parent, lang, callback):
+    def __init__(self, parent, lang, callback, show_info):
         super().__init__(parent)
+        self.show_info = show_info
         self.language = lang
         self.title(self.translate('ftp_set'))
         self.geometry('450x500')
@@ -83,8 +84,7 @@ class FTPSettingsWindow(tk.Toplevel):
                                  f'{self.translate('import_error')}{e}')
             return None
         self.update_servers_list()
-        messagebox.showinfo(self.translate('success'),
-                            self.translate('imported'))
+        self.show_info(self.translate('imported'))
         self.save_servers()
     
     def _export_servers(self):
@@ -99,8 +99,7 @@ class FTPSettingsWindow(tk.Toplevel):
         except Exception as e:
             messagebox.showerror(self.translate('err'),
                                  f'{self.translate('export_error')}{e}')
-        messagebox.showinfo(self.translate('success'),
-                            self.translate('exported'))
+        self.show_info(self.translate('exported'))
 
     def _show_add_window(self):
         self.add_window = FTPAddWindow(
@@ -117,7 +116,7 @@ class FTPSettingsWindow(tk.Toplevel):
         self.edit_window = FTPEditWindow(
             parent=self,
             lang=self.language,
-            callback=self._save_servers,
+            callback=self._edit_save,
             server=self.servers_list[server_name],
             name=server_name
         )
@@ -128,7 +127,7 @@ class FTPSettingsWindow(tk.Toplevel):
             self.callback()  # Передаем обновленные настройки
         self.destroy()
     
-    def translate(self, key):
+    def translate(self, key: str):
         """Получение перевода по ключу"""
         return LANGUAGES[self.language].get(key, key)
 
@@ -168,8 +167,21 @@ class FTPSettingsWindow(tk.Toplevel):
         self.save_servers()
         self.update_servers_list()
     
-    def _save_servers(self, name, data):
-        pass
+    def _edit_save(self, name, adr, login='admin', pas=''):
+        """Добавляет новый сервер"""
+        edit_name = name
+        edit_adress = adr
+        edit_login = login
+        edit_password = pas
+        if not edit_name or not edit_adress:
+            messagebox.showwarning(self.translate('err'), self.translate('no_name_or_adress'))
+        self.servers_list[edit_name] = {
+            'adress': edit_adress,
+            'login': edit_login,
+            'pass': edit_password
+        }
+        self.save_servers()
+        self.update_servers_list()
 
     def save_servers(self):
         with open(self.servers_path, 'w', encoding='utf-8') as file:
@@ -194,12 +206,6 @@ class FTPAddWindow(tk.Toplevel):
         self.title(self.translate('ftp_set'))
         self.geometry('500x250')
         self.servers_path = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE\\servers_list.json'
-        # try:
-        #     with open(self.servers_path, 'r', encoding='utf-8') as file:
-        #         self.servers_list = json.load(file)
-        # except Exception as e:
-        #     with open(self.servers_path, 'w', encoding='utf-8') as file:
-        #         pass
         self.callback = callback
         self.protocol('WM_DELETE_WINDOW', self._on_close)
         self._create_edit_form(self)
@@ -245,7 +251,7 @@ class FTPAddWindow(tk.Toplevel):
         """Вызывается при закрытии окна"""
         self.destroy()
 
-    def translate(self, key):
+    def translate(self, key: str) -> str:
         """Получение перевода по ключу"""
         return LANGUAGES[self.language].get(key, key)
     
@@ -298,6 +304,7 @@ class FTPAddWindow(tk.Toplevel):
 class FTPEditWindow(tk.Toplevel):
     def __init__(self, parent, lang, callback, server, name):
         super().__init__(parent)
+        self.parent = parent
         self.language = lang
         self.title(self.translate('ftp_set'))
         self.geometry('500x250')
@@ -350,31 +357,32 @@ class FTPEditWindow(tk.Toplevel):
         btn_frame = tk.Frame(form_frame)
         btn_frame.grid(row=len(fields)+2, column=1, sticky='e', pady=10)   
         ttk.Button(btn_frame, text=self.translate('save'), command=self._close_and_save).pack(side='left', padx=2)     
-        ttk.Button(btn_frame, text=self.translate('con_test'), command=self._test_connection).pack(side='right', padx=5)
+        self.test_conn = ttk.Button(btn_frame, text=self.translate('con_test'), command=self._test_connection)
+        self.test_conn.pack(side='right', padx=5)
         ttk.Button(btn_frame, text=self.translate('cancel'), command=self._on_close).pack(side='right', padx=5)
 
     def _on_close(self):
         """Вызывается при закрытии окна"""
         self.destroy()
 
-    def translate(self, key):
+    def translate(self, key: str) -> str:
         """Получение перевода по ключу"""
         return LANGUAGES[self.language].get(key, key)
     
     def _close_and_save(self):
         """Добавляет сервер"""
         self.callback(self.entries['conn_name'].get(), self.entries['adress'].get(), self.entries['login'].get(), self.entries['pass'].get())
-        self._on_close
+        self._on_close()
     
     def _test_connection(self):
-        """Тестирует подключение"""        
+        """Тестирует подключение"""
+        ftp = FTP(timeout=5, encoding='cp1251')  
         try:
             # Получаем текущие настройки из формы
             adress = self.entries['adress'].get()
             if not adress:
                 messagebox.showerror(self.translate('err'), self.translate('no_adress'))
                 return
-            ftp = FTP(timeout=5, encoding='cp1251')
             ftp.connect(adress)
             user = self.entries['login'].get()
             pas = self.entries['pass'].get()
@@ -383,10 +391,8 @@ class FTPEditWindow(tk.Toplevel):
             try:
                 files = []
                 ftp.retrlines('LIST', files.append)
-                messagebox.showinfo(
-                    self.translate('success'), 
-                    f'{self.translate('con_success')}!\n{self.translate('found')} {len(files)} {self.translate('files')}.'
-                )
+                self.parent.show_info(f'{self.translate('con_success')}! {self.translate('found')} {len(files)} {self.translate('files')}.')
+                self.test_conn.config(text=f'{self.translate('con_success')}!\n{self.translate('found')} {len(files)} {self.translate('files')}.', state='disable')
             except Exception as e:
                 messagebox.showinfo(
                     self.translate('success'), 
@@ -401,8 +407,10 @@ class FTPEditWindow(tk.Toplevel):
                 self.translate('err'), 
                 self.translate('timeout')
             )
+            ftp.quit()
         except Exception as e:
             messagebox.showerror(
                 self.translate('err'), 
                 f'{self.translate('couldnt_connect')}:\n{str(e)}'
             )
+            ftp.quit()
