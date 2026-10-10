@@ -4,7 +4,7 @@ from tkinter import filedialog, messagebox, Menu, simpledialog
 from src.ftp_settings import  FTPSettingsWindow
 from src.ls_settings import LSSettingsWindow
 from src.conf import LANGUAGES, CURRENT_LANGUAGE, SINTAX_WORDS
-from ftplib import FTP
+from src.ftp_client.FTP_client import FTPClient
 from threading import Thread
 from datetime import datetime
 
@@ -42,6 +42,7 @@ class FANUCE_IDE:
             self.language = data['lang']
             self.root.geometry(data['geo'])
         self.check_robot_ini(self.cache_folder, self.PROJECT_DIRICTORY)
+        self.FTP = FTPClient()
 
         ''' Главное окно '''
         toolbar = tk.Frame(self.root, height=20)
@@ -230,7 +231,6 @@ class FANUCE_IDE:
         # Удаляем все теги подсветки
         self.text_area.tag_remove('comments', "1.0", tk.END)
         self.text_area.tag_remove('search', "1.0", tk.END)
-        self.text_area.tag_remove('sel', "1.0", tk.END)
         self.text_area.tag_remove('keywords', "1.0", tk.END)
         self.text_area.tag_remove('logic', "1.0", tk.END)
         self.text_area.tag_remove('data', "1.0", tk.END)
@@ -270,6 +270,7 @@ class FANUCE_IDE:
                 end = f"{line_num}.{len(line)}"
                 # Применяем тег к строке
                 self.text_area.tag_add("comments", start, end)
+        self.text_area.tag_raise("sel")
         if find:
             start = '1.0'
             count = 0
@@ -393,12 +394,9 @@ class FANUCE_IDE:
     def tread_backup(self, server, dir):
         total_files = 0
         fact_files = 0
-        ftp = FTP(timeout=5, encoding='cp1251')
         try:
-            ftp.connect(server['adress'])
-            login = server['login'] if server['login'] else 'admin'
-            ftp.login(login, server['pass'])
-            files = ftp.nlst()
+            self.FTP.connect(server['adress'], server['login'] if server['login'] else 'admin', server['pass'])
+            files = self.FTP.get_files_list()
             extensions = ['.va']  # NEНужные расширения
             files = [f for f in files if any(not f.lower().endswith(ext) for ext in extensions)]
             os.makedirs(os.path.dirname(dir))
@@ -408,7 +406,7 @@ class FANUCE_IDE:
                     if file[-1:-3:-1].lower() == 'av':
                         continue
                     with open(f'{dir}\\{file}', 'wb+') as f:
-                        ftp.retrbinary(f"RETR {file}", f.write)
+                        self.FTP.download_file(file, f.write)
                         fact_files += 1
                     self.files_queue.append(f'{self.translate('downloaded')}{fact_files}/{total_files}')
                     self.download_progress_bar.config(value=fact_files/total_files*100)
@@ -416,9 +414,7 @@ class FANUCE_IDE:
                     self.show_info(f'{self.translate('connection_error')}: {e}', 2, True)
         except Exception as e:
             self.show_info(f'{self.translate('connection_error')}: {e}', 2, True)
-            ftp.quit()
             return
-        ftp.quit()
         self.show_info(f'{self.translate('downloaded')}{fact_files}/{total_files}', 0, True)
         self.download_progress_bar.pack_forget()
         self.download_progress_bar.config(value=0)
@@ -546,36 +542,17 @@ class FANUCE_IDE:
                                    f'{self.translate('u_sure_to_send')}: {tmp_path}\n{self.translate('to_server')}: {self.target_server_name}?',
                                    icon='question'):
             return
-        ftp = FTP(timeout=7, encoding='cp1251')
         try:
-            ftp.connect(self.target_server['adress'])
-            log = self.target_server['login'] if self.target_server['login'] else 'admin'
-            ftp.login(log, self.target_server['pass'])
-            ftp.voidcmd('TYPE I')
+            self.FTP.connect(self.target_server['adress'], self.target_server['login'] if self.target_server['login'] else 'admin', self.target_server['pass'])
             with open(tmp_path, 'rb') as s_file:
                 if not self.is_karel and tmp_path == self.CURRENT_FILE:
-                    ftp.storbinary(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
+                    self.FTP.send_file(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
                 else:
-                    ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file) 
+                    self.FTP.send_file(f'STOR {tmp_path.split('\\')[-1]}', s_file)
             self.refresh_file_list()
             self.show_info(f'{self.translate('sending_file')} {tmp_path.split('\\')[-1]} {self.translate('was_success')}!')
         except Exception as e:
-            try:
-                ftp = FTP(timeout=7, encoding='cp1251')
-                ftp.connect(self.target_server['adress'])
-                log = self.target_server['login'] if self.target_server['login'] else 'admin'
-                ftp.login(log, self.target_server['pass'])
-                ftp.voidcmd('TYPE I')
-                with open(tmp_path, 'rb') as s_file:
-                    if not self.is_karel and tmp_path == self.CURRENT_FILE:
-                        ftp.storbinary(f'STOR {self.ls_info['name'].lower()}.ls', s_file)
-                    else:
-                        ftp.storbinary(f'STOR {tmp_path.split('\\')[-1]}', s_file) 
-                self.refresh_file_list()
-                self.show_info(f'{self.translate('sending_file')} {tmp_path.split('\\')[-1]} {self.translate('was_success')}!')
-            except:
-                self.show_info(f'{self.translate('couldnt_send_file')}: {e}', 2, True)
-        ftp.quit()
+           self.show_info(f'{self.translate('couldnt_send_file')}: {e}', 2, True)
 
     def _local_nav_back(self):
         """Переходит в родительскую папку для локальных файлов"""
@@ -658,8 +635,8 @@ class FANUCE_IDE:
     def _send_local_file(self):
         item = self.local_file_tree.selection()[0]
         if item:
-            name = self.local_file_tree.item(item, 'text')
-            self.send_file(f'{self.CURRENT_DIRICTORY}\\{name}')
+            full_path = self.local_file_tree.item(item, 'values')[0]
+            self.send_file(full_path)
 
     def _delete_selected_file(self):
         selected = self.file_tree.selection()
@@ -669,17 +646,12 @@ class FANUCE_IDE:
         if messagebox.askyesno("Подтверждение", 
                                f"Вы точно хотите удалить файл {filename}\nС сервера: {self.target_server_name}?",
                                icon='warning'):
-            ftp = FTP(timeout=5, encoding='cp1251')
             try:
-                ftp.connect(self.target_server['adress'])
-                login = self.target_server['login'] if self.target_server['login'] else 'admin'
-                ftp.login(login, self.target_server['pass'])
-                ftp.delete(filename)
+                self.FTP.connect(self.target_server['adress'], self.target_server['login'] if self.target_server['login'] else 'admin', self.target_server['pass'])
+                self.FTP.delete_file(filename)
                 self.file_tree.delete(selected[0])
-
             except Exception as e:
                 messagebox.showerror("Error", f"Не удалось удалить файл: {e}")
-            ftp.quit()
 
     def refresh_file_list(self):
         self._on_server_selected()
@@ -691,25 +663,16 @@ class FANUCE_IDE:
         if selected_name in self.all_servers:
             self.target_server = self.all_servers[selected_name]
             try:
-                ftp = FTP(timeout=5, encoding='cp1251')
-                ftp.connect(self.target_server['adress'])
-                login = self.target_server['login'] if self.target_server['login'] else 'admin'
-                ftp.login(login, self.target_server['pass'])
-                files = ftp.nlst()
-                if self.filter_server_files.get():
-                    extensions = ['.kl', '.ls']  # Нужные расширения
-                    files_ = [f for f in files if any(f.lower().endswith(ext) for ext in extensions)]
-                else:
-                    files_ = files
+                self.FTP.connect(self.target_server['adress'], self.target_server['login'] if self.target_server['login'] else 'admin', self.target_server['pass'])
+                files = self.FTP.get_files_list('ls' if self.filter_server_files.get() else 'none')
             except Exception as e:
                 self.show_info(f'{self.translate('connection_error')}: {e}', 2, True)
                 return
             for item in self.file_tree.get_children():
                 self.file_tree.delete(item)
-            for name in files_:
+            for name in files:
                 self.file_tree.insert('', 'end', text=name)
             self.show_info(f'{self.translate('con_success')}: {selected_name} - {len(files)} {self.translate('files')}')
-            ftp.quit()
     
     def update_server_list(self):
         if hasattr(self, 'server_combobox'):
@@ -775,18 +738,14 @@ class FANUCE_IDE:
     def _temp_open_file(self, event=None):
         item = self.file_tree.selection()[0]
         if item:
-            ftp = FTP(timeout=5, encoding='cp1251')
-            ftp.connect(self.target_server['adress'])
-            login = self.target_server['login'] if self.target_server['login'] else 'admin'
-            ftp.login(login, self.target_server['pass'])
+            self.FTP.connect(self.target_server['adress'], self.target_server['login'] if self.target_server['login'] else 'admin', self.target_server['pass'])
             filename = self.file_tree.item(item, 'text')
             t_filename = f'{self.cache_folder}\\[TEMP_FILE] {filename}'
             with open(t_filename, 'wb+') as f:
-                ftp.retrbinary(f"RETR {filename}", f.write)
+                self.FTP.download_file(filename, f.write)
             self.open_file(t_filename)
             self.update_file_path(custom=f'{self.target_server_name} - {t_filename}', online=1)
             os.remove(t_filename)
-            ftp.quit()
             self.is_temp = True
 
     def _download_and_open_file(self, filename=''):
@@ -804,19 +763,15 @@ class FANUCE_IDE:
                 return
             elif file_path:
                 break
-        ftp = FTP(timeout=5, encoding='cp1251')
         try:
-            ftp.connect(self.target_server['adress'])
-            login = self.target_server['login'] if self.target_server['login'] else 'admin'
-            ftp.login(login, self.target_server['pass'])
+            self.FTP.connect(self.target_server['adress'], self.target_server['login'] if self.target_server['login'] else 'admin', self.target_server['pass'])
             os.makedirs(os.path.dirname(file_path), exist_ok=True)
             with open(file_path, 'wb+') as f:
-                ftp.retrbinary(f"RETR {filename}", f.write)
+                self.FTP.download_file(filename, f.write)
             self.open_file(file_path)
         except Exception as e:
             messagebox.showerror(self.translate('err'), f'{self.translate('couldnt_download_file')}: {e}')
         self.update_local_files()
-        ftp.quit()
         self.is_temp = False
 
     def set_language(self, lang_code):
@@ -1107,6 +1062,7 @@ class FANUCE_IDE:
             return "break"  # Предотвращает стандартное поведение Tab
         elif event.keycode == 8: # 8 - backspace
             self.is_modified = True
+            # if self.text_area.
             if event.char == '\x7f':
                 cursor_index = self.text_area.index(tk.INSERT)
                 for i in range(0, 20):
@@ -1183,6 +1139,7 @@ class FANUCE_IDE:
     
     def on_close(self):
         """Обрабатывает закрытие окна."""
+        self.FTP.disconnect()
         try:
             self._save_settings()
             if self.is_modified:
@@ -1275,6 +1232,7 @@ class SearchBar:
     
     def find_next(self):
         """Найти следующее вхождение"""
+        self.text.tag_remove('sel', "1.0", tk.END)
         query = self.entry.get()
         if not query:
             return        
