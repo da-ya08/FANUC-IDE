@@ -1,6 +1,7 @@
 import tkinter as tk, json, os
 from tkinter import ttk, messagebox
-from .conf import LANGUAGES
+from ..conf import LANGUAGES
+from ..service import Service
 
 class Entry(ttk.Entry):
     def set_text(self, text):
@@ -8,10 +9,11 @@ class Entry(ttk.Entry):
         self.insert(0, text)
 
 class LSSettingsWindow(tk.Toplevel):
-    def __init__(self, parent, lang, callback, current_data):
+    def __init__(self, parent, lang, callback, current_data, service:Service):
         super().__init__(parent)
         self.language = lang
-        self.title(self.translate('ls_set'))
+        self.SERVICE = service
+        self.title(self.SERVICE.translate('ls_set'))
         self.geometry('310x230')
         self.minsize(300, 200)
         self.maxsize(340,250)
@@ -29,9 +31,9 @@ class LSSettingsWindow(tk.Toplevel):
         form_frame = tk.Frame(main_paned, padx=10, pady=10)
         form_frame.pack(expand=True, fill='both')        
         fields = [
-            (self.translate('prog_name'), 'name'),
-            (self.translate('owner'), 'owner'),
-            (self.translate('comment'), 'comment'),
+            (self.SERVICE.translate('prog_name'), 'name'),
+            (self.SERVICE.translate('owner'), 'owner'),
+            (self.SERVICE.translate('comment'), 'comment'),
         ]
         self.entries = {}
         for i, (label_text, name) in enumerate(fields):
@@ -43,17 +45,17 @@ class LSSettingsWindow(tk.Toplevel):
         self.entries['owner'].insert(0, self.header['owner'])
         self.entries['comment'].insert(0, self.header['comment'])
         
-        tk.Label(form_frame, text=self.translate('protect')).grid(row=3, column=0, sticky='e', pady=2)
+        tk.Label(form_frame, text=self.SERVICE.translate('protect')).grid(row=3, column=0, sticky='e', pady=2)
         self.entries['protect'] = tk.Checkbutton(form_frame, anchor='w', variable=self.protect)
         self.entries['protect'].grid(row=3, column=1, sticky='ew', pady=2)
-        tk.Label(form_frame, text=self.translate('movement')).grid(row=4, column=0, sticky='e', pady=2)
+        tk.Label(form_frame, text=self.SERVICE.translate('movement')).grid(row=4, column=0, sticky='e', pady=2)
         self.entries['motion'] = tk.Checkbutton(form_frame, anchor='w', variable=self.motion)
         self.entries['motion'].grid(row=4, column=1, sticky='ew', pady=2)
 
         btn_frame = tk.Frame(form_frame)
         btn_frame.grid(row=len(fields)+2, column=1, sticky='e', pady=10) 
-        ttk.Button(btn_frame, text=self.translate('save'), command=self._but_save).pack(side='left')
-        ttk.Button(btn_frame, text=self.translate('cancel'), command=self._cancel).pack(side='left')
+        ttk.Button(btn_frame, text=self.SERVICE.translate('save'), command=self._but_save).pack(side='left')
+        ttk.Button(btn_frame, text=self.SERVICE.translate('cancel'), command=self._cancel).pack(side='left')
     
     def _write_values(self):
         self.header['name'] = self.entries['name'].get()
@@ -64,8 +66,8 @@ class LSSettingsWindow(tk.Toplevel):
 
     def _on_close(self):
         """Вызывается при закрытии окна"""
-        answ = messagebox.askyesnocancel(self.translate('save'),
-                                  self.translate('save_settings'))
+        answ = messagebox.askyesnocancel(self.SERVICE.translate('save'),
+                                  self.SERVICE.translate('save_settings'))
         if answ is True:
             self._but_save()
         elif answ is False:
@@ -84,7 +86,3 @@ class LSSettingsWindow(tk.Toplevel):
     
     def _close(self):
         self.destroy()
-    
-    def translate(self, key):
-        """Получение перевода по ключу"""
-        return LANGUAGES[self.language].get(key, key)

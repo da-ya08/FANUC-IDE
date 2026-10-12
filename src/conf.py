@@ -217,7 +217,7 @@ SINTAX_WORDS = {
             ' SKIP', ' JMP', ' RUN'
             ],
 'logic': [
-         'ENDIF',' THEN', 'ELSE', 'IF', ' AND ', ' OR '
+         'ENDIF',' THEN', 'ELSE', 'IF ', ' AND ', ' OR '
          ],
 'data': [
          'DO', 'DI', 'F', 'R', 'P', 'PR',

@@ -1,10 +1,13 @@
-import tkinter as tk, os, json, shutil, subprocess, sys, configparser
+import tkinter as tk, os, json, shutil, sys
 from tkinter.ttk import Progressbar, Combobox, Treeview, Button, Scrollbar, Label, Entry
 from tkinter import filedialog, messagebox, Menu, simpledialog
-from src.ftp_settings import  FTPSettingsWindow
-from src.ls_settings import LSSettingsWindow
+from src.widgets.ftp_settings import  FTPSettingsWindow
+from src.widgets.ls_settings import LSSettingsWindow
 from src.conf import LANGUAGES, CURRENT_LANGUAGE, SINTAX_WORDS
 from src.ftp_client.FTP_client import FTPClient
+from src.robot_manager.robot_manager import Robot
+from src.widgets.search_bar import SearchBar
+from src.service import Service
 from threading import Thread
 from datetime import datetime
 
@@ -23,9 +26,9 @@ class FANUCE_IDE:
         self.is_karel = False
         self.is_temp = False
         self.backuping = False
-        self.language = 'en'
-        self.cache_folder = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE'
-        self.SERVERS_FILE = f'{self.cache_folder}\\servers_list.json'
+        self.SERVICE = Service('en')
+        self.CACHE_FOLDER = f'{os.environ['LOCALAPPDATA']}\\FANUC-IDE'
+        self.SERVERS_FILE = f'{self.CACHE_FOLDER}\\servers_list.json'
 
         self.root = root
         self.root.title('FANUC IDE')
@@ -34,14 +37,15 @@ class FANUCE_IDE:
         self.CURRENT_DIRICTORY = self.PROJECT_DIRICTORY
         os.chdir(self.PROJECT_DIRICTORY)
         self.root.iconbitmap(f'{self.PROJECT_DIRICTORY}\\resources\\icon.ico')
-        if not os.path.exists(f'{self.cache_folder}\\cache.json'):
+        if not os.path.exists(f'{self.CACHE_FOLDER}\\cache.json'):
             self._create_config_file()
-        with open(f'{self.cache_folder}\\cache.json', 'r', encoding='utf-8') as f:
+        with open(f'{self.CACHE_FOLDER}\\cache.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             self.CURRENT_DIRICTORY = data['path']
-            self.language = data['lang']
+            self.SERVICE.language = data['lang']
             self.root.geometry(data['geo'])
-        self.check_robot_ini(self.cache_folder, self.PROJECT_DIRICTORY)
+        self.ROBOT = Robot(self.CACHE_FOLDER, self.PROJECT_DIRICTORY, self.SERVICE)
+        self.ROBOT._check_robot_ini()
         self.FTP = FTPClient()
 
         ''' Главное окно '''
@@ -51,9 +55,10 @@ class FANUCE_IDE:
         self.status_frame = tk.Frame(self.root, height=20, borderwidth=1, relief='groove')
         self.status_frame.pack(side='bottom', fill='x')
         self.status_label = tk.Label(self.status_frame)
+        self.SERVICE.status_label = self.status_label
         self.status_label.pack(side='left', fill='x')
         self.download_progress_bar = Progressbar(self.status_frame, orient='horizontal', length=150)
-        self.show_info(text='DA_YA product')
+        self.SERVICE.show_info(text='DA_YA product')
 
         main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
         main_paned.pack(expand=True, fill='both')
@@ -67,7 +72,7 @@ class FANUCE_IDE:
         # Меню-бар
         servers_menubar = tk.Frame(left_paned, height=20)
         left_paned.add(servers_menubar, minsize=20)
-        tk.Label(servers_menubar, text=f'{self.translate('robot')}:').pack(side=tk.LEFT, expand=False, padx=2)
+        tk.Label(servers_menubar, text=f'{self.SERVICE.translate('robot')}:').pack(side=tk.LEFT, expand=False, padx=2)
         self.server_combobox = Combobox(servers_menubar, state='readonly')
         self.server_combobox.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
         self.server_combobox.bind('<<ComboboxSelected>>', self._on_server_selected)
@@ -125,7 +130,7 @@ class FANUCE_IDE:
             justify='left', 
             font=('Calibri', 10), 
             cursor='arrow', 
-            text=self.translate('menubar_code')
+            text=self.SERVICE.translate('menubar_code')
         )
         self.CURRENT_FILE_path_menubar.pack(side=tk.LEFT, fill=tk.X)
         search_button = Button(menu_code_frame,
@@ -147,7 +152,7 @@ class FANUCE_IDE:
             height=25,
             state='disabled'
         )
-        self.search_bar = SearchBar(self.text_area, self.translate, self)
+        self.search_bar = SearchBar(self.text_area, self, self.SERVICE)
         search_button.config(command=self.search_bar.show)
         self.line_numbers = tk.Text(
             code_frame,
@@ -169,25 +174,25 @@ class FANUCE_IDE:
         t_toolbar = tk.Frame(toolbar, height=20)
         t_toolbar.pack(side='left', fill='x')
         self.new_file_button = Button(t_toolbar,
-                                      text=f'📃{self.translate('new')}',
+                                      text=f'📃{self.SERVICE.translate('new')}',
                                       command=self.new_file)
         self.new_file_button.pack(fill='none', side='left')
         self.open_button = Button(t_toolbar,
-                                      text=f'📁{self.translate('open')}',
+                                      text=f'📁{self.SERVICE.translate('open')}',
                                       command=self.open_file)
         self.open_button.pack(fill='none', side='left')
         self.toolbar_save_button = Button(t_toolbar,
-                                      text=f'💾{self.translate('save')}',
+                                      text=f'💾{self.SERVICE.translate('save')}',
                                       command=self.save_file)
         self.toolbar_save_button.pack(fill='none', side='left')
         tk.Frame(t_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
         self.toolbar_send_button = Button(t_toolbar,
-                                      text=f'📤{self.translate('send')}',
+                                      text=f'📤{self.SERVICE.translate('send')}',
                                       command=self.send_file,
                                       state='disable')
         self.toolbar_send_button.pack(fill='none', side='left')
         self.toolbar_compile_button = Button(t_toolbar,
-                                      text=f'🛠{self.translate('compile')}',
+                                      text=f'🛠{self.SERVICE.translate('compile')}',
                                       command=self.copmile_karel,
                                       state='disable')
         self.toolbar_compile_button.pack(fill='none', side='left')
@@ -196,7 +201,7 @@ class FANUCE_IDE:
         tr_toolbar.pack(side='right', fill='x')
         tk.Frame(tr_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
         self.toolbar_backup_button = Button(tr_toolbar,
-                                                text=f'🗃{self.translate('r_backup')}',
+                                                text=f'🗃{self.SERVICE.translate('r_backup')}',
                                                 command=self.robot_backup,
                                                 state='enable')
         self.toolbar_backup_button.pack(fill='none', side='right')
@@ -290,40 +295,40 @@ class FANUCE_IDE:
         edit_menu = tk.Menu(menubar, tearoff=0)
         # Меню "Файл"
         file_menu = tk.Menu(menubar, tearoff=0)
-        file_menu.add_command(label=self.translate('new'), command=self.new_file)
-        file_menu.add_command(label=self.translate('open'), command=self.open_file)
+        file_menu.add_command(label=self.SERVICE.translate('new'), command=self.new_file)
+        file_menu.add_command(label=self.SERVICE.translate('open'), command=self.open_file)
         file_menu.add_separator()
-        file_menu.add_command(label=self.translate('save'), command=self.save_file, state=tk.DISABLED)
-        file_menu.add_command(label=self.translate('save_as'), command=self.save_file_as)
-        file_menu.add_command(label=self.translate('change_dir'), command=self._change_def_dir)
+        file_menu.add_command(label=self.SERVICE.translate('save'), command=self.save_file, state=tk.DISABLED)
+        file_menu.add_command(label=self.SERVICE.translate('save_as'), command=self.save_file_as)
+        file_menu.add_command(label=self.SERVICE.translate('change_dir'), command=self._change_def_dir)
         file_menu.add_separator()
-        file_menu.add_command(label=self.translate('exit'), command=self.on_close)
-        menubar.add_cascade(label=self.translate('file'), menu=file_menu)
+        file_menu.add_command(label=self.SERVICE.translate('exit'), command=self.on_close)
+        menubar.add_cascade(label=self.SERVICE.translate('file'), menu=file_menu)
         # LS
         ls_menu = tk.Menu(edit_menu, tearoff=0)
-        ls_menu.add_command(label=self.translate('config_file'), command=self.open_ls_settings)
+        ls_menu.add_command(label=self.SERVICE.translate('config_file'), command=self.open_ls_settings)
         # KL
         kl_menu = tk.Menu(edit_menu, tearoff=0)
-        kl_menu.add_command(label=self.translate('compile'), command=self.copmile_karel)
+        kl_menu.add_command(label=self.SERVICE.translate('compile'), command=self.copmile_karel)
         # Редактировать
         edit_menu.add_cascade(label='LS', state='disabled', menu=ls_menu)
         edit_menu.add_cascade(label='KL', state='disabled', menu=kl_menu)
-        menubar.add_cascade(label=self.translate('edit_m'), menu=edit_menu)
+        menubar.add_cascade(label=self.SERVICE.translate('edit_m'), menu=edit_menu)
         # Робот
         robot_menu = tk.Menu(menubar, tearoff=0)
-        robot_menu.add_command(label=self.translate('r_backup'), command=self.robot_backup)
-        menubar.add_cascade(label=self.translate('robot'), menu=robot_menu)
+        robot_menu.add_command(label=self.SERVICE.translate('r_backup'), command=self.robot_backup)
+        menubar.add_cascade(label=self.SERVICE.translate('robot'), menu=robot_menu)
         # Язык
         lang_menu = tk.Menu(menubar, tearoff=0)
         lang_menu.add_command(label="English", command=lambda: self.set_language('en'))
         lang_menu.add_command(label="Русский", command=lambda: self.set_language('ru'))
-        menubar.add_cascade(label=self.translate('lang_menu'), menu=lang_menu)
+        menubar.add_cascade(label=self.SERVICE.translate('lang_menu'), menu=lang_menu)
         self.root.config(menu=menubar)
         self.file_menu = file_menu
         self.edit_menu = edit_menu
-        self.new_file_button.config(text=f'📃{self.translate('new')}')
-        self.open_button.config(text=f'📁{self.translate('open')}')
-        self.toolbar_send_button.config(text=f'📤{self.translate('send')}')
+        self.new_file_button.config(text=f'📃{self.SERVICE.translate('new')}')
+        self.open_button.config(text=f'📁{self.SERVICE.translate('open')}')
+        self.toolbar_send_button.config(text=f'📤{self.SERVICE.translate('send')}')
     
     def _setup_context_menus(self):
         self._add_text_context_menu(self.text_area)
@@ -333,11 +338,11 @@ class FANUCE_IDE:
     def _add_text_context_menu(self, text_widget):
         """Добавляет контекстное меню для Text виджетов"""
         menu = Menu(text_widget, tearoff=0)
-        menu.add_command(label=self.translate('copy'), command=lambda: text_widget.event_generate("<<Copy>>"))
-        menu.add_command(label=self.translate('paste'), command=lambda: text_widget.event_generate("<<Paste>>"))
-        menu.add_command(label=self.translate('cut'), command=lambda: text_widget.event_generate("<<Cut>>"))
+        menu.add_command(label=self.SERVICE.translate('copy'), command=lambda: text_widget.event_generate("<<Copy>>"))
+        menu.add_command(label=self.SERVICE.translate('paste'), command=lambda: text_widget.event_generate("<<Paste>>"))
+        menu.add_command(label=self.SERVICE.translate('cut'), command=lambda: text_widget.event_generate("<<Cut>>"))
         menu.add_separator()
-        menu.add_command(label=self.translate('select_all'), 
+        menu.add_command(label=self.SERVICE.translate('select_all'), 
                        command=lambda: text_widget.tag_add("sel", "1.0", "end"))
 
         # Привязка к правой кнопке мыши
@@ -351,30 +356,30 @@ class FANUCE_IDE:
     
     def _add_tree_context_menu(self, widget):
         menu = Menu(widget, tearoff=0)
-        menu.add_command(label=self.translate('open'), command=self._temp_open_file)
-        menu.add_command(label=self.translate('dnld'), command=self._download_and_open_file)
-        menu.add_command(label=self.translate('del'), command=self._delete_selected_file)
+        menu.add_command(label=self.SERVICE.translate('open'), command=self._temp_open_file)
+        menu.add_command(label=self.SERVICE.translate('dnld'), command=self._download_and_open_file)
+        menu.add_command(label=self.SERVICE.translate('del'), command=self._delete_selected_file)
         menu.add_separator()
-        menu.add_command(label=self.translate('refresh'), command=self.refresh_file_list)
-        menu.add_checkbutton(label=self.translate('filter'), command=self.refresh_file_list, variable=self.filter_server_files)
+        menu.add_command(label=self.SERVICE.translate('refresh'), command=self.refresh_file_list)
+        menu.add_checkbutton(label=self.SERVICE.translate('filter'), command=self.refresh_file_list, variable=self.filter_server_files)
         widget.bind('<Button-3>', lambda e: menu.tk_popup(e.x_root, e.y_root))
     
     def _add_local_tree_context_menu(self, widget):
         menu = Menu(widget, tearoff=0)
-        menu.add_command(label=self.translate('open'), command=self._on_local_file_double_click)
-        menu.add_command(label=self.translate('send'), command=self._send_local_file)
-        menu.add_command(label=self.translate('del'), command=self._delete_selected_local_file)
+        menu.add_command(label=self.SERVICE.translate('open'), command=self._on_local_file_double_click)
+        menu.add_command(label=self.SERVICE.translate('send'), command=self._send_local_file)
+        menu.add_command(label=self.SERVICE.translate('del'), command=self._delete_selected_local_file)
         menu.add_separator()
-        menu.add_command(label=self.translate('open_folder'), command=self._open_local_folder)
-        menu.add_command(label=self.translate('create_folder'), command=self._create_folder)
-        menu.add_command(label=self.translate('refresh'), command=self.update_local_files)
+        menu.add_command(label=self.SERVICE.translate('open_folder'), command=self._open_local_folder)
+        menu.add_command(label=self.SERVICE.translate('create_folder'), command=self._create_folder)
+        menu.add_command(label=self.SERVICE.translate('refresh'), command=self.update_local_files)
         widget.bind('<Button-3>', lambda e: menu.tk_popup(e.x_root, e.y_root))
     
     def robot_backup(self, event=''):
         """Создание резервной копии робота"""
         selected_name = self.server_combobox.get()
         if not selected_name:
-            self.show_info(self.translate('no_select_server'), 1, True)
+            self.SERVICE.show_info(self.SERVICE.translate('no_select_server'), 1, True)
             return
         selected_dir = filedialog.askdirectory(title='Backup папка',
                                                initialdir=self.CURRENT_DIRICTORY).replace('/', '\\')
@@ -408,14 +413,14 @@ class FANUCE_IDE:
                     with open(f'{dir}\\{file}', 'wb+') as f:
                         self.FTP.download_file(file, f.write)
                         fact_files += 1
-                    self.files_queue.append(f'{self.translate('downloaded')}{fact_files}/{total_files}')
+                    self.files_queue.append(f'{self.SERVICE.translate('downloaded')}{fact_files}/{total_files}')
                     self.download_progress_bar.config(value=fact_files/total_files*100)
                 except Exception as e:
-                    self.show_info(f'{self.translate('connection_error')}: {e}', 2, True)
+                    self.SERVICE.show_info(f'{self.SERVICE.translate('connection_error')}: {e}', 2, True)
         except Exception as e:
-            self.show_info(f'{self.translate('connection_error')}: {e}', 2, True)
+            self.SERVICE.show_info(f'{self.SERVICE.translate('connection_error')}: {e}', 2, True)
             return
-        self.show_info(f'{self.translate('downloaded')}{fact_files}/{total_files}', 0, True)
+        self.SERVICE.show_info(f'{self.SERVICE.translate('downloaded')}{fact_files}/{total_files}', 0, True)
         self.download_progress_bar.pack_forget()
         self.download_progress_bar.config(value=0)
         self.files_queue = []
@@ -433,7 +438,7 @@ class FANUCE_IDE:
                 self._open_local_folder(self.CURRENT_DIRICTORY)
                 break
             except Exception as e:
-                self.show_info(self.translate('cant_save_here'), 1, True)
+                self.SERVICE.show_info(self.SERVICE.translate('cant_save_here'), 1, True)
                 
     def _create_config_file(self):
         while True:
@@ -459,87 +464,48 @@ class FANUCE_IDE:
                 with open(test_file, 'w') as f:
                     f.write('test')
                 os.remove(test_file)
-                os.makedirs(f'{self.cache_folder}', exist_ok=True)
-                with open(f'{self.cache_folder}\\cache.json', 'w', encoding='utf-8') as f:
+                os.makedirs(f'{self.CACHE_FOLDER}', exist_ok=True)
+                with open(f'{self.CACHE_FOLDER}\\cache.json', 'w', encoding='utf-8') as f:
                     json.dump({'path': selected_dir, 
                                'lang': CURRENT_LANGUAGE,
                                'geo': '650x750'},
                                 f)
                 break
             except Exception as e:
-                messagebox.showerror(self.translate('err'),
+                messagebox.showerror(self.SERVICE.translate('err'),
                                      f"Невозможно записать в выбранную папку:\n{str(e)}\n\nВыберите другую папку.")    
 
     def _save_settings(self, new_path=''):
-        with open(f'{self.cache_folder}\\cache.json', 'r+', encoding='utf-8') as f:
+        with open(f'{self.CACHE_FOLDER}\\cache.json', 'r+', encoding='utf-8') as f:
             temp_path = new_path if new_path else json.load(f)['path']
             f.seek(0)
             f.truncate()
             json.dump({'path': temp_path, 
-                       'lang': self.language,
+                       'lang': self.SERVICE.language,
                        'geo': f'{self.root.geometry()}'}, 
                        f)
 
     def copmile_karel(self):
-        if not self.CURRENT_FILE:
-            return
+        if not self.CURRENT_FILE: return
         self.save_file()
-        try:
-            os.chdir('\\'.join(self.CURRENT_FILE.split('\\')[:-1]))
-            result = subprocess.run(
-                [f'{self.PROJECT_DIRICTORY}\\src\\ktrans.exe', f'{self.CURRENT_FILE}', '/config' , f'{self.cache_folder}\\robot.ini'],
-                capture_output=True,
-                text=True,
-                check=True)
-            self.show_info(self.translate('compile_success'))
-            messagebox.showinfo(self.translate('compile_success'),
-                                result.stdout)
-            self.update_local_files()
-            self.toolbar_compile_button.config(text=self.translate('compiled'))
-            self.toolbar_compile_button.config(state='disable')
-            self.toolbar_send_button.config(state='enable')
-        except Exception as e:
-            messagebox.showerror(self.translate('compilation_error'),
-                                 e.stdout) # type: ignore
-            self.toolbar_send_button.config(state='disable')
-        os.chdir(self.PROJECT_DIRICTORY)
-    
-    def show_info(self, text:str, lvl=0, need_message=False):
-        """Show message
-        
-        :param text (str): text of message
-        :param lvl (int): level of message
-            =0: INFO
-            =1: WARNING
-            =2: ERROR
-        :param need_message (bool): need show window?
-        :return bool: True if writing is successful, False otherwise
-        """
-        levels = ['INFO:', 'WARN:', 'ERROR:']
-        self.status_label.config(text=f'{levels[lvl]} {text}')
-        if lvl == 0 and need_message:
-            messagebox.showinfo(levels[lvl], text)
-        elif lvl == 1 and need_message:
-            messagebox.showwarning(levels[lvl], text)
-        elif lvl == 2 and need_message:
-            messagebox.showerror(levels[lvl], text)
+        self.ROBOT.compile_karel(self.CURRENT_FILE)
     
     def send_file(self, file=''):
         if not self.target_server_name:
-            self.show_info(self.translate('no_select_server'), need_message=True)
+            self.SERVICE.show_info(self.SERVICE.translate('no_select_server'), need_message=True)
             return
         if not self.CURRENT_FILE and not file:
-            self.show_info(self.translate('no_file'), need_message=True)
+            self.SERVICE.show_info(self.SERVICE.translate('no_file'), need_message=True)
             return
         tmp_path = file if file else self.CURRENT_FILE
         tmp_path = tmp_path.replace('/', '\\')
         if tmp_path.split('\\')[-1].split('.')[-1].lower() == 'kl':
             tmp_path = f'{tmp_path[:-2]}pc'
         if os.path.isdir(tmp_path):
-            self.show_info(self.translate('cant_send_folder'), 1, True)
+            self.SERVICE.show_info(self.SERVICE.translate('cant_send_folder'), 1, True)
             return
-        if not messagebox.askyesno(self.translate('send_confirm'),
-                                   f'{self.translate('u_sure_to_send')}: {tmp_path}\n{self.translate('to_server')}: {self.target_server_name}?',
+        if not messagebox.askyesno(self.SERVICE.translate('send_confirm'),
+                                   f'{self.SERVICE.translate('u_sure_to_send')}: {tmp_path}\n{self.SERVICE.translate('to_server')}: {self.target_server_name}?',
                                    icon='question'):
             return
         try:
@@ -550,9 +516,9 @@ class FANUCE_IDE:
                 else:
                     self.FTP.send_file(f'STOR {tmp_path.split('\\')[-1]}', s_file)
             self.refresh_file_list()
-            self.show_info(f'{self.translate('sending_file')} {tmp_path.split('\\')[-1]} {self.translate('was_success')}!')
+            self.SERVICE.show_info(f'{self.SERVICE.translate('sending_file')} {tmp_path.split('\\')[-1]} {self.SERVICE.translate('was_success')}!')
         except Exception as e:
-           self.show_info(f'{self.translate('couldnt_send_file')}: {e}', 2, True)
+           self.SERVICE.show_info(f'{self.SERVICE.translate('couldnt_send_file')}: {e}', 2, True)
 
     def _local_nav_back(self):
         """Переходит в родительскую папку для локальных файлов"""
@@ -562,31 +528,9 @@ class FANUCE_IDE:
             self.update_local_files()
             self.local_path_label.config(text=self.CURRENT_DIRICTORY)
             self.CURRENT_DIRICTORY = parent
-        
-    def check_robot_ini(self, cache_dir, project_dir):
-        if not os.path.exists(f'{self.cache_folder}\\robot.ini'):
-            self._create_robot_ini(cache_dir, project_dir)
-        else:
-            try:
-                config = configparser.ConfigParser()
-                config.read(f'{self.cache_folder}\\robot.ini')
-                path = config["WinOLPC_Util"]["Robot"]
-                if not self.PROJECT_DIRICTORY in path:
-                    self._create_robot_ini(cache_dir, project_dir)
-            except:
-                self._create_robot_ini(cache_dir, project_dir)
-
-    def _create_robot_ini(self, cache_dir, project_dir):
-        with open(f'{cache_dir}\\robot.ini', 'w', encoding='utf-8') as f:
-            f.write('[WinOLPC_Util]\n')
-            f.write(f'Robot={project_dir}\\resources\\Robot_1\n')
-            f.write('Version=V9.10-1\n')
-            f.write(f'Path={project_dir}\\resources\\V910-1\\bin\n')
-            f.write(f'Support={project_dir}\\resources\\Robot_1\\support\n')
-            f.write(f'Output={project_dir}\\resources\\Robot_1\\output\n')
     
     def _open_local_folder(self, l_path=''):
-        open_folder = l_path if l_path else filedialog.askdirectory(title=self.translate('choice_folder'),
+        open_folder = l_path if l_path else filedialog.askdirectory(title=self.SERVICE.translate('choice_folder'),
                                               initialdir=self.CURRENT_DIRICTORY)
         if not open_folder:
             return
@@ -595,18 +539,18 @@ class FANUCE_IDE:
     
     def _create_folder(self):
         while True:
-            folder_name = simpledialog.askstring(f'{self.translate('folder_name')}:',
-                                                 f'{self.translate('enter_folder_name')}: ',
+            folder_name = simpledialog.askstring(f'{self.SERVICE.translate('folder_name')}:',
+                                                 f'{self.SERVICE.translate('enter_folder_name')}: ',
                                                  initialvalue='folder1')
             if folder_name is None:
                 return
             if not folder_name.strip():
-                self.show_info(self.translate('name_empty'), 1, True)
+                self.SERVICE.show_info(self.SERVICE.translate('name_empty'), 1, True)
                 continue
             try:
                 os.makedirs(f'{self.CURRENT_DIRICTORY}\\{folder_name}')
             except Exception as e:
-                self.show_info(f'{self.translate('cant_create_folder')}{e}', 1, True)
+                self.SERVICE.show_info(f'{self.SERVICE.translate('cant_create_folder')}{e}', 1, True)
             self.update_local_files()
             break
 
@@ -614,7 +558,7 @@ class FANUCE_IDE:
         try:
             item = self.local_file_tree.selection()[0]
         except Exception as e:
-            self.show_info(self.translate('no_selected_file'), 1, True)
+            self.SERVICE.show_info(self.SERVICE.translate('no_selected_file'), 1, True)
             return
         if item:
             file = self.CURRENT_DIRICTORY + '\\' + self.local_file_tree.item(item, 'text')
@@ -666,13 +610,13 @@ class FANUCE_IDE:
                 self.FTP.connect(self.target_server['adress'], self.target_server['login'] if self.target_server['login'] else 'admin', self.target_server['pass'])
                 files = self.FTP.get_files_list('ls' if self.filter_server_files.get() else 'none')
             except Exception as e:
-                self.show_info(f'{self.translate('connection_error')}: {e}', 2, True)
+                self.SERVICE.show_info(f'{self.SERVICE.translate('connection_error')}: {e}', 2, True)
                 return
             for item in self.file_tree.get_children():
                 self.file_tree.delete(item)
             for name in files:
                 self.file_tree.insert('', 'end', text=name)
-            self.show_info(f'{self.translate('con_success')}: {selected_name} - {len(files)} {self.translate('files')}')
+            self.SERVICE.show_info(f'{self.SERVICE.translate('con_success')}: {selected_name} - {len(files)} {self.SERVICE.translate('files')}')
     
     def update_server_list(self):
         if hasattr(self, 'server_combobox'):
@@ -685,7 +629,7 @@ class FANUCE_IDE:
             except Exception as e:
                 if 'Expecting value' in str(e):
                     return
-                self.show_info(f'{self.translate('cant_load_list')}{e}', 2, True)
+                self.SERVICE.show_info(f'{self.SERVICE.translate('cant_load_list')}{e}', 2, True)
                 return None 
             self.server_combobox['values'] = list(self.all_servers.keys())
     
@@ -706,7 +650,7 @@ class FANUCE_IDE:
                 else:
                     self.local_file_tree.insert('', 'end', text=f'📃{name}', values=[full_path], tags=('file',))
         except Exception as e:
-            self.show_info('Не удалось открыть папку проектов.\nВыберите новую папку:', 1, True)
+            self.SERVICE.show_info('Не удалось открыть папку проектов.\nВыберите новую папку:', 1, True)
             self._change_def_dir()
     
     def _on_local_file_double_click(self, event=None):
@@ -740,7 +684,7 @@ class FANUCE_IDE:
         if item:
             self.FTP.connect(self.target_server['adress'], self.target_server['login'] if self.target_server['login'] else 'admin', self.target_server['pass'])
             filename = self.file_tree.item(item, 'text')
-            t_filename = f'{self.cache_folder}\\[TEMP_FILE] {filename}'
+            t_filename = f'{self.CACHE_FOLDER}\\[TEMP_FILE] {filename}'
             with open(t_filename, 'wb+') as f:
                 self.FTP.download_file(filename, f.write)
             self.open_file(t_filename)
@@ -756,9 +700,9 @@ class FANUCE_IDE:
             filename = self.file_tree.item(item, 'text')
         while True:
             file_path = filedialog.asksaveasfilename(initialdir=f'{self.CURRENT_DIRICTORY}',
-                                                     filetypes=[(self.translate('all_files'), "*.*")],
+                                                     filetypes=[(self.SERVICE.translate('all_files'), "*.*")],
                                                      initialfile=filename,
-                                                     title=self.translate('dnld')).replace('/', '\\')
+                                                     title=self.SERVICE.translate('dnld')).replace('/', '\\')
             if not file_path:
                 return
             elif file_path:
@@ -770,42 +714,38 @@ class FANUCE_IDE:
                 self.FTP.download_file(filename, f.write)
             self.open_file(file_path)
         except Exception as e:
-            messagebox.showerror(self.translate('err'), f'{self.translate('couldnt_download_file')}: {e}')
+            messagebox.showerror(self.SERVICE.translate('err'), f'{self.SERVICE.translate('couldnt_download_file')}: {e}')
         self.update_local_files()
         self.is_temp = False
 
     def set_language(self, lang_code):
         """Смена языка интерфейса"""
-        self.language = lang_code
+        self.SERVICE.language = lang_code
         # Пересоздаем меню
         self.create_menu()
-        self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
-        self.toolbar_backup_button.config(text=f'🗃{self.translate('r_backup')}')
-        self.toolbar_send_button.config(text=f'📤{self.translate('send')}')
-        self.toolbar_save_button.config(text=f'💾{self.translate('save')}')
+        self.toolbar_compile_button.config(text=f'🛠{self.SERVICE.translate('compile')}')
+        self.toolbar_backup_button.config(text=f'🗃{self.SERVICE.translate('r_backup')}')
+        self.toolbar_send_button.config(text=f'📤{self.SERVICE.translate('send')}')
+        self.toolbar_save_button.config(text=f'💾{self.SERVICE.translate('save')}')
         if self.search_bar.view:
             self.search_bar.hide()
             self.search_bar.show()
         if not self.CURRENT_FILE:
-            self.CURRENT_FILE_path_menubar.config(text=self.translate('menubar_code'))
+            self.CURRENT_FILE_path_menubar.config(text=self.SERVICE.translate('menubar_code'))
         self._setup_context_menus()
-
-    def translate(self, key: str):
-        """Получение перевода по ключу"""
-        return LANGUAGES[self.language].get(key, key)
 
     def update_file_path(self, custom='', online=0):
         """Обновляет заголовок окна."""
         if custom:
             self.CURRENT_FILE_path_menubar.config(text=custom, background='yellow' if online else '#F2F3F4')
         elif self.CURRENT_FILE and not custom:
-            self.CURRENT_FILE_path_menubar.config(text=self.CURRENT_FILE, background='#F2F3F4')
+            self.CURRENT_FILE_path_menubar.config(text=self.CURRENT_FILE.replace('/', '\\'), background='#F2F3F4')
 
     def new_file(self):
         """Создание нового файла."""
         if self.is_modified:
-            response = messagebox.askyesnocancel(self.translate('save_file'),
-                                                 self.translate('quest_bef_cls'),
+            response = messagebox.askyesnocancel(self.SERVICE.translate('save_file'),
+                                                 self.SERVICE.translate('quest_bef_cls'),
                                                  icon=messagebox.WARNING)
             if response is True:  # Пользователь выбрал "Сохранить"
                 self.save_file()
@@ -815,7 +755,7 @@ class FANUCE_IDE:
                 return
         file_path = filedialog.asksaveasfilename(initialdir=self.CURRENT_DIRICTORY,
                                                  defaultextension="new_file.kl",
-                                                 filetypes=[("Karel listing", "*.kl"), ("LS program", "*.ls"), (self.translate('all_files'), "*.*")])
+                                                 filetypes=[("Karel listing", "*.kl"), ("LS program", "*.ls"), (self.SERVICE.translate('all_files'), "*.*")])
         if file_path:
             if file_path[-1:-3:-1].lower() == 'sl':
                 self.open_ls_settings()
@@ -835,7 +775,7 @@ class FANUCE_IDE:
             self.CURRENT_FILE: str = file_path
             self._save_to_file(file_path)
             self.update_file_path()  # Обновляем заголовок окна
-            self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)  # Активируем "Сохранить"
+            self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)  # Активируем "Сохранить"
             self.text_area.config(state='normal')
             self.update_local_files()
             self.is_modified = False  # Сбрасываем флаг изменений
@@ -849,12 +789,12 @@ class FANUCE_IDE:
         if not file_path:
             file_path = filedialog.askopenfilename(
                 initialdir=f'{self.CURRENT_DIRICTORY}',
-                filetypes=[("LS and KAREL", "*.ls *.kl"), (self.translate('all_files'), "*.*")]
+                filetypes=[("LS and KAREL", "*.ls *.kl"), (self.SERVICE.translate('all_files'), "*.*")]
             ).replace('/', '\\')
         if self.is_modified:
             response = messagebox.askyesnocancel(
-                self.translate('save_file'),
-                self.translate('quest_bef_cls'),
+                self.SERVICE.translate('save_file'),
+                self.SERVICE.translate('quest_bef_cls'),
                 icon=messagebox.WARNING
             )
             if response is True:  # Пользователь выбрал "Сохранить"
@@ -926,7 +866,7 @@ class FANUCE_IDE:
                     self.text_area.insert(tk.END, content)
                     self.CURRENT_FILE = file_path  
                     self.update_file_path() 
-                    self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
+                    self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)
                     self.is_modified = False
                     self.update_line_numbers()
                     self.is_karel = False
@@ -934,7 +874,7 @@ class FANUCE_IDE:
                     self.edit_menu.entryconfig('KL', state=tk.DISABLED)
                     self.toolbar_send_button.config(state='enable')
                 except Exception as e:
-                    self.show_info(f'{self.translate('couldnt_open_file')}: {e}', 2, True)
+                    self.SERVICE.show_info(f'{self.SERVICE.translate('couldnt_open_file')}: {e}', 2, True)
             elif file_path[-1:-3:-1].lower() == 'lk':
                 self.ls_info = {}
                 try:
@@ -944,17 +884,17 @@ class FANUCE_IDE:
                         self.text_area.insert(tk.END, content)
                         self.CURRENT_FILE = file_path 
                         self.update_file_path() 
-                        self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
+                        self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)
                         self.is_modified = False
                         self.update_line_numbers()
-                        self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+                        self.toolbar_compile_button.config(text=f'🛠{self.SERVICE.translate('compile')}')
                         self.toolbar_compile_button.config(state='enable')
                         self.toolbar_send_button.config(state='disable')
                         self.is_karel = True
                         self.edit_menu.entryconfig('LS', state=tk.DISABLED)
                         self.edit_menu.entryconfig('KL', state=tk.NORMAL)
                 except Exception as e:
-                    self.show_info(f'{self.translate('couldnt_open_file')}: {e}', 2, True)
+                    self.SERVICE.show_info(f'{self.SERVICE.translate('couldnt_open_file')}: {e}', 2, True)
             else:
                 self.ls_info = {}
                 try:
@@ -964,17 +904,17 @@ class FANUCE_IDE:
                         self.text_area.insert(tk.END, content)
                         self.CURRENT_FILE = file_path 
                         self.update_file_path() 
-                        self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
+                        self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)
                         self.is_modified = False
                         self.update_line_numbers()
-                        self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+                        self.toolbar_compile_button.config(text=f'🛠{self.SERVICE.translate('compile')}')
                         self.toolbar_compile_button.config(state='disable')
                         self.toolbar_send_button.config(state='disable')
                         self.is_karel = False
                         self.edit_menu.entryconfig('LS', state=tk.DISABLED)
                         self.edit_menu.entryconfig('KL', state=tk.DISABLED)
                 except Exception as e:
-                    self.show_info(f'{self.translate('couldnt_open_file')}: {e}', 2, True)
+                    self.SERVICE.show_info(f'{self.SERVICE.translate('couldnt_open_file')}: {e}', 2, True)
         self.highlight_code()
 
     def save_file(self, event=None):
@@ -992,30 +932,30 @@ class FANUCE_IDE:
                 file_path = filedialog.asksaveasfilename(
                     defaultextension="ls kl",
                     initialfile=f'{self.CURRENT_FILE.split('\\')[-1][12:-1]}s',
-                    filetypes=[("LS prog", "*.ls"), (self.translate('all_files'), "*.*")]
+                    filetypes=[("LS prog", "*.ls"), (self.SERVICE.translate('all_files'), "*.*")]
                 )
             else:
                 file_path = filedialog.asksaveasfilename(
                     defaultextension="ls kl",
                     initialfile=self.CURRENT_FILE.split('\\')[-1],
-                    filetypes=[("LS prog", "*.ls"), (self.translate('all_files'), "*.*")]
+                    filetypes=[("LS prog", "*.ls"), (self.SERVICE.translate('all_files'), "*.*")]
                 )
         elif self.CURRENT_FILE[-1:-3:-1].lower() == 'lk':
             file_path = filedialog.asksaveasfilename(
                 defaultextension="kl",
                 initialfile=self.CURRENT_FILE.split('\\')[-1],
-                filetypes=[("Karel", "*.kl"), (self.translate('all_files'), "*.*")]
+                filetypes=[("Karel", "*.kl"), (self.SERVICE.translate('all_files'), "*.*")]
             )
         else:
             file_path = filedialog.asksaveasfilename(
                 initialfile=self.CURRENT_FILE.split('\\')[-1],
-                filetypes=[(self.translate('all_files'), f'*.{self.CURRENT_FILE.split('\\')[-1].split('.')[-1]}')]
+                filetypes=[(self.SERVICE.translate('all_files'), f'*.{self.CURRENT_FILE.split('\\')[-1].split('.')[-1]}')]
             )
         if file_path:
             self.CURRENT_FILE = file_path.replace('/', '\\')
             self._save_to_file(file_path)
             self.update_file_path() 
-            self.file_menu.entryconfig(self.translate('save'), state=tk.NORMAL)
+            self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)
             self.is_modified = False
             return True
         return False
@@ -1040,7 +980,7 @@ class FANUCE_IDE:
                 file.write(self.text_area.get("1.0", tk.END))
         self.is_modified = False 
         self.update_file_path()
-        self.show_info(self.translate('saved_succ'))
+        self.SERVICE.show_info(self.SERVICE.translate('saved_succ'))
         
     def _header_generate(self):
         header = f'/PROG {self.ls_info['name'].upper()}  {'Macro' if self.ls_info['macro'] else ''}\n'
@@ -1082,7 +1022,7 @@ class FANUCE_IDE:
         self.update_line_numbers()
         self.update_file_path(self.CURRENT_FILE + '*')
         if self.is_karel and not self.is_temp:
-            self.toolbar_compile_button.config(text=f'🛠{self.translate('compile')}')
+            self.toolbar_compile_button.config(text=f'🛠{self.SERVICE.translate('compile')}')
             self.toolbar_compile_button.config(state='enable')
         elif not self.is_temp and not self.is_karel:
             self.toolbar_send_button.config(state='enable')
@@ -1115,9 +1055,9 @@ class FANUCE_IDE:
 
         self.ftp_window = FTPSettingsWindow(
             parent=self.root,
-            lang=self.language,
             callback=self._ftp_settings_close,
-            show_info=self.show_info)
+            show_info=self.SERVICE.show_info,
+            service=self.SERVICE)
     
     def _ftp_settings_close(self):
         self.update_server_list()
@@ -1128,9 +1068,10 @@ class FANUCE_IDE:
             return
         self.lss_window = LSSettingsWindow(
             parent=self.root,
-            lang=self.language,
+            lang=self.SERVICE.language,
             callback=self._update_ls_header,
-            current_data=self.ls_info)
+            current_data=self.ls_info,
+            service=self.SERVICE)
     
     def _update_ls_header(self, new_data):
         if new_data:
@@ -1144,8 +1085,8 @@ class FANUCE_IDE:
             self._save_settings()
             if self.is_modified:
                 response = messagebox.askyesnocancel(
-                    self.translate('save_file'),
-                    self.translate('quest_bef_cls'),
+                    self.SERVICE.translate('save_file'),
+                    self.SERVICE.translate('quest_bef_cls'),
                     icon=messagebox.WARNING
                 )
                 if response is True:  # Пользователь выбрал "Сохранить"
@@ -1172,84 +1113,9 @@ class FANUCE_IDE:
     
     def tread_service(self):
         if self.files_queue:
-            self.show_info(self.files_queue[-1])
+            self.SERVICE.show_info(self.files_queue[-1])
         if self.backuping:
             self.root.after(100, self.tread_service)
-
-class SearchBar:
-    def __init__(self, text_widget: tk.Text, translater, ide):
-        self.ide = ide
-        self.view = False
-        self.translate = translater
-        self.text = text_widget
-        self.frame = tk.Frame(self.text, bg="#9E9E9E", bd=1, relief='solid')        
-        # Поле ввода
-        self.entry = Entry(self.frame, width=30)
-        self.entry.pack(side='left', padx=5, pady=5)        
-        # Кнопки
-        self.btn_next = Button(self.frame, text=self.translate('find'), command=self.find_next, cursor='arrow')
-        self.btn_next.pack(side='left', padx=2)
-        
-        # Закрыть (крестик)
-        self.btn_close = Button(self.frame, text='✖', width=2, command=self.hide, cursor='arrow')
-        self.btn_close.pack(side='right', padx=2)        
-        # Инициализация позиции и видимости
-        self.hide()        
-        # Настройка тега для подсветки найденного
-        self.text.tag_configure('search', background="#BAEBEC", foreground="#000000")
-        self.text.tag_configure('sel', background="#4C56DF", foreground="#000000")
-        
-        # Привязка горячих клавиш
-        self.text.bind('<Control-f>', lambda e: self.show())
-        self.text.bind('<Escape>', lambda e: self.hide())
-        self.entry.bind('<Escape>', lambda e: self.hide())
-        # Поиск при вводе текста (опционально)
-        self.entry.bind('<KeyRelease>', lambda e: self.find_all())
-        self.entry.bind('<Return>', lambda e: self.find_next())
-        
-    def show(self):
-        """Показать панель поиска"""
-        # Размещаем в правом верхнем углу текстового виджета
-        self.frame.place(relx=1.0, x=-5, y=5, anchor='ne')
-        self.btn_next.config(text=self.translate('find'))
-        self.entry.focus_set()
-        self.view = True
-        self.entry.delete(0, 'end')
-        self.find_all()  # обновить подсветку
-        
-    def hide(self):
-        """Скрыть панель поиска и снять подсветку"""
-        self.frame.place_forget()
-        self.ide.highlight_code(find='')
-        self.view = False
-        
-    def find_all(self, no_first=False):
-        """Найти все вхождения и подсветить их"""
-        query = self.entry.get()
-        if not query:
-            return
-        self.ide.highlight_code(find=query)
-    
-    def find_next(self):
-        """Найти следующее вхождение"""
-        self.text.tag_remove('sel', "1.0", tk.END)
-        query = self.entry.get()
-        if not query:
-            return        
-        # Текущая позиция курсора (начало выделения или позиция вставки)
-        sel_start = self.text.index('insert')
-        # Ищем от текущей позиции
-        pos = self.text.search(query, sel_start, stopindex='end', nocase=True)
-        if not pos:
-            pos = self.text.search(query, '1.0', stopindex='end', nocase=True)
-        self.find_all()
-        end = self.text.index(f"{pos}+{len(query)}c")
-        self.text.tag_remove('comments', pos, end)
-        self.text.tag_remove('search', pos, end)
-        self.text.tag_add('sel', pos, end)
-        self.text.see(pos)
-        self.text.mark_set("insert", f'{pos}+{len(query)}c')
-        self.text.focus_set()
 
 if __name__ == "__main__":
     root = tk.Tk()
