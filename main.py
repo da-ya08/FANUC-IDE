@@ -3,7 +3,7 @@ from tkinter.ttk import Progressbar, Combobox, Treeview, Button, Scrollbar, Labe
 from tkinter import filedialog, messagebox, Menu, simpledialog
 from src.widgets.ftp_settings import  FTPSettingsWindow
 from src.widgets.ls_settings import LSSettingsWindow
-from src.conf import LANGUAGES, CURRENT_LANGUAGE, SINTAX_WORDS
+from src.conf import CURRENT_LANGUAGE, SINTAX_WORDS
 from src.ftp_client.FTP_client import FTPClient
 from src.robot_manager.robot_manager import Robot
 from src.widgets.search_bar import SearchBar
