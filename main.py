@@ -1,6 +1,6 @@
-import tkinter as tk, os, json, shutil, sys
-from tkinter.ttk import Progressbar, Combobox, Treeview, Button, Scrollbar, Label, Entry
-from tkinter import filedialog, messagebox, Menu, simpledialog
+import os, json, shutil, sys
+from tkinter.ttk import Progressbar, Combobox, Treeview, Button, Scrollbar, Label
+from tkinter import filedialog, messagebox, Menu, simpledialog, Frame, Label, PanedWindow, END, Menu, Tk, IntVar, HORIZONTAL, RAISED, VERTICAL, LEFT, RIGHT, Y, X, TOP, Text, NONE, DISABLED, NORMAL, INSERT
 from src.widgets.ftp_settings import  FTPSettingsWindow
 from src.widgets.ls_settings import LSSettingsWindow
 from src.conf import CURRENT_LANGUAGE, SINTAX_WORDS
@@ -21,7 +21,7 @@ class FANUCE_IDE:
         self.logic = SINTAX_WORDS['logic']
         self.data = SINTAX_WORDS['data']
         self.point = SINTAX_WORDS['point']
-        self.filter_server_files = tk.IntVar(value=1)
+        self.filter_server_files = IntVar(value=1)
         self.is_modified = False
         self.is_karel = False
         self.is_temp = False
@@ -49,42 +49,42 @@ class FANUCE_IDE:
         self.FTP = FTPClient()
 
         ''' Главное окно '''
-        toolbar = tk.Frame(self.root, height=20)
+        toolbar = Frame(self.root, height=20)
         toolbar.pack(side='top', fill='x')
 
-        self.status_frame = tk.Frame(self.root, height=20, borderwidth=1, relief='groove')
+        self.status_frame = Frame(self.root, height=20, borderwidth=1, relief='groove')
         self.status_frame.pack(side='bottom', fill='x')
-        self.status_label = tk.Label(self.status_frame)
+        self.status_label = Label(self.status_frame)
         self.SERVICE.status_label = self.status_label
         self.status_label.pack(side='left', fill='x')
         self.download_progress_bar = Progressbar(self.status_frame, orient='horizontal', length=150)
         self.SERVICE.show_info(text='DA_YA product')
 
-        main_paned = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, sashrelief=tk.RAISED, sashwidth=4)
-        main_paned.pack(expand=True, fill='both')
+        self.main_paned = PanedWindow(self.root, orient=HORIZONTAL, sashrelief=RAISED, sashwidth=4)
+        self.main_paned.pack(expand=True, fill='both')
 
-        left_paned = tk.PanedWindow(main_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED, sashwidth=4)
-        main_paned.add(left_paned, minsize=220)
-        right_frame = tk.Frame(main_paned)  
-        main_paned.add(right_frame)
+        left_paned = PanedWindow(self.main_paned, orient=VERTICAL, sashrelief=RAISED, sashwidth=4)
+        self.main_paned.add(left_paned, minsize=220)
+        right_frame = Frame(self.main_paned)  
+        self.main_paned.add(right_frame)
 
         '''Левая часть'''
         # Меню-бар
-        servers_menubar = tk.Frame(left_paned, height=20)
+        servers_menubar = Frame(left_paned, height=20)
         left_paned.add(servers_menubar, minsize=20)
-        tk.Label(servers_menubar, text=f'{self.SERVICE.translate('robot')}:').pack(side=tk.LEFT, expand=False, padx=2)
+        Label(servers_menubar, text=f'{self.SERVICE.translate('robot')}:').pack(side=LEFT, expand=False, padx=2)
         self.server_combobox = Combobox(servers_menubar, state='readonly')
-        self.server_combobox.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+        self.server_combobox.pack(side=LEFT, expand=True, fill=X, padx=2)
         self.server_combobox.bind('<<ComboboxSelected>>', self._on_server_selected)
         self.ftp_settings_but = Button(servers_menubar, width=4, text='⚙', command=self.show_ftp_settings)
-        self.ftp_settings_but.pack(side=tk.RIGHT, padx=2, expand=False)
-        files_paned = tk.PanedWindow(left_paned, orient=tk.VERTICAL, sashrelief=tk.RAISED)
+        self.ftp_settings_but.pack(side=RIGHT, padx=2, expand=False)
+        files_paned = PanedWindow(left_paned, orient=VERTICAL, sashrelief=RAISED)
         left_paned.add(files_paned, minsize=100)  # Основная область с разделителем
         # Панель файлового дерева
-        file_tree_frame = tk.Frame(files_paned)
+        file_tree_frame = Frame(files_paned)
         file_tree_frame.pack(expand=True, fill='both')
         tree_scroll = Scrollbar(file_tree_frame)
-        tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        tree_scroll.pack(side=RIGHT, fill=Y)
         self.file_tree = Treeview(
             file_tree_frame,
             yscrollcommand=tree_scroll.set,
@@ -96,15 +96,15 @@ class FANUCE_IDE:
         self.file_tree.bind('<Double-1>', self._temp_open_file)
         files_paned.add(file_tree_frame, minsize=100)
         # Локальные файлы        
-        local_file_tree_frame = tk.Frame(files_paned)
+        local_file_tree_frame = Frame(files_paned)
         local_file_tree_frame.pack(expand=True, fill='both')
-        self.local_nav_frame = tk.Frame(local_file_tree_frame)
+        self.local_nav_frame = Frame(local_file_tree_frame)
         self.local_nav_frame.pack(fill='x')
 
         self.local_path_label = Label(self.local_nav_frame, text=self.CURRENT_DIRICTORY)
         self.local_path_label.pack(side='left', fill='x', expand=True)
         local_tree_scroll = Scrollbar(local_file_tree_frame)
-        local_tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        local_tree_scroll.pack(side=RIGHT, fill=Y)
         self.local_file_tree = Treeview(
             local_file_tree_frame,
             yscrollcommand=local_tree_scroll.set,
@@ -123,29 +123,29 @@ class FANUCE_IDE:
 
         '''Правая часть'''
         # Меню кода
-        menu_code_frame = tk.Frame(right_frame, height=20)
-        menu_code_frame.pack(side=tk.TOP, fill=tk.X)
-        self.CURRENT_FILE_path_menubar = tk.Label(
+        menu_code_frame = Frame(right_frame, height=20)
+        menu_code_frame.pack(side=TOP, fill=X)
+        self.CURRENT_FILE_path_menubar = Label(
             menu_code_frame, 
             justify='left', 
             font=('Calibri', 10), 
             cursor='arrow', 
             text=self.SERVICE.translate('menubar_code')
         )
-        self.CURRENT_FILE_path_menubar.pack(side=tk.LEFT, fill=tk.X)
+        self.CURRENT_FILE_path_menubar.pack(side=LEFT, fill=X)
         search_button = Button(menu_code_frame,
                                       text='🔎',
                                       width=5)
         search_button.pack(fill='none', side='right')
 
         # Область кода
-        code_frame = tk.Frame(right_frame)
+        code_frame = Frame(right_frame)
         code_frame.pack(expand=True, fill='both')
-        self.scrollbarY = tk.Scrollbar(code_frame)
-        self.text_area = tk.Text(
+        self.scrollbarY = Scrollbar(code_frame)
+        self.text_area = Text(
             code_frame, 
             yscrollcommand=self.scrollbarY.set,
-            wrap=tk.NONE, 
+            wrap=NONE, 
             pady=2,
             font=('Consolas', 12),
             width=80, 
@@ -154,7 +154,7 @@ class FANUCE_IDE:
         )
         self.search_bar = SearchBar(self.text_area, self, self.SERVICE)
         search_button.config(command=self.search_bar.show)
-        self.line_numbers = tk.Text(
+        self.line_numbers = Text(
             code_frame,
             width=4,
             padx=3,
@@ -166,12 +166,12 @@ class FANUCE_IDE:
             foreground='gray',
             state='disabled'
         )
-        self.line_numbers.pack(side=tk.LEFT, fill=tk.Y)
-        self.scrollbarY.pack(side=tk.RIGHT, fill=tk.Y)
-        self.text_area.pack(side=tk.LEFT, expand=True, fill='both')
+        self.line_numbers.pack(side=LEFT, fill=Y)
+        self.scrollbarY.pack(side=RIGHT, fill=Y)
+        self.text_area.pack(side=LEFT, expand=True, fill='both')
 
         # Toolbar
-        t_toolbar = tk.Frame(toolbar, height=20)
+        t_toolbar = Frame(toolbar, height=20)
         t_toolbar.pack(side='left', fill='x')
         self.new_file_button = Button(t_toolbar,
                                       text=f'📃{self.SERVICE.translate('new')}',
@@ -185,7 +185,7 @@ class FANUCE_IDE:
                                       text=f'💾{self.SERVICE.translate('save')}',
                                       command=self.save_file)
         self.toolbar_save_button.pack(fill='none', side='left')
-        tk.Frame(t_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
+        Frame(t_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
         self.toolbar_send_button = Button(t_toolbar,
                                       text=f'📤{self.SERVICE.translate('send')}',
                                       command=self.send_file,
@@ -197,18 +197,22 @@ class FANUCE_IDE:
                                       state='disable')
         self.toolbar_compile_button.pack(fill='none', side='left')
         
-        tr_toolbar = tk.Frame(toolbar, height=20)
-        tr_toolbar.pack(side='right', fill='x')
-        tk.Frame(tr_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
+        tr_toolbar = Frame(toolbar, height=20)
+        tr_toolbar.pack(side='left', fill='x')
+        Frame(tr_toolbar, background='gray', width=2, height=20).pack(fill='none', side='left')
         self.toolbar_backup_button = Button(tr_toolbar,
                                                 text=f'🗃{self.SERVICE.translate('r_backup')}',
                                                 command=self.robot_backup,
                                                 state='enable')
-        self.toolbar_backup_button.pack(fill='none', side='right')
+        self.toolbar_backup_button.pack(fill='none', side='left')
 
         self.text_area.bind('<KeyPress>', self.new_input)
         self.text_area.bind('<KeyRelease>', self.update_line_numbers)
         # Настраиваем тег для подсветки
+        self.text_area.tag_config('kl-comments',
+                                  foreground="#3a3a3a",      # цвет текста
+                                  background="#adffaa",        # цвет фона
+                                  font=('Consolas', 10, 'italic'))
         self.text_area.tag_config('comments',
                                   foreground='black',      # цвет текста
                                   background='#f0ff6a',        # цвет фона
@@ -234,16 +238,17 @@ class FANUCE_IDE:
 
     def highlight_code(self, event=None, find=''):
         # Удаляем все теги подсветки
-        self.text_area.tag_remove('comments', "1.0", tk.END)
-        self.text_area.tag_remove('search', "1.0", tk.END)
-        self.text_area.tag_remove('keywords', "1.0", tk.END)
-        self.text_area.tag_remove('logic', "1.0", tk.END)
-        self.text_area.tag_remove('data', "1.0", tk.END)
-        self.text_area.tag_remove('point', "1.0", tk.END)
-        self.text_area.tag_remove('ON', "1.0", tk.END)
-        self.text_area.tag_remove('OFF', "1.0", tk.END)
+        self.text_area.tag_remove('comments', "1.0", END)
+        self.text_area.tag_remove('kl-comments', "1.0", END)
+        self.text_area.tag_remove('search', "1.0", END)
+        self.text_area.tag_remove('keywords', "1.0", END)
+        self.text_area.tag_remove('logic', "1.0", END)
+        self.text_area.tag_remove('data', "1.0", END)
+        self.text_area.tag_remove('point', "1.0", END)
+        self.text_area.tag_remove('ON', "1.0", END)
+        self.text_area.tag_remove('OFF', "1.0", END)
         # Получаем весь текст
-        content = self.text_area.get("1.0", tk.END)
+        content = self.text_area.get("1.0", END)
         lines = content.splitlines()
         for line_num, line in enumerate(lines, start=1):
             for word in self.keywords:
@@ -268,14 +273,19 @@ class FANUCE_IDE:
             if '=OFF' in line:
                 start = f'{line_num}.{line.index('=OFF')+1}'
                 end = f'{start}+{len('=OFF')-1}c'
-                self.text_area.tag_add("OFF", start, end)
+                self.text_area.tag_add('OFF', start, end)
             if '!' in line and line.index('!') < 3:
                 # Координаты начала и конца строки
                 start = f"{line_num}.{line.index('!')}"
                 end = f"{line_num}.{len(line)}"
                 # Применяем тег к строке
-                self.text_area.tag_add("comments", start, end)
-        self.text_area.tag_raise("sel")
+                self.text_area.tag_add('comments', start, end)
+            if self.is_karel and '--' in line:
+                start = f"{line_num}.{line.index('--')}"
+                end = f"{line_num}.{len(line)}"
+                # Применяем тег к строке
+                self.text_area.tag_add('kl-comments', start, end)
+        self.text_area.tag_raise('sel')
         if find:
             start = '1.0'
             count = 0
@@ -291,35 +301,35 @@ class FANUCE_IDE:
                 count += 1
     
     def create_menu(self):
-        menubar = tk.Menu(self.root)
-        edit_menu = tk.Menu(menubar, tearoff=0)
+        menubar = Menu(self.root)
+        edit_menu = Menu(menubar, tearoff=0)
         # Меню "Файл"
-        file_menu = tk.Menu(menubar, tearoff=0)
+        file_menu = Menu(menubar, tearoff=0)
         file_menu.add_command(label=self.SERVICE.translate('new'), command=self.new_file)
         file_menu.add_command(label=self.SERVICE.translate('open'), command=self.open_file)
         file_menu.add_separator()
-        file_menu.add_command(label=self.SERVICE.translate('save'), command=self.save_file, state=tk.DISABLED)
+        file_menu.add_command(label=self.SERVICE.translate('save'), command=self.save_file, state=DISABLED)
         file_menu.add_command(label=self.SERVICE.translate('save_as'), command=self.save_file_as)
         file_menu.add_command(label=self.SERVICE.translate('change_dir'), command=self._change_def_dir)
         file_menu.add_separator()
         file_menu.add_command(label=self.SERVICE.translate('exit'), command=self.on_close)
         menubar.add_cascade(label=self.SERVICE.translate('file'), menu=file_menu)
         # LS
-        ls_menu = tk.Menu(edit_menu, tearoff=0)
+        ls_menu = Menu(edit_menu, tearoff=0)
         ls_menu.add_command(label=self.SERVICE.translate('config_file'), command=self.open_ls_settings)
         # KL
-        kl_menu = tk.Menu(edit_menu, tearoff=0)
+        kl_menu = Menu(edit_menu, tearoff=0)
         kl_menu.add_command(label=self.SERVICE.translate('compile'), command=self.copmile_karel)
         # Редактировать
         edit_menu.add_cascade(label='LS', state='disabled', menu=ls_menu)
         edit_menu.add_cascade(label='KL', state='disabled', menu=kl_menu)
         menubar.add_cascade(label=self.SERVICE.translate('edit_m'), menu=edit_menu)
         # Робот
-        robot_menu = tk.Menu(menubar, tearoff=0)
+        robot_menu = Menu(menubar, tearoff=0)
         robot_menu.add_command(label=self.SERVICE.translate('r_backup'), command=self.robot_backup)
         menubar.add_cascade(label=self.SERVICE.translate('robot'), menu=robot_menu)
         # Язык
-        lang_menu = tk.Menu(menubar, tearoff=0)
+        lang_menu = Menu(menubar, tearoff=0)
         lang_menu.add_command(label="English", command=lambda: self.set_language('en'))
         lang_menu.add_command(label="Русский", command=lambda: self.set_language('ru'))
         menubar.add_cascade(label=self.SERVICE.translate('lang_menu'), menu=lang_menu)
@@ -468,7 +478,7 @@ class FANUCE_IDE:
                 with open(f'{self.CACHE_FOLDER}\\cache.json', 'w', encoding='utf-8') as f:
                     json.dump({'path': selected_dir, 
                                'lang': CURRENT_LANGUAGE,
-                               'geo': '650x750'},
+                               'geo': '1200x800'},
                                 f)
                 break
             except Exception as e:
@@ -763,23 +773,23 @@ class FANUCE_IDE:
                     self.buffer_asser = ''
                     return
                 self.buffer_asser = '/POS\n/END\n'
-                self.edit_menu.entryconfig('LS', state=tk.NORMAL)
-                self.edit_menu.entryconfig('KL', state=tk.DISABLED)
+                self.edit_menu.entryconfig('LS', state=NORMAL)
+                self.edit_menu.entryconfig('KL', state=DISABLED)
                 self.toolbar_send_button.config(state='enable')
                 self.toolbar_compile_button.config(state='disable')
             elif file_path[-1:-3:-1].lower() == 'kl':
-                self.edit_menu.entryconfig('LS', state=tk.DISABLED)
-                self.edit_menu.entryconfig('KL', state=tk.NORMAL)
+                self.edit_menu.entryconfig('LS', state=DISABLED)
+                self.edit_menu.entryconfig('KL', state=NORMAL)
                 self.toolbar_send_button.config(state='disable')
                 self.toolbar_compile_button.config(state='enable')
             self.CURRENT_FILE: str = file_path
             self._save_to_file(file_path)
             self.update_file_path()  # Обновляем заголовок окна
-            self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)  # Активируем "Сохранить"
+            self.file_menu.entryconfig(self.SERVICE.translate('save'), state=NORMAL)  # Активируем "Сохранить"
             self.text_area.config(state='normal')
             self.update_local_files()
             self.is_modified = False  # Сбрасываем флаг изменений
-            self.text_area.delete("1.0", tk.END)
+            self.text_area.delete("1.0", END)
         else:
             self.update_file_path()
         self.is_temp = False
@@ -816,12 +826,16 @@ class FANUCE_IDE:
                 text_getted = False
                 try:
                     with open(file_path, "r") as file:
+                        protect = False
+                        motion = False
+                        owner = False
+                        comm = False
                         one_line = file.readline()
                         if not '/PROG' in one_line:
                             file.seek(0)
                             content = file.read()
-                            self.text_area.delete("1.0", tk.END) 
-                            self.text_area.insert(tk.END, content)
+                            self.text_area.delete("1.0", END) 
+                            self.text_area.insert(END, content)
                             self.CURRENT_FILE = file_path  
                             self.update_file_path() 
                             self.update_line_numbers()
@@ -848,30 +862,38 @@ class FANUCE_IDE:
                                 if not header_getted:
                                     if 'OWNER' in one_line:
                                         self.ls_info['owner'] = one_line.strip().split()[-1].replace(';','')
+                                        owner = True
                                     elif 'COMMENT' in one_line:
                                         self.ls_info['comment'] = one_line.split('"')[-2]
+                                        comm = True
                                     elif 'PROTECT' in one_line:
                                         self.ls_info['protect'] = False if 'READ_WRITE' in one_line else True
+                                        protect = True
                                     elif 'DEFAULT_GROUP' in one_line:
                                         self.ls_info['motion'] = True if '1,' in one_line else False
+                                        motion = True
                                 elif header_getted and not text_getted:
                                     content += one_line[5:]
                                     continue
                                 elif header_getted and text_getted:
                                     asser += one_line
+                                self.ls_info['protect'] = self.ls_info['protect'] if protect else False
+                                self.ls_info['motion'] = self.ls_info['motion'] if motion else False
+                                self.ls_info['owner'] = self.ls_info['owner'] if motion else ''
+                                self.ls_info['comment'] = self.ls_info['comment'] if comm else ''
                     self.buffer_asser = asser
                     content = content[:-1]
                     content = content.replace(";", "")
-                    self.text_area.delete("1.0", tk.END) 
-                    self.text_area.insert(tk.END, content)
+                    self.text_area.delete("1.0", END) 
+                    self.text_area.insert(END, content)
                     self.CURRENT_FILE = file_path  
                     self.update_file_path() 
-                    self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)
+                    self.file_menu.entryconfig(self.SERVICE.translate('save'), state=NORMAL)
                     self.is_modified = False
                     self.update_line_numbers()
                     self.is_karel = False
-                    self.edit_menu.entryconfig('LS', state=tk.NORMAL)
-                    self.edit_menu.entryconfig('KL', state=tk.DISABLED)
+                    self.edit_menu.entryconfig('LS', state=NORMAL)
+                    self.edit_menu.entryconfig('KL', state=DISABLED)
                     self.toolbar_send_button.config(state='enable')
                 except Exception as e:
                     self.SERVICE.show_info(f'{self.SERVICE.translate('couldnt_open_file')}: {e}', 2, True)
@@ -880,19 +902,19 @@ class FANUCE_IDE:
                 try:
                     with open(file_path, "r", encoding="utf-8") as file:
                         content = file.read()
-                        self.text_area.delete("1.0", tk.END) 
-                        self.text_area.insert(tk.END, content)
+                        self.text_area.delete("1.0", END) 
+                        self.text_area.insert(END, content)
                         self.CURRENT_FILE = file_path 
                         self.update_file_path() 
-                        self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)
+                        self.file_menu.entryconfig(self.SERVICE.translate('save'), state=NORMAL)
                         self.is_modified = False
                         self.update_line_numbers()
                         self.toolbar_compile_button.config(text=f'🛠{self.SERVICE.translate('compile')}')
                         self.toolbar_compile_button.config(state='enable')
                         self.toolbar_send_button.config(state='disable')
                         self.is_karel = True
-                        self.edit_menu.entryconfig('LS', state=tk.DISABLED)
-                        self.edit_menu.entryconfig('KL', state=tk.NORMAL)
+                        self.edit_menu.entryconfig('LS', state=DISABLED)
+                        self.edit_menu.entryconfig('KL', state=NORMAL)
                 except Exception as e:
                     self.SERVICE.show_info(f'{self.SERVICE.translate('couldnt_open_file')}: {e}', 2, True)
             else:
@@ -900,19 +922,19 @@ class FANUCE_IDE:
                 try:
                     with open(file_path, "r", encoding="utf-8") as file:
                         content = file.read()
-                        self.text_area.delete("1.0", tk.END) 
-                        self.text_area.insert(tk.END, content)
+                        self.text_area.delete("1.0", END) 
+                        self.text_area.insert(END, content)
                         self.CURRENT_FILE = file_path 
                         self.update_file_path() 
-                        self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)
+                        self.file_menu.entryconfig(self.SERVICE.translate('save'), state=NORMAL)
                         self.is_modified = False
                         self.update_line_numbers()
                         self.toolbar_compile_button.config(text=f'🛠{self.SERVICE.translate('compile')}')
                         self.toolbar_compile_button.config(state='disable')
                         self.toolbar_send_button.config(state='disable')
                         self.is_karel = False
-                        self.edit_menu.entryconfig('LS', state=tk.DISABLED)
-                        self.edit_menu.entryconfig('KL', state=tk.DISABLED)
+                        self.edit_menu.entryconfig('LS', state=DISABLED)
+                        self.edit_menu.entryconfig('KL', state=DISABLED)
                 except Exception as e:
                     self.SERVICE.show_info(f'{self.SERVICE.translate('couldnt_open_file')}: {e}', 2, True)
         self.highlight_code()
@@ -955,7 +977,7 @@ class FANUCE_IDE:
             self.CURRENT_FILE = file_path.replace('/', '\\')
             self._save_to_file(file_path)
             self.update_file_path() 
-            self.file_menu.entryconfig(self.SERVICE.translate('save'), state=tk.NORMAL)
+            self.file_menu.entryconfig(self.SERVICE.translate('save'), state=NORMAL)
             self.is_modified = False
             return True
         return False
@@ -964,8 +986,8 @@ class FANUCE_IDE:
         """Сохраняет текст в указанный файл."""
         if self.ls_info and self.CURRENT_FILE[-1:-3:-1].lower() == 'sl':
             text_to_save = self._header_generate()
-            temp = self.text_area.get("1.0", tk.END)
-            text = self.text_area.get("1.0", tk.END).split("\n")[:-1]
+            temp = self.text_area.get("1.0", END)
+            text = self.text_area.get("1.0", END).split("\n")[:-1]
             temp = ""
             for i, line in enumerate(text):
                 t = "    " + str(i+1)
@@ -977,7 +999,7 @@ class FANUCE_IDE:
             self.toolbar_send_button.config(state='enable')
         else:
             with open(file_path, "w", encoding="utf-8") as file:
-                file.write(self.text_area.get("1.0", tk.END))
+                file.write(self.text_area.get("1.0", END))
         self.is_modified = False 
         self.update_file_path()
         self.SERVICE.show_info(self.SERVICE.translate('saved_succ'))
@@ -998,19 +1020,19 @@ class FANUCE_IDE:
         if not self.CURRENT_FILE or self.is_temp:
             return
         if event.keycode == 9: # 9 - tab
-            self.text_area.insert(tk.INSERT, " " * 4)
+            self.text_area.insert(INSERT, " " * 4)
             return "break"  # Предотвращает стандартное поведение Tab
         elif event.keycode == 8: # 8 - backspace
             self.is_modified = True
             # if self.text_area.
             if event.char == '\x7f':
-                cursor_index = self.text_area.index(tk.INSERT)
+                cursor_index = self.text_area.index(INSERT)
                 for i in range(0, 20):
                     if self.text_area.get(f"{cursor_index} - {i+1}c", f"{cursor_index} - {i}c") in self.del_stoppers:
                         self.text_area.delete(f"{cursor_index} - {i-1}c", cursor_index)
                         break
                 return "continue"
-            cursor_index = self.text_area.index(tk.INSERT)
+            cursor_index = self.text_area.index(INSERT)
             start_index = f"{cursor_index} - 4c"
             if self.text_area.get(start_index, cursor_index) == " " * 4:
                 self.text_area.delete(start_index, cursor_index)
@@ -1030,10 +1052,10 @@ class FANUCE_IDE:
 
     def update_line_numbers(self, event=None):
         """Обновляет номера строк с выравниванием по правому краю"""
-        self.line_numbers.config(state=tk.NORMAL)
-        self.line_numbers.delete(1.0, tk.END)
+        self.line_numbers.config(state=NORMAL)
+        self.line_numbers.delete(1.0, END)
         # Получаем количество строк
-        lines = self.text_area.get(1.0, tk.END).count('\n')
+        lines = self.text_area.get(1.0, END).count('\n')
         lines = 1 if lines == 0 else lines
         # Определяем максимальную ширину
         max_width = 4
@@ -1043,7 +1065,7 @@ class FANUCE_IDE:
             for i in range(1, lines + 1)
         )
         self.line_numbers.insert(1.0, line_numbers_text)
-        self.line_numbers.config(state=tk.DISABLED)
+        self.line_numbers.config(state=DISABLED)
         # Синхронизируем прокрутку
         self.line_numbers.yview_moveto(self.text_area.yview()[0])
 
@@ -1118,6 +1140,6 @@ class FANUCE_IDE:
             self.root.after(100, self.tread_service)
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = Tk()
     ide = FANUCE_IDE(root)
     root.mainloop()

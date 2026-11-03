@@ -223,7 +223,7 @@ SINTAX_WORDS = {
          'DO', 'DI', 'F', 'R', 'P', 'PR',
          ],
 'point': [
-         ' J ', ' L '
+         'J ', 'L '
          ]
 }
 
